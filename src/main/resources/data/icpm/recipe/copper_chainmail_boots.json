@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "C C",
+    "C C"
+  ],
+  "key": {
+    "C": "icpm:copper_chain"
+  },
+  "result": {
+    "id": "icpm:copper_chainmail_boots",
+    "count": 1
+  }
+}

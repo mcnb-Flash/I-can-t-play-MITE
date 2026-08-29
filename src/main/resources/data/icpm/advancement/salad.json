@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "icpm:salad"
+    },
+    "title": {
+      "translate": "advancements.icpm.salad.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.salad.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:forage",
+  "criteria": {
+    "get_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "icpm:salad"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IL",
+    "s#"
+  ],
+  "key": {
+    "I": "icpm:ancient_metal_ingot",
+    "L": "minecraft:leather",
+    "s": "minecraft:stick",
+    "#": "#minecraft:planks"
+  },
+  "result": {
+    "id": "icpm:ancient_metal_workbench",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:adamantium_dagger",
+    "icpm:ancient_metal_dagger",
+    "icpm:flint_knife",
+    "icpm:mithril_dagger",
+    "icpm:netherite_dagger",
+    "icpm:obsidian_knife",
+    "icpm:silver_dagger"
+  ]
+}

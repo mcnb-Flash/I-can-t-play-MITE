@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I",
+    "S",
+    "S"
+  ],
+  "key": {
+    "I": "icpm:adamantium_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:adamantium_shovel",
+    "count": 1
+  }
+}

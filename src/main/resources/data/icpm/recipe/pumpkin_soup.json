@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:water_bowl",
+    "minecraft:pumpkin"
+  ],
+  "result": {
+    "id": "icpm:pumpkin_soup",
+    "count": 1
+  }
+}

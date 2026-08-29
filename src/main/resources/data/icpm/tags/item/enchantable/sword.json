@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:swords",
+    "icpm:adamantium_sword",
+    "icpm:ancient_metal_sword",
+    "icpm:mithril_sword",
+    "icpm:silver_sword"
+  ]
+}

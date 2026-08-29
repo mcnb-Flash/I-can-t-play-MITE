@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/warped_stem",
+    "down": "minecraft:block/warped_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/warped_stem",
+    "south": "minecraft:block/warped_stem",
+    "east": "minecraft:block/warped_stem",
+    "west": "minecraft:block/warped_stem"
+  }
+}

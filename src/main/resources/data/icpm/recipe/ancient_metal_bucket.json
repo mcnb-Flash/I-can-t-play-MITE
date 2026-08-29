@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["N N", " N "],
+  "key": {"N": "icpm:ancient_metal_ingot"},
+  "result": {"id": "icpm:ancient_metal_bucket", "count": 1}
+}

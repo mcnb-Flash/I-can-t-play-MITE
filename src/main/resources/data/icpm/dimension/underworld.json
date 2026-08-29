@@ -1,0 +1,14 @@
+{
+  "type": "icpm:underworld",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "icpm:underworld",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "icpm:underworld"
+    },
+    "structures": {
+      "icpm:ancient_city": "icpm:ancient_cities"
+    }
+  }
+}

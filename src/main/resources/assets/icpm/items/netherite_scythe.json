@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/netherite_scythe",
+                  "type":  "minecraft:model"
+              }
+}

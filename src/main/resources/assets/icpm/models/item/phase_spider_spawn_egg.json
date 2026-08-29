@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "layer0":  "icpm:item/phase_spider_spawn_egg"
+                 },
+    "parent":  "minecraft:item/generated"
+}

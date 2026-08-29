@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "C C",
+    "CCC",
+    "CCC"
+  ],
+  "key": {
+    "C": "icpm:iron_chain"
+  },
+  "result": {
+    "id": "icpm:iron_chainmail_chestplate",
+    "count": 1
+  }
+}

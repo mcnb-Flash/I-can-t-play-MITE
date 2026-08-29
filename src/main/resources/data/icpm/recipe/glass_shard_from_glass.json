@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass"
+  ],
+  "result": {
+    "id": "icpm:glass_shard",
+    "count": 9
+  }
+}

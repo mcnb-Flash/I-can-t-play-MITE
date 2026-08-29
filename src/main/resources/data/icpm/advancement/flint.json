@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:flint"
+    },
+    "title": {
+      "translate": "advancements.icpm.flint.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.flint.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:flint_fragment",
+  "criteria": {
+    "get_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:flint"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:sugar",
+    "minecraft:apple"
+  ],
+  "result": {
+    "id": "icpm:sorbet",
+    "count": 1
+  }
+}

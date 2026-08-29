@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:water_bowl",
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom"
+  ],
+  "result": {
+    "id": "minecraft:mushroom_stew"
+  }
+}

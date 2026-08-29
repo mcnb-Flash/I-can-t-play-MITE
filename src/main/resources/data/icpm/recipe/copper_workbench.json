@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IL",
+    "s#"
+  ],
+  "key": {
+    "I": "minecraft:copper_ingot",
+    "L": "minecraft:leather",
+    "s": "minecraft:stick",
+    "#": "#minecraft:planks"
+  },
+  "result": {
+    "id": "icpm:copper_workbench",
+    "count": 1
+  }
+}

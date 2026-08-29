@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "layer0":  "icpm:item/annihilation_skeleton_spawn_egg"
+                 },
+    "parent":  "minecraft:item/generated"
+}

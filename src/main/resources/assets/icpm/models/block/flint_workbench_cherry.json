@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/cherry_log",
+    "down": "minecraft:block/cherry_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/cherry_log",
+    "south": "minecraft:block/cherry_log",
+    "east": "minecraft:block/cherry_log",
+    "west": "minecraft:block/cherry_log"
+  }
+}

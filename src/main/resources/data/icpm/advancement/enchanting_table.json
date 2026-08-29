@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:enchanting_table"
+    },
+    "title": {
+      "translate": "advancements.icpm.enchanting_table.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.enchanting_table.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:diamond",
+  "criteria": {
+    "get_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:enchanting_table"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ]
+}

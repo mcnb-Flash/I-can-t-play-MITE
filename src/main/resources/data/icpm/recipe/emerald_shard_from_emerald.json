@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:emerald"
+  ],
+  "result": {
+    "id": "icpm:emerald_shard",
+    "count": 9
+  }
+}

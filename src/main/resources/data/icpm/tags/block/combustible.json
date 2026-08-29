@@ -1,0 +1,31 @@
+{
+  "values": [
+    "#minecraft:planks",
+    "#minecraft:logs",
+    "#minecraft:wooden_fences",
+    "#minecraft:wooden_stairs",
+    "#minecraft:wooden_pressure_plates",
+    "#minecraft:wooden_buttons",
+    "#minecraft:wooden_trapdoors",
+    "#minecraft:wooden_doors",
+    "minecraft:bookshelf",
+    "minecraft:tnt",
+    "minecraft:tall_grass",
+    "minecraft:fern",
+    "minecraft:grass",
+    "minecraft:dead_bush",
+    "minecraft:bush",
+    "#minecraft:wool",
+    "minecraft:vine",
+    "minecraft:coal_block",
+    "minecraft:hay_block",
+    "minecraft:cobweb",
+    "#minecraft:crops",
+    "minecraft:sugar_cane",
+    "minecraft:cartography_table",
+    "minecraft:crafting_table",
+    "minecraft:lectern",
+    "minecraft:composter",
+    "minecraft:ladder"
+  ]
+}

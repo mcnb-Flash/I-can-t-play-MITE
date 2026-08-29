@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "icpm:diamond_shard"
+  },
+  "result": {
+    "id": "minecraft:diamond",
+    "count": 1
+  }
+}

@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/netherite_dagger",
+                  "type":  "minecraft:model"
+              }
+}

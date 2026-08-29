@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "icpm:block/hell_portal_x"
+    },
+    "axis=z": {
+      "model": "icpm:block/hell_portal_z"
+    }
+  }
+}

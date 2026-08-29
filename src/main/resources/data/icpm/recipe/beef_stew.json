@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:water_bowl",
+    "minecraft:beef",
+    "minecraft:potato",
+    "minecraft:carrot"
+  ],
+  "result": {
+    "id": "icpm:beef_stew",
+    "count": 1
+  }
+}

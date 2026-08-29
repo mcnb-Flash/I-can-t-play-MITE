@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:flint_arrow",
+    "icpm:obsidian_arrow",
+    "icpm:copper_arrow",
+    "icpm:silver_arrow",
+    "icpm:gold_arrow",
+    "icpm:iron_arrow",
+    "icpm:ancient_metal_arrow",
+    "icpm:mithril_arrow",
+    "icpm:adamantium_arrow"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:enchantable/bow",
+    "icpm:bow",
+    "icpm:ancient_metal_bow",
+    "icpm:mithril_bow"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "icpm:block/sandstone_furnace_top",
+    "front": "icpm:block/sandstone_furnace_front_on",
+    "side": "icpm:block/sandstone_furnace_side"
+  }
+}

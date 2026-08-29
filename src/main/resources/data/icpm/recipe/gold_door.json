@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "??",
+    "??",
+    "??"
+  ],
+  "key": {
+    "?": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "icpm:gold_door",
+    "count": 1
+  }
+}

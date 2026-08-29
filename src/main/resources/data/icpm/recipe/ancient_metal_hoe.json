@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["II", " S", " S"],
+  "key": {"I": "icpm:ancient_metal_ingot", "S": "minecraft:stick"},
+  "result": {"id": "icpm:ancient_metal_hoe", "count": 1}
+}

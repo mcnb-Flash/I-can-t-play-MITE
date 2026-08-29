@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I I",
+    "IAI",
+    " A "
+  ],
+  "key": {
+    "I": "icpm:ancient_metal_ingot",
+    "A": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:ancient_metal_battle_axe",
+    "count": 1
+  }
+}

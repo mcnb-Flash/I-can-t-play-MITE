@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FS",
+    "s#"
+  ],
+  "key": {
+    "F": "minecraft:flint",
+    "S": "#icpm:cords",
+    "s": "minecraft:stick",
+    "#": "minecraft:mangrove_log"
+  },
+  "result": {
+    "id": "icpm:flint_workbench",
+    "count": 1,
+    "components": {
+      "minecraft:block_state": {
+        "wood": "6"
+      }
+    }
+  }
+}

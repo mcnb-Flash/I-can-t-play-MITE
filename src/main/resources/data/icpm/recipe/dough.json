@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:flour",
+    "icpm:water_bowl"
+  ],
+  "result": {
+    "id": "icpm:dough",
+    "count": 1
+  }
+}

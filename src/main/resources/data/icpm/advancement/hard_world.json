@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:zombie_head"
+    },
+    "title": {
+      "translate": "advancements.icpm.hard_world.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.hard_world.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:icpm_root",
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "impossible"
+    ]
+  ]
+}

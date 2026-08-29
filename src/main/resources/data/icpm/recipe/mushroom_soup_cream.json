@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:mushroom_stew",
+    "icpm:milk_bowl"
+  ],
+  "result": {
+    "id": "icpm:mushroom_soup_cream",
+    "count": 1
+  }
+}

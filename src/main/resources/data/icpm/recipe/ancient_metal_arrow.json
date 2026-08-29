@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "X",
+    "#",
+    "Y"
+  ],
+  "key": {
+    "#": "minecraft:stick",
+    "X": "icpm:ancient_metal_nugget",
+    "Y": "minecraft:feather"
+  },
+  "result": {
+    "id": "icpm:ancient_metal_arrow",
+    "count": 4
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:egg"
+    },
+    "title": {
+      "translate": "advancements.icpm.eat_egg.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.eat_egg.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:throw_egg",
+  "criteria": {
+    "eat_egg": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "items": [
+            "minecraft:egg"
+          ]
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "eat_egg"
+    ]
+  ]
+}

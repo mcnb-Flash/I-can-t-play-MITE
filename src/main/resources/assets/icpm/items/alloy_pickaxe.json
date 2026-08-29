@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/alloy_pickaxe",
+                  "type":  "minecraft:model"
+              }
+}

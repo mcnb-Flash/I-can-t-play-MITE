@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FS",
+    "CS"
+  ],
+  "key": {
+    "F": "minecraft:flint",
+    "S": "minecraft:stick",
+    "C": "#icpm:cords"
+  },
+  "result": {
+    "id": "icpm:flint_hatchet",
+    "count": 1
+  }
+}

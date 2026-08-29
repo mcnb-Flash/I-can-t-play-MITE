@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "icpm:item/earth_elemental_spawn_egg"
+  }
+}

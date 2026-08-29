@@ -1,0 +1,75 @@
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+
+# eclipse
+
+*.launch
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# macos
+
+*.DS_Store
+
+# fabric
+
+run/
+
+# java
+
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# === ICPM project-specific (keep the GitHub repo clean) ===
+
+# Gradle / Kotlin / loom caches (regenerable)
+.kotlin/
+mappings/
+logs/
+
+# stray decompiled / leftover artifacts
+*.class
+*.cls
+*.lnk
+startSleepInBed.txt
+tmp_dump.py
+
+# superseded artifacts
+old/
+
+# WorkBuddy agent internal data (not project source)
+.workbuddy/
+
+# root-level duplicates of src/main/resources (the build uses src/, not these)
+/assets/
+/data/
+/META-INF/
+
+# root decompiled reference sources (dev-only, not part of the build)
+/com/
+/net/
+/org/
+
+# loom-generated artifacts inside libs/ (regenerable; keep only the real jei dep)
+libs/*.loom-target.att
+libs/mappings.tiny
+libs/minecraft-yarn.jar

@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:copper_nugget"
+    },
+    "title": {
+      "translate": "advancements.icpm.panning.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.panning.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:wooden_shovel",
+  "criteria": {
+    "get_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:copper_nugget",
+              "icpm:silver_nugget"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ]
+}

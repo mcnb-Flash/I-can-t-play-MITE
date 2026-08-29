@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:copper_shears",
+    "icpm:gold_shears",
+    "icpm:silver_shears",
+    "icpm:ancient_metal_shears",
+    "icpm:mithril_shears",
+    "icpm:adamantium_shears",
+    "icpm:bow",
+    "icpm:ancient_metal_bow",
+    "icpm:mithril_bow",
+    "icpm:flint_fishing_rod",
+    "icpm:obsidian_fishing_rod",
+    "icpm:copper_fishing_rod",
+    "icpm:silver_fishing_rod",
+    "icpm:gold_fishing_rod",
+    "icpm:iron_fishing_rod",
+    "icpm:ancient_metal_fishing_rod",
+    "icpm:mithril_fishing_rod",
+    "icpm:adamantium_fishing_rod"
+  ]
+}

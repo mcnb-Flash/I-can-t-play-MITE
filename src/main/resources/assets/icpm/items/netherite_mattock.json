@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/netherite_mattock",
+                  "type":  "minecraft:model"
+              }
+}

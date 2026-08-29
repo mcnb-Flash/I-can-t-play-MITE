@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " I",
+    "I "
+  ],
+  "key": {
+    "I": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "icpm:copper_shears",
+    "count": 1
+  }
+}

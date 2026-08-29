@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "icpm:block/workbench/mangrove_log",
+    "down": "minecraft:block/mangrove_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "icpm:block/workbench/mangrove_log",
+    "south": "icpm:block/workbench/mangrove_log",
+    "east": "icpm:block/workbench/mangrove_log",
+    "west": "icpm:block/workbench/mangrove_log"
+  }
+}

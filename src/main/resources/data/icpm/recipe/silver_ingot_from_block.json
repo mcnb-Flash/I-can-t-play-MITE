@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "minecraft:building",
+  "ingredients": [
+    "icpm:silver_block"
+  ],
+  "result": {
+    "count": 9,
+    "id": "icpm:silver_ingot"
+  }
+}

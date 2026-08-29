@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "layer0":  "icpm:item/netherite_mattock"
+                 },
+    "parent":  "minecraft:item/handheld"
+}

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:silver_spear",
+    "icpm:ancient_metal_spear",
+    "icpm:mithril_spear",
+    "icpm:adamantium_spear"
+  ]
+}

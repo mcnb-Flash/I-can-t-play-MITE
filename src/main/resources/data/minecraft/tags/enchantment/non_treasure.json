@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:speed",
+    "icpm:regeneration",
+    "icpm:endurance",
+    "icpm:free_action",
+    "icpm:stun",
+    "icpm:vampiric",
+    "icpm:disarming",
+    "icpm:piercing",
+    "icpm:fishing_fortune",
+    "icpm:fertility",
+    "icpm:tree_felling",
+    "icpm:quickness",
+    "icpm:poison",
+    "icpm:arrow_recovery",
+    "icpm:butchering",
+    "icpm:harvesting",
+    "icpm:true_flight"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/wood_cudgel",
+                  "type":  "minecraft:model"
+              }
+}

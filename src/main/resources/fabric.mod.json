@@ -1,0 +1,47 @@
+{
+	"schemaVersion": 1,
+	"id": "icpm",
+	"version": "1.0.6",
+	"name": "I can't play mite",
+	"description": "A hardcore survival mod for Minecraft 1.21.11 fabric.",
+	"authors": [
+		"78&DeepSeekAI"
+	],
+	"license": "CC0-1.0",
+	"icon": "assets/icpm/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "name.icpm.ICPM",
+				"adapter": "kotlin"
+			}
+		],
+		"client": [
+			{
+				"value": "name.icpm.client.ICPMClient",
+				"adapter": "kotlin"
+			}
+		],
+		"jei": [
+			{
+				"value": "name.icpm.jei.ICPMJeiPlugin",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [
+		"icpm.mixins.json",
+		{
+			"config": "icpm.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*"
+	}
+}

@@ -1,0 +1,111 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gravel"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "predicates": {
+              "minecraft:enchantments": [
+                {
+                  "enchantments": "minecraft:silk_touch",
+                  "levels": {
+                    "min": 1
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gravel",
+          "weight": 7500
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:flint_fragment",
+          "weight": 1560
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:flint",
+          "weight": 104
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:copper_nugget",
+          "weight": 556
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:silver_nugget",
+          "weight": 185
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_nugget",
+          "weight": 62
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:obsidian_shard",
+          "weight": 21
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:emerald_shard",
+          "weight": 7
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:diamond_shard",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:mithril_nugget",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "icpm:adamantium_nugget",
+          "weight": 1
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:inverted",
+          "term": {
+            "condition": "minecraft:match_tool",
+            "predicate": {
+              "predicates": {
+                "minecraft:enchantments": [
+                  {
+                    "enchantments": "minecraft:silk_touch",
+                    "levels": {
+                      "min": 1
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

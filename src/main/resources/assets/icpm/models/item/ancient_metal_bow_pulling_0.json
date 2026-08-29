@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/bow",
+  "textures": {
+    "layer0": "icpm:item/ancient_metal_bow_pulling_0"
+  }
+}

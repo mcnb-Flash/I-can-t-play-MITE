@@ -1,0 +1,39 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:book"
+    },
+    "title": {
+      "translate": "advancements.icpm.enlightenment.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.enlightenment.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:bookshelf",
+  "criteria": {
+    "enchant": {
+      "trigger": "minecraft:enchanted_item",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:book",
+              "minecraft:written_book",
+              "minecraft:enchanted_book"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "enchant"
+    ]
+  ]
+}

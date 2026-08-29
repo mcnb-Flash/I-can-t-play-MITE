@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/acacia_log",
+    "down": "minecraft:block/acacia_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/acacia_log",
+    "south": "minecraft:block/acacia_log",
+    "east": "minecraft:block/acacia_log",
+    "west": "minecraft:block/acacia_log"
+  }
+}

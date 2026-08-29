@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "icpm:block/return_portal_x"
+    },
+    "axis=z": {
+      "model": "icpm:block/return_portal_z"
+    }
+  }
+}

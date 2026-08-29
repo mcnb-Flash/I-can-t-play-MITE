@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/obsidian_shard",
+                  "type":  "minecraft:model"
+              }
+}

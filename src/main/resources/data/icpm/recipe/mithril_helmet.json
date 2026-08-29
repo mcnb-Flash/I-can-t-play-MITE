@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", "I I"],
+  "key": {"I": "icpm:mithril_ingot"},
+  "result": {"id": "icpm:mithril_helmet", "count": 1}
+}

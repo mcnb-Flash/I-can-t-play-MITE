@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["P", "P", "S"],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "minecraft:wooden_sword",
+    "count": 1
+  }
+}

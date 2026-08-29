@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "CCC",
+    "C C"
+  ],
+  "key": {
+    "C": "icpm:ancient_metal_chain"
+  },
+  "result": {
+    "id": "icpm:ancient_metal_chainmail_helmet",
+    "count": 1
+  }
+}

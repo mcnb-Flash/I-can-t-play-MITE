@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "??",
+    "??",
+    "??"
+  ],
+  "key": {
+    "?": "icpm:mithril_ingot"
+  },
+  "result": {
+    "id": "icpm:mithril_door",
+    "count": 1
+  }
+}

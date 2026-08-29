@@ -1,0 +1,8 @@
+{
+    "textures":  {
+                     "body":  "icpm:block/anvil/ancient_metal/base",
+                     "top":  "icpm:block/anvil/ancient_metal/top_damaged_1",
+                     "particle":  "icpm:block/anvil/ancient_metal/base"
+                 },
+    "parent":  "minecraft:block/anvil"
+}

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:adamantium_war_hammer",
+    "icpm:ancient_metal_war_hammer",
+    "icpm:copper_war_hammer",
+    "icpm:gold_war_hammer",
+    "icpm:mithril_war_hammer",
+    "icpm:netherite_war_hammer",
+    "icpm:silver_war_hammer"
+  ]
+}

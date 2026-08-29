@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "icpm:block/obsidian_furnace_top",
+    "front": "icpm:block/obsidian_furnace_front_on",
+    "side": "icpm:block/obsidian_furnace_side"
+  }
+}

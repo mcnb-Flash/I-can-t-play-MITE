@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "minecraft:building",
+  "ingredients": [
+    "icpm:mithril_block"
+  ],
+  "result": {
+    "count": 9,
+    "id": "icpm:mithril_ingot"
+  }
+}

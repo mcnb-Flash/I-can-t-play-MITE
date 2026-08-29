@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "# #",
+    "###"
+  ],
+  "key": {
+    "#": "minecraft:obsidian"
+  },
+  "result": {
+    "id": "icpm:obsidian_furnace",
+    "count": 1
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "icpm:ancient_metal_ingot"
+    },
+    "title": {
+      "translate": "advancements.icpm.ancient_metal_ingot.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.ancient_metal_ingot.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:go_deeper",
+  "criteria": {
+    "get_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "icpm:ancient_metal_ingot"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:pickaxes",
+    "icpm:adamantium_mattock",
+    "icpm:adamantium_pickaxe",
+    "icpm:adamantium_war_hammer",
+    "icpm:ancient_metal_mattock",
+    "icpm:ancient_metal_pickaxe",
+    "icpm:ancient_metal_war_hammer",
+    "icpm:copper_mattock",
+    "icpm:copper_war_hammer",
+    "icpm:gold_mattock",
+    "icpm:gold_war_hammer",
+    "icpm:mithril_mattock",
+    "icpm:mithril_pickaxe",
+    "icpm:mithril_war_hammer",
+    "icpm:netherite_mattock",
+    "icpm:netherite_war_hammer",
+    "icpm:silver_mattock",
+    "icpm:silver_pickaxe",
+    "icpm:silver_war_hammer"
+  ]
+}

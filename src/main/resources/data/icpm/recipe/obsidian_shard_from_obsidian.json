@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:obsidian"
+  ],
+  "result": {
+    "id": "icpm:obsidian_shard",
+    "count": 9
+  }
+}

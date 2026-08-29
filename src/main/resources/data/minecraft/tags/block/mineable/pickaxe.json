@@ -1,0 +1,29 @@
+﻿{
+  "replace": false,
+  "values": [
+    "icpm:silver_ore",
+    "icpm:deepslate_silver_ore",
+    "icpm:mithril_ore",
+    "icpm:deepslate_mithril_ore",
+    "icpm:adamantium_ore",
+    "icpm:deepslate_adamantium_ore",
+    "icpm:silver_block",
+    "icpm:ancient_metal_block",
+    "icpm:mithril_block",
+    "icpm:adamantium_block",
+    "icpm:obsidian_furnace",
+    "icpm:clay_furnace",
+    "icpm:hardened_clay_furnace",
+    "icpm:sandstone_furnace",
+    "icpm:netherrack_furnace",
+    "icpm:emerald_enchanting_table",
+    "icpm:silver_strongbox",
+    "icpm:gold_strongbox",
+    "icpm:iron_strongbox",
+    "icpm:ancient_metal_strongbox",
+    "icpm:mithril_strongbox",
+    "icpm:adamantium_strongbox",
+    "icpm:mithril_runestone",
+    "icpm:adamantium_runestone"
+  ]
+}

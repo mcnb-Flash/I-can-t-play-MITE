@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "layer0":  "icpm:item/wood_spider_spawn_egg"
+                 },
+    "parent":  "minecraft:item/generated"
+}

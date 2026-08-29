@@ -1,0 +1,22 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "icpm:flint_workbench",
+          "functions": [
+            {
+              "function": "minecraft:copy_state",
+              "block": "icpm:flint_workbench",
+              "properties": [
+                "wood"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

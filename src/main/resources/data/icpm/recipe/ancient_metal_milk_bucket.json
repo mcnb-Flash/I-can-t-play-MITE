@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": ["icpm:ancient_metal_bucket", "minecraft:milk_bucket"],
+  "result": {"id": "icpm:ancient_metal_milk_bucket", "count": 1}
+}

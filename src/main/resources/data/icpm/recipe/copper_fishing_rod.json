@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  /",
+    " /|",
+    "/?|"
+  ],
+  "key": {
+    "/": "minecraft:stick",
+    "|": "minecraft:string",
+    "?": "minecraft:copper_nugget"
+  },
+  "result": {
+    "id": "icpm:copper_fishing_rod",
+    "count": 1
+  }
+}

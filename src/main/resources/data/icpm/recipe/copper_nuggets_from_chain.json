@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:copper_chain"
+  ],
+  "result": {
+    "id": "minecraft:copper_nugget",
+    "count": 4
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "icpm:copper_chainmail_chestplate"
+    },
+    "title": {
+      "translate": "advancements.icpm.copper_chainmail.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.copper_chainmail.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:silver_workbench",
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "impossible"
+    ]
+  ]
+}

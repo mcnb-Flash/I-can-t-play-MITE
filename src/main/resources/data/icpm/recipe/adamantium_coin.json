@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N"
+  ],
+  "key": {
+    "N": "icpm:adamantium_nugget"
+  },
+  "result": {
+    "id": "icpm:adamantium_coin",
+    "count": 1
+  }
+}

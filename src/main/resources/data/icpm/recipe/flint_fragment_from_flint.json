@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:flint"
+  ],
+  "result": {
+    "id": "icpm:flint_fragment",
+    "count": 4
+  }
+}

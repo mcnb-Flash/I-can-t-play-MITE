@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:silver_ore",
+    "icpm:deepslate_silver_ore",
+    "icpm:mithril_ore",
+    "icpm:deepslate_mithril_ore",
+    "icpm:adamantium_ore",
+    "icpm:deepslate_adamantium_ore",
+    "icpm:silver_block",
+    "icpm:ancient_metal_block",
+    "icpm:mithril_block",
+    "icpm:adamantium_block"
+  ]
+}

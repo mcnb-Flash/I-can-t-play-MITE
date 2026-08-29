@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:ender_pearl"
+    },
+    "title": {
+      "translate": "advancements.icpm.journey.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.journey.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:adamantium_pickaxe",
+  "criteria": {
+    "impossible": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "impossible"
+    ]
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " ? ",
+    "? ?",
+    " ? "
+  ],
+  "key": {
+    "?": "icpm:silver_nugget"
+  },
+  "result": {
+    "id": "icpm:silver_chain",
+    "count": 1
+  }
+}

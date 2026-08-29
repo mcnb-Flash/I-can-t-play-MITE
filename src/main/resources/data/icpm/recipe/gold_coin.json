@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N"
+  ],
+  "key": {
+    "N": "minecraft:gold_nugget"
+  },
+  "result": {
+    "id": "icpm:gold_coin",
+    "count": 1
+  }
+}
