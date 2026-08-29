@@ -73,3 +73,6 @@ old/
 libs/*.loom-target.att
 libs/mappings.tiny
 libs/minecraft-yarn.jar
+
+# GitHub Actions workflow needs `workflow` scope to push; kept local-only for now
+.github/
