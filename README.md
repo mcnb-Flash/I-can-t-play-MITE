@@ -76,5 +76,8 @@ Built on MITE's design philosophy, ICPM rewrites vanilla's overly forgiving surv
 3. Place the jar into your `mods/` folder.
 4. Launch the game and start a new (or existing) world.
 
+## Art Assets
+All in-game textures (blocks, items, entities, armor, portals, status-effect icons) and the mod icons were **programmatically generated as original flat-pixel art** and contain **no assets derived from any third-party texture pack (including MITE)**. To contribute hand-drawn art, replace the PNGs under `src/main/resources/assets/icpm/` — reference paths in models/blockstates/lang stay unchanged.
+
 ## License
 Released into the public domain — see [LICENSE](LICENSE).

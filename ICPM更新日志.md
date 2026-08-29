@@ -2,6 +2,13 @@
 
 ## 1.0.6
 
+**画风整体重构（程序化原创 · 移除 MITE 素材 · 2026-08-29）**
+
+- 根因：项目 534 个贴图（方块/物品/实体/盔甲/传送门/状态效果）+ 2 个 mod 图标大多直接提取自 MITE 材质包，存在版权风险与"是否 MITE 二创"的歧义。
+- 方案：用 PIL 编写确定性生成器（`gen_icpm_textures.py`，存临时目录未入仓库），按「路径语义（block/item/entity/armor/portal/mob_effect）+ 命名关键词调色板」生成统一原创扁平像素画风，覆盖全部 534 个 PNG 并保留原尺寸/原文件名；mod 图标重写为"盾牌+火焰"原创设计。model/blockstate/lang 引用路径不变，已 `clean build` 验证资源可正常加载。
+- 画风特征：统一深描边 + 确定性主色 + 简单几何/纹理（金属斜高光、木横纹、石噪点、矿亮点、草叶点、实体生物轮廓+眼睛、盔甲分层、传送门竖向能量渐变带），100% 程序生成、无第三方素材。
+- 已 `git push` 覆盖 GitHub（远程 `ddde068..8852149`）；`.github/workflows/build.yml` 因 PAT 缺 workflow scope 已排除出仓库（仍留磁盘）。回归美术只需替换 `src/main/resources/assets/icpm/` 下对应 PNG（路径不变）或改生成器重跑。
+
 ①按 R196 源码修正金属砧耐久机制（把"GUI 画假条 + 软储存"改为"有耐久值的方块 + 完整耐久机制"）：
 
 - **砧物品拥有真实耐久**：新增 `ICPMMetalAnvilItem`（`BlockItem` 子类），用 `Item.Properties.durability(maxDurability)` 让砧物品本身承载最大耐久（1.21.11 的正确 API 是 `durability(int)`，非旧版 `maxDamage(int)`）。物品栏悬停显示「砧耐久: 剩余/最大」，按剩余比例着色（充足红 / 中等橙 / 将损绿）。
