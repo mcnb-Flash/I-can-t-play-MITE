@@ -77,7 +77,9 @@ Built on MITE's design philosophy, ICPM rewrites vanilla's overly forgiving surv
 4. Launch the game and start a new (or existing) world.
 
 ## Art Assets
-All in-game textures (blocks, items, entities, armor, portals, status-effect icons) and the mod icons were **programmatically generated as original flat-pixel art** and contain **no assets derived from any third-party texture pack (including MITE)**. To contribute hand-drawn art, replace the PNGs under `src/main/resources/assets/icpm/` — reference paths in models/blockstates/lang stay unchanged.
+Textures are sourced from **MITE Resource Pack 1.6.41** where a clear match exists; ICPM-original items (such as the metal spears) retain their **self-drawn textures**. If you plan to redistribute this mod publicly, please be aware that the MITE-derived textures may carry licensing restrictions from the original MITE project.
+
+To replace any texture, drop a new PNG into the matching path under `src/main/resources/assets/icpm/` — model/blockstate/lang references do not need to change.
 
 ## License
 Released into the public domain — see [LICENSE](LICENSE).
