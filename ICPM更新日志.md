@@ -2,6 +2,32 @@
 
 ## 1.0.6
 
+**修复：ICPM 弓射不出 ICPM 箭 + ICPM 鱼竿无法使用 · 2026-08-30**
+
+① 弓射不出 ICPM 箭（箭矢实体根本构造不出来）
+
+- **现象**：手持任意弓（含 `icpm:bow` / `ancient_metal_bow` / `mithril_bow`），背包里带着 ICPM 箭（`#minecraft:arrows` 标签里已有 9 种 ICPM 箭），拉满弦松手后**什么都没射出来**，也听不到箭矢破空声。
+- **根因**：`ICPMArrowEntity.getDefaultPickupItem()` 里调用了 `getPickupItem()`。而 1.21.11 原版 `AbstractArrow(EntityType, Level)` 构造器的最后一步就是
+  `this.pickupItemStack = this.getDefaultPickupItem();`
+  此刻 `pickupItemStack` **仍为 null**（没有任何行内初始化），而 `getPickupItem()` 的实现是 `this.pickupItemStack.copy()` → **NullPointerException**。
+  结果：`ArrowItem.createArrow` 一抛异常，`ProjectileWeaponItem.shoot` 整条链路中断，连 `addFreshEntity` 都到不了 —— 表现就是「弓拉满弦却射不出箭」，且日志不一定显眼。
+  作为对照，原版 `Arrow.getDefaultPickupItem()` 是 `new ItemStack(Items.ARROW)`，从不回溯自身状态。
+- **修复**（`src/main/kotlin/name/icpm/entity/projectile/ICPMArrowEntity.kt`）：
+  - `getDefaultPickupItem()` 改为直接 `return ItemStack(ICPMItems.FLINT_ARROW)`，**禁止**在构造期读取自身任何字段（已写进文件头注释作铁律）。
+  - `onHitBlock()` 的回收判定用 `pickupStackSafe()`（`runCatching` 兜底），避免任何异常把整支箭搞崩。
+- 顺带加固（`ICPMArrowItem.kt`）：`createArrow` 的武器栈为空时兜底为普通弓，避免原版在服务端抛 `IllegalArgumentException: Invalid weapon firing an arrow`（发射器/命令等非弓路径）。
+
+② ICPM 鱼竿无法使用（右键永远只能收线）
+
+- **现象**：右键 ICPM 鱼竿没有任何反应，抛不出浮漂。
+- **根因**：原版 `FishingRodItem.use()` 的行为被 `Player.fishing` 是否为 null **二分**——非 null 只走「收线」分支（`retrieve` + 扣耐久），**永远不会再抛竿**。一旦玩家身上残留一个失效钩子引用（钩子被丢弃 / 玩家换维度 / 实体生成失败），右键就永久卡在收线分支，且**不会有任何报错**。
+- **修复**：新增 `src/main/kotlin/name/icpm/item/ICPMFishingRodItem.kt`，9 种 ICPM 鱼竿改用它注册。它在调用原版逻辑前先清理失效引用（`isRemoved || !isAlive || hook.level() !== player.level()`），其余抛竿/收线/耐久/统计全部沿用原版实现。
+
+③ 顺带修正：ICPM 弓没有拉弦动画
+
+- `assets/icpm/items/{bow,ancient_metal_bow,mithril_bow}.json` 仍是 1.21.4 之前的 `models/item/*.json` + `overrides` 思路，1.21.11 早已不读 `overrides`，导致拉弓时模型纹丝不动，玩家更难判断「到底有没有在拉弦」。
+- 改为 1.21.4+ 的物品模型定义：`condition(minecraft:using_item)` → `range_dispatch(minecraft:use_duration, scale 0.05, threshold 0.65/0.9)`，与 `assets/minecraft/items/bow.json` 结构一致。
+
 **画风回滚：恢复 MITE Resource Pack 1.6.41 贴图 · 保留自绘长矛 · 2026-08-30**
 
 - 根因：上一轮程序化生成的"原创"扁平贴图效果极差，玩家反馈"很多物品没有恢复原来的贴图"。
@@ -11,6 +37,13 @@
   - **长矛贴图保护**：`item/adamantium_spear*.png`、`item/ancient_metal_spear*.png`、`item/mithril_spear*.png`、`item/silver_spear*.png` 共 8 个文件被判定为"前几轮自行绘制、无侵权风险"，强制保留预重构版本，不被 MITE RP 覆盖。
 - 结果：534 个游戏贴图 + 2 个 mod 图标全部恢复为 MITE 画风（或预重构版本），`clean build` 验证资源可正常加载；双端部署（`.bak.20260830_095254`）。
 - 版权提示：这些贴图源自 MITE Resource Pack 1.6.41，公开分发可能存在授权风险；用户已知情并接受。
+
+**修复：贴图白色背景板（部分物品加载错误）· 2026-08-30**
+
+- **现象**：从 MITE RP 1.6.41 恢复贴图后，部分物品贴图带上了不透明白色背景板（本应有透明通道的物品贴图变成了实白底），导致贴图加载错误。
+- **根因**：恢复流程中 6 张工作区贴图被误写成实白底（对比 HEAD 应为透明版）；`blueberry` 被 MITE RP 覆盖成实白底（对比提交 `ddde068` 应为透明版）。属批量恢复/覆盖脚本未做透明通道校验遗留的问题。
+- **修复**：用 Pillow 全量审计 532 张 png 的「透明像素占比 / 实白占比」，跨「工作区 / HEAD(`d06edad`) / `ddde068` / MITE RP」四版对比定位异常；对 6 张（`copper_chain` / `gold_battle_axe` / `gold_lava_bucket` / `mithril_leggings` / `salad` / `silver_war_hammer`）执行 `git checkout HEAD --` 恢复为透明版，对 `blueberry` 执行 `git checkout ddde068 --` 恢复为透明版；其余 5 张门贴图（adamantium/ancient_metal/gold/mithril/silver_door）本就不透明、属正常，确认无须修。
+- 构建 BUILD SUCCESSFUL（7m6s）；双端部署（先 `msvcrt` 探测 JVM 锁：服务端/客户端均 UNLOCKED，备份 `.bak.20260830_142000` 后覆盖，`zipfile.testzip` 校验 + 校验 jar 内 `blueberry`/`copper_chain`/`salad`/`silver_war_hammer` 透明通道均 OK）；弓拉弦动画 json（bow/ancient_metal_bow/mithril_bow）随同一 jar 入包。
 
 ~~**画风整体重构（程序化原创 · 移除 MITE 素材 · 2026-08-29）**~~（已回滚，见上）
 

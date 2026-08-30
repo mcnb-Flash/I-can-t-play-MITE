@@ -8,6 +8,7 @@ import net.minecraft.world.entity.projectile.arrow.AbstractArrow
 import net.minecraft.world.item.ArrowItem
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.item.component.TooltipDisplay
 import net.minecraft.world.level.Level
@@ -31,7 +32,11 @@ class ICPMArrowItem(
         shooter: LivingEntity,
         weaponStack: ItemStack?
     ): AbstractArrow {
-        val arrow = ICPMArrowEntity.create(level, shooter, stack, weaponStack ?: ItemStack.EMPTY)
+        // 原版 AbstractArrow 在服务端会校验武器栈：为空直接抛
+        // IllegalArgumentException("Invalid weapon firing an arrow")。
+        // 发射器/命令等非弓路径可能传入空栈，这里兜底为普通弓，避免整支箭胎死腹中。
+        val weapon = if (weaponStack == null || weaponStack.isEmpty) ItemStack(Items.BOW) else weaponStack
+        val arrow = ICPMArrowEntity.create(level, shooter, stack, weapon)
         arrow.setBaseDamage(damage.toDouble())
         return arrow
     }

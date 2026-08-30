@@ -215,15 +215,16 @@ object ICPMItems {
     @JvmField val ANCIENT_METAL_CHAIN: Item = register("ancient_metal_chain", Item(makeProperties("ancient_metal_chain", 64)))
 
     // ========== 钓鱼竿（ICPM R196 ItemFishingRod：2 木棍 + 线 + 碎片/粒，材料决定耐久） ==========
-    @JvmField val FLINT_FISHING_ROD: Item = register("flint_fishing_rod", FishingRodItem(makeProperties("flint_fishing_rod", 1).durability(40).enchantable(1)))
-    @JvmField val OBSIDIAN_FISHING_ROD: Item = register("obsidian_fishing_rod", FishingRodItem(makeProperties("obsidian_fishing_rod", 1).durability(100).enchantable(1)))
-    @JvmField val COPPER_FISHING_ROD: Item = register("copper_fishing_rod", FishingRodItem(makeProperties("copper_fishing_rod", 1).durability(120).enchantable(1)))
-    @JvmField val SILVER_FISHING_ROD: Item = register("silver_fishing_rod", FishingRodItem(makeProperties("silver_fishing_rod", 1).durability(150).enchantable(1)))
-    @JvmField val GOLD_FISHING_ROD: Item = register("gold_fishing_rod", FishingRodItem(makeProperties("gold_fishing_rod", 1).durability(80).enchantable(1)))
-    @JvmField val IRON_FISHING_ROD: Item = register("iron_fishing_rod", FishingRodItem(makeProperties("iron_fishing_rod", 1).durability(200).enchantable(1)))
-    @JvmField val MITHRIL_FISHING_ROD: Item = register("mithril_fishing_rod", FishingRodItem(makeProperties("mithril_fishing_rod", 1).durability(400).enchantable(1)))
-    @JvmField val ADAMANTIUM_FISHING_ROD: Item = register("adamantium_fishing_rod", FishingRodItem(makeProperties("adamantium_fishing_rod", 1).durability(800).enchantable(1)))
-    @JvmField val ANCIENT_METAL_FISHING_ROD: Item = register("ancient_metal_fishing_rod", FishingRodItem(makeProperties("ancient_metal_fishing_rod", 1).durability(350).enchantable(1)))
+    // 用 ICPMFishingRodItem：清理可能残留的失效鱼钩引用，避免右键永远只能收线而无法抛竿
+    @JvmField val FLINT_FISHING_ROD: Item = register("flint_fishing_rod", ICPMFishingRodItem(makeProperties("flint_fishing_rod", 1).durability(40).enchantable(1)))
+    @JvmField val OBSIDIAN_FISHING_ROD: Item = register("obsidian_fishing_rod", ICPMFishingRodItem(makeProperties("obsidian_fishing_rod", 1).durability(100).enchantable(1)))
+    @JvmField val COPPER_FISHING_ROD: Item = register("copper_fishing_rod", ICPMFishingRodItem(makeProperties("copper_fishing_rod", 1).durability(120).enchantable(1)))
+    @JvmField val SILVER_FISHING_ROD: Item = register("silver_fishing_rod", ICPMFishingRodItem(makeProperties("silver_fishing_rod", 1).durability(150).enchantable(1)))
+    @JvmField val GOLD_FISHING_ROD: Item = register("gold_fishing_rod", ICPMFishingRodItem(makeProperties("gold_fishing_rod", 1).durability(80).enchantable(1)))
+    @JvmField val IRON_FISHING_ROD: Item = register("iron_fishing_rod", ICPMFishingRodItem(makeProperties("iron_fishing_rod", 1).durability(200).enchantable(1)))
+    @JvmField val MITHRIL_FISHING_ROD: Item = register("mithril_fishing_rod", ICPMFishingRodItem(makeProperties("mithril_fishing_rod", 1).durability(400).enchantable(1)))
+    @JvmField val ADAMANTIUM_FISHING_ROD: Item = register("adamantium_fishing_rod", ICPMFishingRodItem(makeProperties("adamantium_fishing_rod", 1).durability(800).enchantable(1)))
+    @JvmField val ANCIENT_METAL_FISHING_ROD: Item = register("ancient_metal_fishing_rod", ICPMFishingRodItem(makeProperties("ancient_metal_fishing_rod", 1).durability(350).enchantable(1)))
 
     // ========== 马铠 (ICPM 多级金属马铠, 1.21.11 用 EQUIPPABLE 组件实现) ==========
     // 1.21.11 无 AnimalArmorItem：马铠是普通 Item + EQUIPPABLE 组件（slot=BODY, asset=装备资源, allowedEntities=马）。
