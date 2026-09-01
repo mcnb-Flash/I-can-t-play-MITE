@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -36,10 +37,37 @@ public class ClientShutdownTracer {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("HEAD"))
     private void icpm$disconnectEnter(CallbackInfo ci) {
         LOG.error("[SHUTDOWN] Minecraft.disconnect(Screen,ZZ) ENTER  thread=" + Thread.currentThread().getName());
+        Thread w = new Thread(ClientShutdownTracer::icpm$disconnectWatch, "ICPM-DisconnectScreenWatcher");
+        w.setDaemon(true);
+        icpm$disconnectWatchdog = w;
+        w.start();
     }
 
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("TAIL"))
     private void icpm$disconnectExit(CallbackInfo ci) {
+        Thread w = icpm$disconnectWatchdog;
+        icpm$disconnectWatchdog = null;
+        if (w != null) {
+            w.interrupt();
+        }
         LOG.error("[SHUTDOWN] Minecraft.disconnect(Screen,ZZ) EXIT   thread=" + Thread.currentThread().getName());
+    }
+
+    @Unique
+    private static Thread icpm$disconnectWatchdog;
+
+    /**
+     * 渲染线程看门狗：disconnect(Screen,ZZ) 内 `while (!isShutdown()) runTick(false)` 等待
+     * 服务端线程退出；超 8 秒仍未退出即 dump 全线程栈（同时可见 "Server thread" 卡点）。
+     */
+    @Unique
+    private static void icpm$disconnectWatch() {
+        try {
+            Thread.sleep(8_000L);
+        } catch (InterruptedException e) {
+            return;
+        }
+        LOG.error("[SHUTDOWN] disconnect(Screen,ZZ) STALLED > 8s (保存界面不消失)! Dumping all thread stacks...");
+        name.icpm.FreezeDetector.dumpThreads(0L, 0L, "Minecraft.disconnect(Screen,ZZ) stalled");
     }
 }

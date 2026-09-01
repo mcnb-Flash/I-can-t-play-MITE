@@ -50,10 +50,12 @@ public abstract class FixedLocalPlayerUuidMixin {
         if (real == null || ICpmMiteUuid.equals(real.getProfileId())) {
             return;
         }
-        // 仅离线模式（accessToken 为空/"0"）才固定 UUID；在线模式保持真实会话 UUID，
-        // 避免破坏正版/第三方服务器的会话校验。
+        // 仅离线模式才固定 UUID；在线模式保持真实会话 UUID（避免破坏正版/第三方服务器校验）。
+        // 离线判定：正版/在线会话的 accessToken 是 JWT（含 '.'）；离线启动器的 token 是
+        // "0"、空串或启动器伪 token（本机启动器实测为"去连字符的 UUID 字符串"，即
+        // Realms 报错 "Failed to parse into SignedJWT: 26977e4c...9" 的来源），均不含 '.'。
         String token = real.getAccessToken();
-        boolean offline = token == null || token.isEmpty() || "0".equals(token);
+        boolean offline = token == null || token.isEmpty() || !token.contains(".");
         if (!offline) {
             return;
         }

@@ -38,4 +38,19 @@ public class ServerShutdownTracer {
     private void icpm$saveAllChunksExit(CallbackInfoReturnable<Boolean> ci) {
         LOG.error("[SHUTDOWN] saveAllChunks EXIT   thread=" + Thread.currentThread().getName());
     }
+
+    /**
+     * halt 是单机「停止服务端」的实际入口（ServerCommonPacketListenerImpl.onDisconnect 在
+     * 玩家断开后调用）：halt ENTER 出现但没有后续服务端日志 ⇒ 卡在 halt 之前的链路。
+     */
+    @Inject(method = "halt", at = @At("HEAD"))
+    private void icpm$haltEnter(boolean waitForShutdown, CallbackInfo ci) {
+        LOG.error("[SHUTDOWN] MinecraftServer.halt ENTER  waitForShutdown=" + waitForShutdown
+                + "  thread=" + Thread.currentThread().getName());
+    }
+
+    @Inject(method = "halt", at = @At("TAIL"))
+    private void icpm$haltExit(boolean waitForShutdown, CallbackInfo ci) {
+        LOG.error("[SHUTDOWN] MinecraftServer.halt EXIT   thread=" + Thread.currentThread().getName());
+    }
 }

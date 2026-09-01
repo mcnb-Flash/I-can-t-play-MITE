@@ -18,10 +18,17 @@
   3. `removePlayerFromWorld` 返回后 `ServerCommonPacketListenerImpl.onDisconnect` 才会执行 `Stopping singleplayer server as player logged out` → `server.halt(false)` 让服务端线程退出。
   4. **本次卡死日志中【没有】** `Stopping singleplayer server` 且服务端线程在 `mcnb退出游戏` 后静默 ⇒ **`PlayerList.remove` 一直没返回** ⇒ 服务端线程活着 ⇒ `isShutdown()` 永假 ⇒ 保存界面永转（与用户"卡死在保存世界页面"完全吻合）。
 - 已排查排除（非根因）：`PlayerMixin` 存档注入（`writeExperience`/`writeIcpmPlayerData`）、`PortalPositionStorage`/`PlayerNutritionManager`/`ICPMFoodStats`/`PlayerStatsManager`、全部自定义 DataComponent（`QualityComponent`/`NutritionComponent`/`CraftPreviewComponent`/`COIN_XP`/`RUNESTONE_VARIANT`/`SHIELD_ATTACHED`，均为 int/bool/简单 record codec，序列化安全）、`ICPM.java` 生命周期回调、`FixedPlayerUuidMixin`、弓/箭/鱼竿改动（构造器参数非组件）。
-- 新增埋点（下轮复现即可实锤卡点）：
-  - `PlayerListShutdownTracer`（服务端）：`PlayerList.remove` HEAD/TAIL 打点 + **4 秒看门狗**——remove 超 4s 未退出立即 dump 全线程栈（含 "Server thread" 精确卡点），无需等待原 FreezeDetector 的 10s 阈值。
-  - `ClientShutdownTracer` 增补 `disconnect(Screen,ZZ)` 进出打点，确认渲染线程进入/退出等待循环。
-  - 复现方法：进档 → 「保存并退出」→ 停在保存界面后**等 10 秒**再强制关窗，把 `E:/.minecraft/versions/1.21.11MITE测试/logs/latest.log` 发我即可（看门狗会在 4s 后自动 dump 全栈）。
+- **第二轮复现（2026-09-01 23:20，含 PlayerListShutdownTracer）进一步锁定**：
+  - `PlayerList.remove` 本轮**正常返回**（`[SHUTDOWN] PlayerList.remove ENTER → EXIT` 同一秒），但之后**仍无** `Stopping singleplayer server`、也无 `MinecraftServer.halt ENTER` ⇒ 卡点收窄到 **remove EXIT 之后、halt 之前**的断线链尾部（`textFilter.leave()` / `super.onDisconnect` 的 isSingleplayerOwner 名称比对 + LOGGER + halt），该段全部是平凡原版代码，且 ICPM 无任何 mixin 挂在这几个类上 ⇒ **高度怀疑第三方 mod（TPA/FTB 等）的断线钩子或该段抛出的被吞异常**。
+  - `isSingleplayerOwner(NameAndId)`（反编译确认）只比对**玩家名**（equalsIgnoreCase），UUID 不对称（客户端 26977e4c vs 服务端 00000000）不影响该判定。
+  - `MinecraftServer.halt(false)` 仅 `running=false`（join 仅在 waitForShutdown=true 时）——若 halt 被调用服务端线程会很快退出；日志无 halt ⇒ 确实没走到。
+  - 服务端玩家 UUID 已确认固定为 `00000000-0000-3004-998f-501a96e2ae48`（`PlayerList.remove ENTER player=00000000-...`）——`FixedPlayerUuidMixin` 经服务端离线登录的 `createOfflinePlayerUUID` 重新派生生效，旧档 playerdata 可正常承接。
+- 新增埋点（下轮复现即可实锤卡点，dump 全线程栈含 "Server thread" 精确卡点）：
+  - `PlayerListShutdownTracer`（服务端）：`PlayerList.remove` HEAD/TAIL 打点 + **4 秒看门狗**。
+  - `DisconnectChainTracer`（服务端，新增）：`ServerGamePacketListenerImpl.onDisconnect` HEAD/TAIL 打点 + **5 秒看门狗**，覆盖 remove 之后的整段断线链。
+  - `ServerShutdownTracer` 增补 `MinecraftServer.halt` HEAD/TAIL 打点。
+  - `ClientShutdownTracer` 增补 `disconnect(Screen,ZZ)` **8 秒渲染线程看门狗**（保存界面不消失即 dump 全线程栈，同时可见服务端线程状态）。
+  - 复现方法：进档 → 「保存并退出」→ 停在保存界面后**等 15 秒**再强制关窗，把 `E:/.minecraft/versions/1.21.11MITE测试/logs/latest.log`（或 RawOutput.txt）发我即可（8s 内自动出全栈 dump）。
 
 ㉔ 顺带修复潜在卡死：`ICPMExperience.getExperienceLevel` 的无限循环
 
