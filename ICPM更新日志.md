@@ -34,6 +34,20 @@
 
 - `while (getExperienceRequired(level + 1) <= experience) level++`：`getExperienceRequired(level > 200)` 恒返回 `Int.MAX_VALUE`，若 `totalExperience` 达到 `Int.MAX_VALUE`（如 `/xp set 2147483647`），循环将永不退出 → 服务端死循环卡死。已加 `level < MAX_LEVEL` 上限钳制。
 
+㉕ 保存世界卡死——**根因实锤 + 根因级修复**（2026-09-01 第三轮，新档同样复现）
+
+- 第三轮复现（全新存档）拿到全线程栈，机制 100% 闭合：
+  - `[SHUTDOWN]` 断线链完整走完：`onDisconnect ENTER→EXIT`、`PlayerList.remove ENTER→EXIT`（玩家名 mcnb、UUID 已固定为 00000000-...）；
+  - 但**没有** `Stopping singleplayer server as player logged out`、**没有** `MinecraftServer.halt ENTER`；
+  - **线程栈铁证**：`Server thread state=TIMED_WAITING`，parked 在 `waitUntilNextTick` —— 服务端线程健康活着、`running` 仍为 true ⇒ **`halt` 从未被调用 ⇒ `IntegratedServer.isSingleplayerOwner` 返回了 false**；
+  - 于是渲染线程 `while(!isShutdown())` 永真 → 保存界面永转。新档/旧档都复现 ⇒ 与存档数据无关。
+- 根因（反编译 `Minecraft.getGameProfile()` + `IntegratedServer.<init>`）：
+  - `IntegratedServer.<init>` 用 `setSingleplayerProfile(this.getGameProfile())` 设置房主 profile；
+  - `getGameProfile()` **优先返回启动器异步 profile 查询（profileFuture）的 ProfileResult.profile()**，其 name 未必等于游戏内玩家名；离线回退分支才用 `this.user`（字段，非 getUser()）。
+  - 本启动器 UUID 为随机 v4（非名字派生），账号名与游戏内名 "mcnb" 不一致 ⇒ `singleplayerProfile.name() ≠ "mcnb"` ⇒ 原版按名字比对的 `isSingleplayerOwner` 恒 false ⇒ 房主断线时集成服务器不会自行停机。
+- 修复：新增客户端 `IntegratedServerOwnerFixMixin`，`@Inject isSingleplayerOwner HEAD`：singleplayerProfile 名字与断线玩家一致时放行原版；否则回退为「与客户端本地用户名 `Minecraft.getUser().getName()` 比对」——本地玩家就是房主（原版本意），LAN 他人名字不同仍返回 false。附带 `[SHUTDOWN] isSingleplayerOwner FALLBACK` 打点输出两边实际值。
+- 双端构建部署，备份 `.bak.20260901_23xxxx`，testzip OK。
+
 **修复：ICPM 弓射不出 ICPM 箭 + ICPM 鱼竿无法使用 · 2026-08-30**
 
 ① 弓射不出 ICPM 箭（箭矢实体根本构造不出来）
