@@ -76,3 +76,7 @@ libs/minecraft-yarn.jar
 
 # GitHub Actions workflow needs `workflow` scope to push; kept local-only for now
 .github/
+
+# diagnostic disassembler scratch (generated)
+tmp_disasm/
+tmp_*.py

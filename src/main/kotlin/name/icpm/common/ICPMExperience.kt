@@ -85,7 +85,10 @@ object ICPMExperience {
             return maxOf(-((-experience - 1) / 20 + 1), MIN_LEVEL)
         }
         var level = 0
-        while (getExperienceRequired(level + 1) <= experience) {
+        // 上限钳制：getExperienceRequired(level>MAX_LEVEL) 恒返回 Int.MAX_VALUE，
+        // 若 experience 达到 Int.MAX_VALUE（如 /xp set 2147483647），原实现会 level++ 永远
+        // 递增 → 服务端死循环卡死（保存/退出时尤甚）。必须限制 level < MAX_LEVEL。
+        while (level < MAX_LEVEL && getExperienceRequired(level + 1) <= experience) {
             level++
         }
         return level

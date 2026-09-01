@@ -28,4 +28,18 @@ public class ClientShutdownTracer {
     private void icpm$saveQuitExit(CallbackInfo ci) {
         LOG.error("[SHUTDOWN] disconnectWithSavingScreen EXIT   (保存界面已显示，等待底层关闭任务完成)");
     }
+
+    /**
+     * disconnect(Screen;ZZ) 是「保存并退出」的真正实现：内部 `while (!integratedServer.isShutdown())
+     * runTick(false)` 循环绘制保存界面，直到服务端线程死亡。打点确认渲染线程是否进入/退出该循环。
+     */
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("HEAD"))
+    private void icpm$disconnectEnter(CallbackInfo ci) {
+        LOG.error("[SHUTDOWN] Minecraft.disconnect(Screen,ZZ) ENTER  thread=" + Thread.currentThread().getName());
+    }
+
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("TAIL"))
+    private void icpm$disconnectExit(CallbackInfo ci) {
+        LOG.error("[SHUTDOWN] Minecraft.disconnect(Screen,ZZ) EXIT   thread=" + Thread.currentThread().getName());
+    }
 }

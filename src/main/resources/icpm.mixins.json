@@ -76,6 +76,7 @@
         "ICPMLivestockGrowthMixin",
         "ICPMChickenAccessor",
         "ServerShutdownTracer",
+        "PlayerListShutdownTracer",
         "FixedPlayerUuidMixin",
         "ShieldBlockItemMixin",
         "ShieldBlockHurtMixin",

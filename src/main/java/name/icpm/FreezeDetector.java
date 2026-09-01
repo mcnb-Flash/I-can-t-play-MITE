@@ -172,7 +172,8 @@ public final class FreezeDetector {
         return sb.toString();
     }
 
-    private static void dumpThreads(long clientStalled, long serverStuckMs, String serverTopFrame) {
+    /** 全线程栈 dump（供卡死探测器自身及 PlayerListShutdownTracer 等诊断组件调用）。 */
+    public static void dumpThreads(long clientStalled, long serverStuckMs, String serverTopFrame) {
         try {
             ThreadMXBean bean = ManagementFactory.getThreadMXBean();
             ThreadInfo[] infos;

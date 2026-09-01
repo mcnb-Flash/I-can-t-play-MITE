@@ -2,6 +2,31 @@
 
 ## 1.0.6
 
+**修复：保存世界卡死（保存界面永不消失）+ 玩家数据错乱（UUID 不承接旧存档）· 2026-09-01**
+
+㉒ 玩家数据错乱根因：1.21.11 本地玩家 UUID 由【启动器】计算，不再经过 `UUIDUtil.createOfflinePlayerUUID`，导致旧的 `FixedPlayerUuidMixin`（覆盖该函数）对本地玩家**完全失效**：
+
+- 现象：每次进旧档都会用启动器给的随机 UUID 新建 `playerdata/<新uuid>.dat`，老 MITE 存档的 `playerdata/00000000-0000-3004-998f-501a96e2ae48.dat` 被孤立 → 背包/等级/进度全部"重置"，即用户反馈的"玩家数据错乱"。日志佐证（latest.log）：
+  `Local player id 26977e4c-a09d-4fe2-ae82-bdb5168dc209 was not found in the known players list [00000000-0000-3004-998f-501a96e2ae48, ...]! FTB Teams will not be able to function correctly!`
+- 修复：新增客户端 mixin `FixedLocalPlayerUuidMixin`，注入 `Minecraft.getUser()` 的 RETURN，把离线模式（accessToken 为空/"0"）下返回的 `User` 替换为携带固定 MITE UUID 的新 `User`（保留名称/令牌/xuid/clientId）。`getUser()` 是本地玩家登录握手（`ClientHandshakePacketListenerImpl`）与 FTB Teams 读取本地 UUID 的唯一来源，改这一处即可让登录包 UUID、服务端 ServerPlayer 的 GameProfile/UUID、playerdata 文件名、客户端 LocalPlayer 全部回到固定 UUID，旧档进度无缝承接。**在线模式不生效**，不影响正版/第三方服务器。
+
+㉓ 保存世界卡死（保存界面永不消失）——已完成根因定位 + 埋点，待一次复现实锤卡点：
+
+- 反编译 1.21.11 关闭链路确认：
+  1. 渲染线程在 `Minecraft.disconnect(Screen,ZZ)` 内 `while (!integratedServer.isShutdown()) runTick(false)` 循环绘制"保存世界中"界面；`isShutdown() == !serverThread.isAlive()`，即**等服务端线程死**。
+  2. 服务端玩家断线走 `ServerGamePacketListenerImpl.onDisconnect` → 先打 `xxx lost connection` → `removePlayerFromWorld()` → `PlayerList.remove(player)`（保存玩家/移除实体/广播）。
+  3. `removePlayerFromWorld` 返回后 `ServerCommonPacketListenerImpl.onDisconnect` 才会执行 `Stopping singleplayer server as player logged out` → `server.halt(false)` 让服务端线程退出。
+  4. **本次卡死日志中【没有】** `Stopping singleplayer server` 且服务端线程在 `mcnb退出游戏` 后静默 ⇒ **`PlayerList.remove` 一直没返回** ⇒ 服务端线程活着 ⇒ `isShutdown()` 永假 ⇒ 保存界面永转（与用户"卡死在保存世界页面"完全吻合）。
+- 已排查排除（非根因）：`PlayerMixin` 存档注入（`writeExperience`/`writeIcpmPlayerData`）、`PortalPositionStorage`/`PlayerNutritionManager`/`ICPMFoodStats`/`PlayerStatsManager`、全部自定义 DataComponent（`QualityComponent`/`NutritionComponent`/`CraftPreviewComponent`/`COIN_XP`/`RUNESTONE_VARIANT`/`SHIELD_ATTACHED`，均为 int/bool/简单 record codec，序列化安全）、`ICPM.java` 生命周期回调、`FixedPlayerUuidMixin`、弓/箭/鱼竿改动（构造器参数非组件）。
+- 新增埋点（下轮复现即可实锤卡点）：
+  - `PlayerListShutdownTracer`（服务端）：`PlayerList.remove` HEAD/TAIL 打点 + **4 秒看门狗**——remove 超 4s 未退出立即 dump 全线程栈（含 "Server thread" 精确卡点），无需等待原 FreezeDetector 的 10s 阈值。
+  - `ClientShutdownTracer` 增补 `disconnect(Screen,ZZ)` 进出打点，确认渲染线程进入/退出等待循环。
+  - 复现方法：进档 → 「保存并退出」→ 停在保存界面后**等 10 秒**再强制关窗，把 `E:/.minecraft/versions/1.21.11MITE测试/logs/latest.log` 发我即可（看门狗会在 4s 后自动 dump 全栈）。
+
+㉔ 顺带修复潜在卡死：`ICPMExperience.getExperienceLevel` 的无限循环
+
+- `while (getExperienceRequired(level + 1) <= experience) level++`：`getExperienceRequired(level > 200)` 恒返回 `Int.MAX_VALUE`，若 `totalExperience` 达到 `Int.MAX_VALUE`（如 `/xp set 2147483647`），循环将永不退出 → 服务端死循环卡死。已加 `level < MAX_LEVEL` 上限钳制。
+
 **修复：ICPM 弓射不出 ICPM 箭 + ICPM 鱼竿无法使用 · 2026-08-30**
 
 ① 弓射不出 ICPM 箭（箭矢实体根本构造不出来）

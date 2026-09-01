@@ -14,7 +14,8 @@
 		"InventoryScreenCraftMixin",
 		"BloodMoonSkyMixin",
 		"ClientShutdownTracer",
-		"ICPMBloodMoonEyesMixin"
+		"ICPMBloodMoonEyesMixin",
+		"FixedLocalPlayerUuidMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
