@@ -36,10 +36,12 @@ public abstract class ZombieMiteDropMixin {
         if (!recentlyHit) {
             return;
         }
-        // 基础概率：村民僵尸 1/50，标准 1/200；命中则掉对应稀有物（简化：不含 looting 加成）
+        // 基础概率：村民僵尸 1/50，标准 1/200（R196 dropRareDrop 的 rand.nextInt(200)==0 语义）
         boolean villager = self instanceof ZombieVillager;
         int base = villager ? 50 : 200;
-        if (self.getRandom().nextInt(base) >= 5) {
+        // ⚠️ 修复：原实现 nextInt(base)>=5 返回 → 概率变为 5/base（1/40、1/10），
+        // 与注释/R196 差 5 倍。改为 nextInt(base)==0 才是 1/base。
+        if (self.getRandom().nextInt(base) != 0) {
             return;
         }
         Item[] pool = villager ? VILLAGER_DROPS() : STANDARD_DROPS();

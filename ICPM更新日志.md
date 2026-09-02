@@ -2,6 +2,17 @@
 
 ## 1.0.6
 
+**修复：剪羊毛机制空转 + 弓耐久空壳 + 僵尸稀有掉落率偏差（mixin 审计第二轮）· 2026-09-02**
+
+㉗ 专项审计第二轮（全量精读剩余行为/方块/耐久/客户端 mixin + 字节码实证）确认并修复：
+
+- **剪羊毛/剪蘑菇牛 50 耐久 + 右键去抖完全空转（字节码实证）**：
+  - 1.21.11 剪羊毛/剪蘑菇牛发生在 `Sheep.mobInteract` / `MushroomCow.mobInteract`（各含 `stack.is(Items.SHEARS)` + `shear()` + `hurtAndBreak(1)`），**不走** `Item.interactLivingEntity`（`ShearsItem` 不覆写该方法）→ 旧 `ShearsInteractMixin` 挂在 `Item.interactLivingEntity` 上完全无效：冷却不触发、补 49 耐久不生效；且原版判定硬比对 `Items.SHEARS`，ICPM 六把自定义剪刀 ≠ 原版物品 → **剪不了羊/蘑菇牛**。
+  - 修复：重写 `ShearsInteractMixin` 为 `@Mixin({Sheep, MushroomCow})`：`@Redirect ItemStack.is(Item)` 把 `Items.SHEARS` 比对放宽为「任意 ShearsItem 子类」（蘑菇牛的 BOWL/煲汤比对互不干扰）；`mobInteract` HEAD 去抖冷却（仅对剪刀类生效，喂食/挤奶不受影响）；RETURN 成功后补扣 49 耐久（原版已扣 1，合计 50，对齐 R196）。
+- **`BowDurabilityMixin` 为未注册空壳**：文件存在但不在 mixins.json，方法体为空；1.21.11 原版在 `ProjectileWeaponItem.shoot` 统一扣弓耐久 → 文件已删除。
+- **僵尸/村民僵尸稀有掉落率与注释/R196 差 5 倍**：`nextInt(base)>=5` 实际 5/base（1/40、1/10），注释写明 1/50、1/200 → 修正为 `nextInt(base)!=0`（1/base）。
+- 构建 + 双端部署（备份 `.bak.20260902_220416`，testzip OK）。
+
 **修复：多个"有名无实"附魔/回血机制（mixin 名不副实专项审计第一轮）· 2026-09-02**
 
 ㉖ 专项审计：106 个 mixin × 145 个注入点全量盘点 + 精读 + 全代码引用核对，确认并修复两类根因导致的 4 个空壳机制：
