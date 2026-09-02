@@ -334,7 +334,9 @@ object ICPMExperience {
         } else if (levelChange > 0) {
             val healthLimitAfter = getHealthLimit(levelAfter)
             if (healthLimitAfter > healthLimitBefore && !suppressHealing) {
-                player.heal((healthLimitAfter - healthLimitBefore).toFloat())
+                // ⚠️ 修复（2026-09-02）：升级回血必须经 healAuthorized，否则被
+                // DisableVanillaHealingMixin 无条件 cancel → 升级不回血（有名无实）。
+                ICPMHealProgressManager.healAuthorized(player, (healthLimitAfter - healthLimitBefore).toFloat())
             }
             if (!suppressSound) {
                 player.playSound(

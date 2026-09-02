@@ -21,32 +21,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * ICPM 近战附魔（R196 EntityPlayer.attackEntityAsMob 移植）：
  * 击晕(战锤/棍棒)、吸血(剑/镰刀)、缴械(剑) —— 注入 LivingEntity.actuallyHurt；
- * 穿刺(镐/战斧，无视护甲) —— 注入 LivingEntity.getDamageAfterArmorAbsorb。
+ * 穿刺(镐/战斧，穿透护甲) —— 由 ICPMArmorValueMixin 在护甲结算内实现（本 mixin 原在
+ * getDamageAfterArmorAbsorb RETURN 注入，但该方法被 ICPMArmorValueMixin HEAD-cancel 短路，
+ * RETURN 注入永不触发 → 穿刺有名无实，已迁移合并进护甲计算）。
  */
 @Mixin(LivingEntity.class)
 public abstract class ICPMCombatEnchantMixin {
-
-    /** 护甲减伤后：穿刺每级穿透 20% 护甲减伤（R196: piercing = levelFraction*5 护甲点） */
-    @Inject(method = "getDamageAfterArmorAbsorb", at = @At("RETURN"), cancellable = true)
-    private void icpm$piercing(DamageSource damageSource, float f, CallbackInfoReturnable<Float> cir) {
-        if (damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
-            return;
-        }
-        Entity attacker = damageSource.getDirectEntity();
-        if (!(attacker instanceof Player player)) {
-            return;
-        }
-        ItemStack weapon = player.getMainHandItem();
-        int lvl = ICPMEnchantEffects.level(player.level(), weapon, "piercing");
-        if (lvl <= 0) {
-            return;
-        }
-        float base = cir.getReturnValue();
-        float original = f;
-        float reduced = Math.max(original - base, 0.0f);
-        // 每级穿透 20% 的护甲减免
-        cir.setReturnValue(Math.min(original, base + reduced * Math.min(1.0f, lvl * 0.2f)));
-    }
 
     /** 近战命中结算时：击晕 / 吸血 / 缴械 */
     @Inject(method = "actuallyHurt", at = @At("HEAD"))
@@ -68,13 +48,15 @@ public abstract class ICPMCombatEnchantMixin {
         }
 
         // 吸血：概率 level/10，治疗 伤害*0.5*random（≥1）（R196 getVampiricTransfer）
+        // ⚠️ 修复（2026-09-02）：必须经 healAuthorized，否则被 DisableVanillaHealingMixin 无条件
+        // cancel（玩家无"生命恢复"药水效果时）→ 吸血附魔有名无实。
         int vamp = ICPMEnchantEffects.level(player.level(), weapon, "vampiric");
         if (vamp > 0 && f > 0.0f && target.isAlive() && target.level().random.nextFloat() < vamp / 10.0f) {
             int transfer = (int) (f * 0.5f * target.level().random.nextFloat());
             if (transfer < 1) {
                 transfer = 1;
             }
-            player.heal(transfer);
+            name.icpm.common.ICPMHealProgressManager.healAuthorized(player, transfer);
         }
 
         // 缴械：概率 level/10，打落目标手持武器（R196 EntityPlayer.disarming）

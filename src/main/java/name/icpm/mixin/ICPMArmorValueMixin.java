@@ -61,15 +61,20 @@ public abstract class ICPMArmorValueMixin {
         if (source.is(DamageTypeTags.BYPASSES_ARMOR)) {
             return;
         }
-        float protection = icpm$totalProtection(self, source);
+        float armorProt = icpm$armorProtection(self);
+        // 穿刺附魔（R196，镐/战斧）：每级穿透 20% 的【护甲】减伤；附魔保护不被穿透。
+        float protection = armorProt * icpm$pierceFactor(source) + icpm$enchantProtection(self, source);
         float reduced = Math.max(amount - protection, 1.0f);
         cir.setReturnValue(reduced);
         cir.cancel();
     }
 
-    /** R196 ItemArmor.getTotalArmorProtection（护甲部分）+ 附魔保护 */
+    /**
+     * R196 ItemArmor.getTotalArmorProtection（仅护甲部分）。
+     * 注：穿刺只能穿透护甲部分，故与附魔保护分开计算。
+     */
     @Unique
-    private static float icpm$totalProtection(LivingEntity self, DamageSource source) {
+    private static float icpm$armorProtection(LivingEntity self) {
         float total = 0.0f;
         for (EquipmentSlot slot : ARMOR_SLOTS) {
             ItemStack stack = self.getItemBySlot(slot);
@@ -85,11 +90,38 @@ public abstract class ICPMArmorValueMixin {
             multiplied *= icpm$damageFactor(stack, self);
             total += multiplied;
         }
-        // 附魔保护（1.21.11 EnchantmentHelper.getDamageProtection）
-        if (self.level() instanceof ServerLevel sl) {
-            total += EnchantmentHelper.getDamageProtection(sl, self, source);
-        }
         return total;
+    }
+
+    /** 附魔保护（1.21.11 EnchantmentHelper.getDamageProtection，仅服务端有值） */
+    @Unique
+    private static float icpm$enchantProtection(LivingEntity self, DamageSource source) {
+        if (self.level() instanceof ServerLevel sl) {
+            return EnchantmentHelper.getDamageProtection(sl, self, source);
+        }
+        return 0.0f;
+    }
+
+    /**
+     * 穿刺因子：攻击者主手持 icpm:piercing 附魔武器时返回 (1 − min(1, 级×0.2))，
+     * 否则 1.0（不穿透）。R196：piercing = levelFraction*5 护甲点，本实现按
+     * "每级穿透 20% 护甲减伤"折算（与旧 icpm$piercing 语义一致）。
+     */
+    @Unique
+    private static float icpm$pierceFactor(DamageSource source) {
+        net.minecraft.world.entity.Entity attacker = source.getDirectEntity();
+        if (!(attacker instanceof net.minecraft.world.entity.player.Player player)) {
+            return 1.0f;
+        }
+        ItemStack weapon = player.getMainHandItem();
+        if (weapon.isEmpty()) {
+            return 1.0f;
+        }
+        int lvl = name.icpm.common.ICPMEnchantEffects.level(player.level(), weapon, "piercing");
+        if (lvl <= 0) {
+            return 1.0f;
+        }
+        return Math.max(0.0f, 1.0f - Math.min(1.0f, lvl * 0.2f));
     }
 
     /** R196 ItemHelmet=5 / ItemCuirass=8 / ItemLeggings=7 / ItemBoots=4 */

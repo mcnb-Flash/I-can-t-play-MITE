@@ -1,5 +1,6 @@
 package name.icpm.common
 
+import net.minecraft.world.entity.LivingEntity
 import java.util.UUID
 
 /**
@@ -24,6 +25,21 @@ object ICPMHealProgressManager {
 
     @JvmStatic
     fun isMitHealing(): Boolean = mitHealing
+
+    /**
+     * ICPM 授权回血：以 mitHealing 标志包裹 heal，使 DisableVanillaHealingMixin 放行。
+     * 供 ICPM 自研回血调用（再生附魔 / 吸血附魔 / 升级回血），避免被"拦截原版回血"误杀
+     * （曾致再生附魔与吸血附魔有名无实——heal 被 DisableVanillaHealingMixin 无条件 cancel）。
+     */
+    @JvmStatic
+    fun healAuthorized(entity: LivingEntity, amount: Float) {
+        beginHealing()
+        try {
+            entity.heal(amount)
+        } finally {
+            endHealing()
+        }
+    }
 
     /**
      * 添加一个 tick 的回血进度

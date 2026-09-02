@@ -2,6 +2,21 @@
 
 ## 1.0.6
 
+**修复：多个"有名无实"附魔/回血机制（mixin 名不副实专项审计第一轮）· 2026-09-02**
+
+㉖ 专项审计：106 个 mixin × 145 个注入点全量盘点 + 精读 + 全代码引用核对，确认并修复两类根因导致的 4 个空壳机制：
+
+- **根因 A：`DisableVanillaHealingMixin` 一刀切拦截 `heal()`**，对无"生命恢复"药水效果的玩家无条件 cancel，误杀所有 ICPM 自研回血：
+  - ❌ 再生附魔（ICPMRegenerationMixin 的 heal 被 cancel）→ 修复：经新增的 `ICPMHealProgressManager.healAuthorized` 授权回血；
+  - ❌ 吸血附魔（ICPMCombatEnchantMixin 的 player.heal 被 cancel）→ 修复：同上；
+  - ❌ 升级回血（ICPMExperience 升级时 heal 差值被 cancel）→ 修复：同上。
+  - 自然回血（ICPMFoodStats 经 begin/endHealing 保护）原本正常，未受影响。
+- **根因 B：`ICPMArmorValueMixin` 在 `getDamageAfterArmorAbsorb` HEAD-cancel 接管护甲**，使同一方法的 RETURN 注入（ICPMCombatEnchantMixin 的穿刺）永不触发——原 javadoc"穿刺在 RETURN 其后执行，无冲突"是错误假设（HEAD-cancel 会短路整个方法体，RETURN 注入点不可达）：
+  - ❌ 穿刺附魔完全无效 → 修复：把穿刺逻辑迁入 ICPMArmorValueMixin 的护甲结算内（护甲部分 ×(1−min(1,级×0.2))，仅穿透护甲、不穿透附魔保护）；并修正旧公式方向错误（旧式 base+reduced×0.2 实际"保留 20% 减免、穿透 80%"，与"每级穿透 20%"注释相反）。
+- 排查后排除（非空壳，证据充分）：5 个 `require=0` 注入目标全部真实存在（Player.canEat / Item.isCorrectToolForDrops / BlockBehaviour.getDestroyProgress / PathNavigation.isStableDestination / startShutdownWatchdog）；挖掘/采集/护甲/食物/盾牌/银器 mixin 逻辑闭环；`speed`、`fishing_fortune` 附魔为**数据驱动效果**（attributes / fishing_luck_bonus），无需 Java 即生效；附魔数据无解析错误。
+- 遗留待办：ICPMEdibleUseMixin 注释与实现不符（注释称改用 "use"，实际仍硬编码 `method_7836 remap=false`，功能正常但脆弱，建议后续改用官方名）；`HealthRegenManager.kt` 与 `ICPMHealProgressManager.addTickProgress` 为孤儿死代码（无调用）。
+- 已编译验证（compileJava BUILD SUCCESSFUL）。
+
 **修复：保存世界卡死（保存界面永不消失）+ 玩家数据错乱（UUID 不承接旧存档）· 2026-09-01**
 
 ㉒ 玩家数据错乱根因：1.21.11 本地玩家 UUID 由【启动器】计算，不再经过 `UUIDUtil.createOfflinePlayerUUID`，导致旧的 `FixedPlayerUuidMixin`（覆盖该函数）对本地玩家**完全失效**：
