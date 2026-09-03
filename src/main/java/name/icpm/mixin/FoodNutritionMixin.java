@@ -1,6 +1,7 @@
 package name.icpm.mixin;
 
 import name.icpm.common.ICPMFoodStats;
+import name.icpm.common.ICPMInsulinResistance;
 import name.icpm.common.PlayerNutritionManager;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,6 +37,7 @@ public class FoodNutritionMixin {
         if (stack.has(DataComponents.FOOD)) {
             PlayerNutritionManager.onFoodEaten(player, stack);
             ICPMFoodStats.onFoodEaten(player, stack);
+            ICPMInsulinResistance.onFoodEaten(player, stack); // 糖 → 胰岛素抵抗（R196）
         }
     }
 }

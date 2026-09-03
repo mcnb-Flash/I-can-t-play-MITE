@@ -439,5 +439,8 @@
   "curse.fearOfWolves.desc": "Wolves latch onto you relentlessly.",
   "curse.fearOfCreepers.desc": "Creepers latch onto you relentlessly.",
   "curse.fearOfUndead.desc": "The undead latch onto you relentlessly.",
-  "item.icpm.bottle_of_disenchanting": "Bottle of Disenchanting"
+  "item.icpm.bottle_of_disenchanting": "Bottle of Disenchanting",
+  "insulin.level.1": "Insulin resistance (mild): excess sugar now makes you nauseous.",
+  "insulin.level.2": "Insulin resistance (moderate): sugar no longer satiates; eating sweets sickens you.",
+  "insulin.level.3": "Insulin resistance (severe): eating sweets poisons you!"
 }

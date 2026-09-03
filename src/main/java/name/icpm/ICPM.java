@@ -378,6 +378,9 @@ public class ICPM implements ModInitializer {
         // 女巫召狼：被玩家打伤后的倒计时与刷新（R196 summonWolves）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
                 name.icpm.curse.WitchSummonManager::onServerTick);
+        // 胰岛素抵抗自然代谢（R196 FoodStats.onUpdate 每 tick −1）
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
+                name.icpm.common.ICPMInsulinResistance::onServerTick);
 
         // 月相机制：血月强制降雨 + 月相变化广播（R196 World.isBloodMoon/isBlueMoon/isHarvestMoon）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {

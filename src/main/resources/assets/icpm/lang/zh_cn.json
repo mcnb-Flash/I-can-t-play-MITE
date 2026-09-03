@@ -571,5 +571,8 @@
   "curse.fearOfWolves.desc": "狼会咬住你不放。",
   "curse.fearOfCreepers.desc": "苦力怕会咬住你不放。",
   "curse.fearOfUndead.desc": "亡灵会咬住你不放。",
-  "item.icpm.bottle_of_disenchanting": "去咒药水"
+  "item.icpm.bottle_of_disenchanting": "去咒药水",
+  "insulin.level.1": "§e你的胰岛素抵抗已达轻度：过量糖分会让你头晕目眩。",
+  "insulin.level.2": "§6你的胰岛素抵抗已达中度：糖分不再提供饱食，进食高糖即昏眩。",
+  "insulin.level.3": "§c你的胰岛素抵抗已达重度：进食高糖会中毒！"
 }

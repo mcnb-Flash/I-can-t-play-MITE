@@ -5,6 +5,7 @@ import name.icpm.common.ICPMExperience;
 import name.icpm.common.ICPMFoodStats;
 import name.icpm.common.ICPMHealProgressManager;
 import name.icpm.common.PlayerNutritionManager;
+import name.icpm.common.ICPMInsulinResistance;
 import name.icpm.common.PlayerStatsManager;
 import name.icpm.common.PortalPositionStorage;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -110,6 +111,7 @@ public class PlayerMixin {
         PlayerNutritionManager.load(player, tag);
         ICPMFoodStats.load(player, tag);
         PortalPositionStorage.load(player, tag);
+        ICPMInsulinResistance.load(player, tag);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
@@ -121,6 +123,7 @@ public class PlayerMixin {
         PlayerNutritionManager.save(player, tag);
         ICPMFoodStats.save(player, tag);
         PortalPositionStorage.save(player, tag);
+        ICPMInsulinResistance.save(player, tag);
     }
 
     /**
