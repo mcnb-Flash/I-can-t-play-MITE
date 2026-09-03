@@ -2,6 +2,17 @@
 
 ## 1.0.6
 
+**新增：女巫诅咒全套 + 去咒药水（R196 完整移植，效果/变体架构）· 2026-09-03**
+
+㉘ R196 女巫诅咒机制全套移植：
+
+- **架构**：诅咒 = 单一 MobEffect `icpm:witch_curse`（效果/变体架构，amplifier 编码 16 类诅咒类型），玩家至多一中（原版效果槽天然保证），效果本体随玩家 NBT 自动持久化；检测统一 `ICPMCurseManager.isCursed(entity, curse, learn)`。
+- **生命周期**：女巫远程攻击 1/4 概率施咒（6000 tick 延迟）→ pending 到期 realize 施加无限时长效果 → 杀施咒女巫 / 喝去咒药水解除；诅咒豁免牛奶与死亡清除（removeAllEffects 保留 witch_curse，牛奶不再成为解咒捷径）。
+- **16 类诅咒全部接入真实生效点**：禁箱（ChestBlock.useWithoutItem）、禁甲（ArmorSlot.mayPlace + realize 瞬间自动脱甲）、厌食动/植物与禁饮（Player.canEat，食物分类自动取 FOOD_NUTRITION 蛋白/植物营养表）、禁饮药水（Item.use 拦普通药水，投掷药水放行）、装腐（hurtAndBreak 中央 4 参 ×2）、笨拙（合成等效等级−20 + 经验花费×2）、禁跑（setSprinting）、屏息（air 钳制 90）、缠绕（脚下藤蔓/植物减速）、禁眠（startSleepInBed 失败）、末影敌视（附近末影人周期锁定）、恐惧系（亡灵/蜘蛛/狼/苦力怕被命中 3/4 咬住不放）。
+- **召狼**：女巫被玩家打伤后 3 秒在目标旁刷 1-3 只敌意狼（一生一次；setLastHurtByMob+setTarget 使其真实追击）。
+- **去咒药水**：新物品 `icpm:bottle_of_disenchanting`（R196 ItemBottleOfDisenchanting），饮用即解咒且豁免禁饮。
+- 68 个诅咒语言键（名称/描述/生效/解除，中英）。
+
 **修复：剪羊毛机制空转 + 弓耐久空壳 + 僵尸稀有掉落率偏差（mixin 审计第二轮）· 2026-09-02**
 
 ㉗ 专项审计第二轮（全量精读剩余行为/方块/耐久/客户端 mixin + 字节码实证）确认并修复：

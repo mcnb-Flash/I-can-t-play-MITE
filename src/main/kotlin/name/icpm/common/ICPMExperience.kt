@@ -164,11 +164,11 @@ object ICPMExperience {
     /**
      * R196 EntityPlayer.getCraftingExperienceCost：
      * 合成高于 average 品质时消耗的额外经验 = round(quality_adjusted_difficulty / 5)。
-     * R196 中 clumsiness 诅咒会翻倍，本模组无诅咒故系数为 1。
+     * R196 中 clumsiness 诅咒会把该花费翻倍；本实现由调用方经 costMultiplier 传入。
      */
     @JvmStatic
-    fun getCraftingExperienceCost(qualityAdjustedDifficulty: Float): Int {
-        return Math.round(qualityAdjustedDifficulty / 5.0f)
+    fun getCraftingExperienceCost(qualityAdjustedDifficulty: Float, costMultiplier: Int = 1): Int {
+        return Math.round(qualityAdjustedDifficulty / 5.0f) * costMultiplier
     }
 
     /**
@@ -190,13 +190,15 @@ object ICPMExperience {
         difficulty: Float,
         maxQualityOrdinal: Int,
         averageOrdinal: Int,
-        minOrdinal: Int
+        minOrdinal: Int,
+        costMultiplier: Int = 1
     ): Int {
         if (experience <= 0) {
             return minOrdinal
         }
         for (q in maxQualityOrdinal downTo averageOrdinal + 1) {
-            val cost = getCraftingExperienceCost(getQualityAdjustedDifficulty(difficulty, q, averageOrdinal))
+            val cost = getCraftingExperienceCost(
+                getQualityAdjustedDifficulty(difficulty, q, averageOrdinal), costMultiplier)
             if (cost <= experience) return q
         }
         return minOrdinal

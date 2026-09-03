@@ -260,4 +260,13 @@ public class PlayerNutritionManager {
             PLAYER_NUTRITION.put(player.getUUID(), NutritionComponent.DEFAULT);
         }
     }
+
+    /**
+     * 查询食物营养三维 [protein, essentialFats, phytonutrients]（×8000 比例）。
+     * 供诅咒食物分类等系统使用；无记录返回 null。
+     */
+    public static int[] getFoodNutrition(String itemId) {
+        int[] v = FOOD_NUTRITION.get(itemId);
+        return v == null ? null : v.clone();
+    }
 }

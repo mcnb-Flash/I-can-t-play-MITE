@@ -151,6 +151,20 @@ public class ICPM implements ModInitializer {
     );
     public static final net.minecraft.core.Holder<MobEffect> MALNUTRITION_HOLDER = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(MALNUTRITION);
 
+    // 女巫诅咒（R196 Curse）：单一 MobEffect + amplifier 变体（curse.id-1）编码 16 类诅咒。
+    // 玩家至多一个诅咒 → 效果槽天然唯一；检测统一走 ICPMCurseManager.isCursed。
+    public static final MobEffect WITCH_CURSE = Registry.register(
+            BuiltInRegistries.MOB_EFFECT,
+            id("witch_curse"),
+            new MobEffect(MobEffectCategory.HARMFUL, 0x4B0082) {
+                @Override
+                public boolean shouldApplyEffectTickThisTick(int tickCount, int amplifier) {
+                    return true;
+                }
+            }
+    );
+    public static final net.minecraft.core.Holder<MobEffect> WITCH_CURSE_HOLDER = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(WITCH_CURSE);
+
     // 存储注册名 - 用于重复注册
     private static final List<RegisteredBlock> REGISTERED_BLOCKS = new ArrayList<>();
 
@@ -357,6 +371,13 @@ public class ICPM implements ModInitializer {
                 name.icpm.common.ICPMFarmlandFertility.onBlockRemoved(world.dimension(), pos);
             }
         });
+
+        // 女巫诅咒引擎：pending 诅咒到期 realize（R196 WorldServer.checkCurses）
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
+                name.icpm.curse.ICPMCurseManager::onServerTick);
+        // 女巫召狼：被玩家打伤后的倒计时与刷新（R196 summonWolves）
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
+                name.icpm.curse.WitchSummonManager::onServerTick);
 
         // 月相机制：血月强制降雨 + 月相变化广播（R196 World.isBloodMoon/isBlueMoon/isHarvestMoon）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {

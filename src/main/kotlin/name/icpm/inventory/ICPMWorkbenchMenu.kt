@@ -572,16 +572,22 @@ class ICPMWorkbenchMenu(
     /** legendary 品质 ordinal（物品允许的最高品质） */
     private val MAX_ORD = EnumQuality.LEGENDARY.ordinal
 
+    /** 笨拙诅咒（R196 clumsiness）：等效等级 −20（getMinCraftingQuality）+ 品质经验花费 ×2 */
+    private fun clumsyCursed(): Boolean =
+            name.icpm.curse.ICPMCurseManager.isCursed(ownerPlayer, name.icpm.curse.ICPMCurse.CLUMSINESS, true)
+
     /** 由玩家等级决定的最低品质 ordinal（R196 getMinCraftingQuality 的等级部分） */
     private fun getMinQualityOrdinal(): Int {
-        val level = ICPMExperience.getExperienceLevel(ICPMExperience.getExperience(ownerPlayer))
+        var level = ICPMExperience.getExperienceLevel(ICPMExperience.getExperience(ownerPlayer))
+        if (clumsyCursed()) level -= 20 // R196：笨拙按等效低 20 级计算基准品质
         return ICPMExperience.getMinCraftingQualityOrdinal(level, AVG_ORD, MIN_ORD)
     }
 
     /** 由玩家经验决定的最高品质 ordinal（R196 getMaxCraftingQuality 的 XP 成本部分） */
     private fun getMaxQualityOrdinal(): Int {
         val exp = ICPMExperience.getExperience(ownerPlayer)
-        return ICPMExperience.getMaxCraftingQualityOrdinal(exp, recipeDifficulty, MAX_ORD, AVG_ORD, getMinQualityOrdinal())
+        return ICPMExperience.getMaxCraftingQualityOrdinal(exp, recipeDifficulty, MAX_ORD, AVG_ORD,
+                getMinQualityOrdinal(), if (clumsyCursed()) 2 else 1)
     }
 
     /** 将当前选中品质钳制进 [min, max] 区间（R196 setCraftingResultIndex 的 clamp 行为） */
@@ -594,7 +600,7 @@ class ICPMWorkbenchMenu(
         val q = EnumQuality.fromOrdinal(ordinal)
         if (q.ordinal <= AVG_ORD) return 0
         val qad = ICPMExperience.getQualityAdjustedDifficulty(recipeDifficulty, q.ordinal, AVG_ORD)
-        return ICPMExperience.getCraftingExperienceCost(qad)
+        return ICPMExperience.getCraftingExperienceCost(qad, if (clumsyCursed()) 2 else 1)
     }
 
     /** 计算当前选中品质对应的合成额外经验成本（average 及以下为 0） */

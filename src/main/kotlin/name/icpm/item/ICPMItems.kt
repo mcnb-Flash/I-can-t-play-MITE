@@ -818,6 +818,9 @@ object ICPMItems {
     @JvmField val MILK_BOWL: Item = register("milk_bowl", Item(makeProperties("milk_bowl", 4).food(ICPMFoodProperties.MILK_BOWL).usingConvertsTo(Items.BOWL).craftRemainder(Items.BOWL)))
     @JvmField val WATER_BOWL: Item = register("water_bowl", Item(makeProperties("water_bowl", 4).food(ICPMFoodProperties.WATER_BOWL).usingConvertsTo(Items.BOWL).craftRemainder(Items.BOWL)))
 
+    // ========== 去咒药水（R196 ItemBottleOfDisenchanting：饮用解咒，豁免禁饮诅咒） ==========
+    @JvmField val BOTTLE_OF_DISENCHANTING: Item = register("bottle_of_disenchanting", CurseCureItem(makeProperties("bottle_of_disenchanting", 1)))
+
     // ========== 粪便（ICPM 1.6.4 ItemManure：燃料 + 施肥） ==========
     @JvmField val MANURE: Item = register("manure", IcpmManureItem(makeProperties("manure", 64)))
 
