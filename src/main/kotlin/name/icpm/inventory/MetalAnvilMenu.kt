@@ -67,6 +67,8 @@ class MetalAnvilMenu(
 
     /** R196 stackSizeToBeUsedInRepair：本次修复消耗的金属粒数量（修复量循环计算） */
     private var stackSizeToBeUsedInRepair = 0
+    /** 去附魔模式：材料槽为去咒药水时置 true，取件时消耗 1 瓶（R196 is_disenchanting）。 */
+    private var disenchanting = false
 
     /** 命名框文字（R196 repairedItemName）：为空表示不命名 */
     private var repairedItemName: String = ""
@@ -104,6 +106,7 @@ class MetalAnvilMenu(
         addSlot(object : Slot(input, 1, 76, 47) {
             override fun mayPlace(stack: ItemStack): Boolean {
                 return isRepairMaterial(stack) || stack.item == Items.ENCHANTED_BOOK
+                        || stack.item == ICPMItems.BOTTLE_OF_DISENCHANTING
             }
             
             override fun set(stack: ItemStack) {
@@ -240,12 +243,35 @@ class MetalAnvilMenu(
     private fun updateRepairResult() {
         val inputStack = input.getItem(0)
         val materialStack = input.getItem(1)
+        disenchanting = false
         
         // 无输入 → 无结果
         if (inputStack.isEmpty()) {
             input.setItem(resultSlotIndex, ItemStack.EMPTY)
             repairAmount = 0
             stackSizeToBeUsedInRepair = 0
+            return
+        }
+
+        // ===== R196 is_disenchanting：装备 + 去咒药水 → 结果 = 输入副本清空附魔 =====
+        if (materialStack.item == ICPMItems.BOTTLE_OF_DISENCHANTING) {
+            val enchantments = inputStack.get(DataComponents.ENCHANTMENTS)
+            if (enchantments == null || enchantments.isEmpty) {
+                playerInventory.player.displayClientMessage(
+                    Component.literal("§e该物品没有可去除的附魔"),
+                    true
+                )
+                input.setItem(resultSlotIndex, ItemStack.EMPTY)
+                repairAmount = 0
+                stackSizeToBeUsedInRepair = 0
+                return
+            }
+            val result = inputStack.copy()
+            result.set(DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY)
+            disenchanting = true
+            repairAmount = 0
+            stackSizeToBeUsedInRepair = 0
+            input.setItem(resultSlotIndex, result)
             return
         }
 
@@ -543,6 +569,14 @@ class MetalAnvilMenu(
         if (inputStack.isEmpty()) return
 
         val materialStack = input.getItem(1)
+        // R196 去附魔：消耗 1 瓶去咒药水 + 消耗输入装备（结果不含附魔）
+        if (disenchanting && materialStack.item == ICPMItems.BOTTLE_OF_DISENCHANTING) {
+            if (materialStack.count > 1) materialStack.shrink(1) else materialStack.setCount(0)
+            disenchanting = false
+            inputStack.shrink(1)
+            updateRepairResult()
+            return
+        }
         // 消耗金属粒（仅修复时 stackSizeToBeUsedInRepair > 0；纯命名不消耗材料）
         val toConsume = stackSizeToBeUsedInRepair
         if (toConsume > 0 && !materialStack.isEmpty) {
