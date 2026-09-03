@@ -8,6 +8,7 @@
         "PlayerMixin",
         "PlayerReachMixin",
         "WitchCurseMixin",
+        "WitchCurseDeathMixin",
         "WitchSummonHookMixin",
         "CurseDecayMixin",
         "CurseFearMixin",

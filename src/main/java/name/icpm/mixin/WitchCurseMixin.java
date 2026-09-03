@@ -2,7 +2,6 @@ package name.icpm.mixin;
 
 import name.icpm.curse.ICPMCurse;
 import name.icpm.curse.ICPMCurseManager;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,13 +47,5 @@ public abstract class WitchCurseMixin {
         }
         ICPMCurseManager.curse(player, witch, ICPMCurse.getRandom(witch.getRandom()),
                 ICPMCurseManager.CURSE_DELAY_TICKS);
-    }
-
-    @Inject(method = "die", at = @At("HEAD"))
-    private void icpm$removeCursesOnDeath(DamageSource source, CallbackInfo ci) {
-        // R196 onDeath → removeCursesForWitch：该女巫施放的全部诅咒（含 pending）撤销
-        ICPMCurseManager.removeForWitch((Witch) (Object) this);
-        // 清理召狼倒计时/记录
-        name.icpm.curse.WitchSummonManager.onWitchRemoved((Witch) (Object) this);
     }
 }

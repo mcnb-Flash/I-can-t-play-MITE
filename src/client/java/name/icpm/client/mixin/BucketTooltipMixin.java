@@ -26,9 +26,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *   <li>Shift：岩浆桶显示"当被盛装时" + 红色熔化概率（仅概率&gt;0，艾德曼不显示）；</li>
  *   <li>Shift：水/岩浆桶且（创造或经验≥100）显示蓝色/红色"Ctrl+右键 放置源头(100 XP)"。</li>
  * </ul>
- * 仅作用原版铁桶三件套与 ICPM 金属桶。
+ * 仅作用原版铁桶三件套与 ICPM 金属桶（处理器内 instanceof 守卫）。
+ *
+ * <p>注意：appendHoverText 只声明于父类 Item，BucketItem 未覆写——Mixin 注入
+ * 继承方法必须在声明类（Item）上做，否则启动即 "could not find any targets"。
  */
-@Mixin(BucketItem.class)
+@Mixin(Item.class)
 public abstract class BucketTooltipMixin {
 
     @Inject(method = "appendHoverText(Lnet/minecraft/world/item/ItemStack;"
