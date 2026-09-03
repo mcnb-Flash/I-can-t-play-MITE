@@ -6,38 +6,35 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.Unique;
 
 /**
- * 物品实体 tick 时若携带生食且位于燃烧方块/火焰/熔岩上，按 R196 逻辑累计烹饪进度，满额转成熟食。
+ * 火焰烧肉 —— 物品实体在火焰中的持续烹饪（R196 忠实移植，重构版）。
  *
- * <p>R196 的 EntityItem 在火/熔岩中不会因"燃烧"而立即消失（它有独立的 health 系统），
- * 而现代 MC 的物品实体一旦接触火/熔岩会被直接销毁，导致无法"烧多次"。这里让"正在被烹饪的生/熟食物"
- * 临时 {@code fireImmune()}，等价于 R196 的"受伤但不死、累计烹饪进度"语义。</p>
+ * <p>R196 语义：生食掉落物只要持续受火焰灼烧，cooking_progress 就连续累计
+ * （+火伤×3/tick），累计满 100 即烤熟 —— 没有"点火 N 次 / 离开热源窗口"。
+ * 现代 MC 物品会被火直接销毁且无 R196 的独立 health，故在受热/刚熟期间临时防火，
+ * 使"持续灼烧 → 熟"完整成立。
+ *
+ * <p>本轮重构移除的混元3 自创状态机：{@code icpmBurnConsumed}（"每次连续受热窗口只贡献
+ * 25 进度、必须离火再放回才能继续、点 4 次熟"）、熟食永久防火。原因：R196 不存在窗口模型；
+ * 熟食永久防火会让熟食在火中永不损毁，同样违背原文（原文熟食继续受火会再次累计直至消失）。
  */
 @Mixin(ItemEntity.class)
 public class ItemEntityMixin {
 
+    /** 烹饪进度（R196 cooking_progress）。 */
     @Unique
     private float icpmCookingProgress = 0.0F;
-    /**
-     * 一旦开始受热烹饪即标记为"烹饪物"，烤熟后仍保持免疫，避免熟食被火/熔岩销毁而"夹生消失"。
-     */
+    /** 刚烤熟（仍在热源上），短暂防火以免熟食被现代火焰秒毁（R196 熟食尚有短暂存活期）。 */
     @Unique
-    private boolean icpmCooking = false;
-    /**
-     * 当前这次连续受热窗口已贡献过进度，需离开热源再放回才会再次累计（还原 R196 的"反复点燃"）。
-     */
-    @Unique
-    private boolean icpmBurnConsumed = false;
+    private boolean icpmJustCooked = false;
 
-    /**
-     * 让受热中的生/熟食物临时防火，避免被火/熔岩直接销毁（R196 等价行为）。
-     */
+    /** 受热烹饪中的生食（与刚烤熟的熟食）临时防火，避免被火/熔岩直接销毁。 */
     @Inject(method = "fireImmune", at = @At("HEAD"), cancellable = true)
     private void icpm$fireImmune(CallbackInfoReturnable<Boolean> cir) {
         ItemEntity self = (ItemEntity) (Object) this;
@@ -45,10 +42,9 @@ public class ItemEntityMixin {
         if (stack.isEmpty()) {
             return;
         }
-        // 生食 或 已进入烹饪态的物品，只要位于燃烧方块/火/熔岩上即免疫销毁。
-        // 切勿在此调用 self.isOnFire()/isInLava()：isOnFire 会回环到 fireImmune 包装器导致无限递归崩溃。
-        if ((BurningCookingHandler.isRawFood(stack.getItem()) || icpmCooking)
-                && BurningCookingHandler.isOnHeat(self.level(), self.blockPosition())) {
+        // 切勿在 isOnHeat 内调用 self.isOnFire()（会回环 fireImmune → 无限递归）。
+        if (BurningCookingHandler.isOnHeat(self.level(), self.blockPosition())
+                && (BurningCookingHandler.isRawFood(stack.getItem()) || icpmJustCooked)) {
             cir.setReturnValue(true);
             cir.cancel();
         }
@@ -69,26 +65,17 @@ public class ItemEntityMixin {
 
         BlockPos pos = self.blockPosition();
         boolean onHeat = BurningCookingHandler.isOnHeat(level, pos);
-
         if (!onHeat) {
-            // 离开热源：允许下次受热重新开始一段"燃烧"，对应 R196 的再次点燃。
-            icpmBurnConsumed = false;
+            icpmJustCooked = false; // 离开热源：刚熟标记失效，之后交给火焰正常规则
             return;
         }
 
-        if (BurningCookingHandler.getCooked(stack.getItem()) == null) {
-            // 已经是熟食且仍在热源上：保持免疫即可，不再累计。
-            return;
-        }
-
-        icpmCooking = true;
-
-        // 每次连续受热窗口只贡献一段进度；窗口结束后必须离开热源再放回才能继续（还原"点 4 次"）。
-        if (!icpmBurnConsumed) {
-            icpmBurnConsumed = true;
-            icpmCookingProgress += BurningCookingHandler.COOK_UNIT;
+        // 生食持续受热：连续累计（R196 每 tick +damage×3）
+        if (BurningCookingHandler.isRawFood(stack.getItem())) {
+            icpmCookingProgress += BurningCookingHandler.COOK_RATE;
             if (icpmCookingProgress >= BurningCookingHandler.COOK_THRESHOLD) {
                 icpmCookingProgress = 0.0F;
+                icpmJustCooked = true;
                 BurningCookingHandler.completeCook(self);
             }
         }

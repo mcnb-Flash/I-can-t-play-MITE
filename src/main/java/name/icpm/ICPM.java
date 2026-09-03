@@ -381,6 +381,9 @@ public class ICPM implements ModInitializer {
         // 胰岛素抵抗自然代谢（R196 FoodStats.onUpdate 每 tick −1）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
                 name.icpm.common.ICPMInsulinResistance::onServerTick);
+        // 火焰烧肉：到期执行 R196 tryExtinguishByItems（堆料概率灭火）
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
+                name.icpm.common.BurningCookingHandler::onServerTick);
 
         // 月相机制：血月强制降雨 + 月相变化广播（R196 World.isBloodMoon/isBlueMoon/isHarvestMoon）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
