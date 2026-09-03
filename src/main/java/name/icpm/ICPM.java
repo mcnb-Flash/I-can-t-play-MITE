@@ -216,6 +216,43 @@ public class ICPM implements ModInitializer {
             });
         });
 
+        // 注册 R196 桶「Ctrl+右键 消耗100经验 放置液体源头」包（C2S）
+        // ItemBucket.shouldContainedLiquidBePlacedAsSourceBlock = ctrl && xp>=100
+        PayloadTypeRegistry.playC2S().register(name.icpm.network.BucketSourcePacket.TYPE, name.icpm.network.BucketSourcePacket.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(name.icpm.network.BucketSourcePacket.TYPE, (payload, context) -> {
+            context.server().execute(() -> {
+                if (!(context.player() instanceof net.minecraft.server.level.ServerPlayer sp)) {
+                    return;
+                }
+                ItemStack held = sp.getItemInHand(payload.hand());
+                if (!(held.getItem() instanceof net.minecraft.world.item.BucketItem bucket)) {
+                    return;
+                }
+                net.minecraft.world.level.material.Fluid content = bucket.getContent();
+                if (content != net.minecraft.world.level.material.Fluids.WATER
+                        && content != net.minecraft.world.level.material.Fluids.LAVA) {
+                    return;
+                }
+                if (!name.icpm.item.ICPMBucketRules.isR196Bucket(held)) {
+                    return;
+                }
+                // 距离/交互权限校验（客户端射线同源：blockInteractionRange）
+                net.minecraft.core.BlockPos pos = payload.pos();
+                double d = sp.getEyePosition().distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+                double reach = sp.blockInteractionRange();
+                if (d > (reach + 2.0) * (reach + 2.0)) {
+                    return;
+                }
+                if (!sp.level().mayInteract(sp, pos) || !sp.mayUseItemAt(pos, payload.face(), held)) {
+                    return;
+                }
+                // 目标：命中块可被替换则放命中块，否则放面相邻块
+                net.minecraft.world.level.block.state.BlockState st = sp.level().getBlockState(pos);
+                net.minecraft.core.BlockPos target = st.canBeReplaced(content) ? pos : pos.relative(payload.face());
+                name.icpm.item.ICPMBucketRules.placeSourceAt(sp, held, payload.hand(), target);
+            });
+        });
+
         // 注册背包合成进度同步网络包（S2C）
         // 注：背包 2x2 合成的「开始/取走」时间门控直接由服务端
         // ICPMInventoryCraftingMixin 在 InventoryMenu.clicked 上完成，
@@ -384,6 +421,9 @@ public class ICPM implements ModInitializer {
         // 火焰烧肉：到期执行 R196 tryExtinguishByItems（堆料概率灭火）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
                 name.icpm.common.BurningCookingHandler::onServerTick);
+        // R196 桶：流动液块密闭沉降成源（scheduleBlockChange moving→still）
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
+                name.icpm.item.ICPMBucketRules::onServerTick);
 
         // 月相机制：血月强制降雨 + 月相变化广播（R196 World.isBloodMoon/isBlueMoon/isHarvestMoon）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {

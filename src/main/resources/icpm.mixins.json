@@ -27,6 +27,7 @@
         "ICPMDurabilityAttackMixin",
         "ICPMSilverCombatMixin",
         "MattockHoeMixin",
+        "BucketItemR196Mixin",
         "FlintAndSteelMixin",
         "FireBlockMixin",
         "ICPMPortalTriggerMixin",

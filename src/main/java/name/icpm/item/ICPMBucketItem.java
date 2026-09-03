@@ -49,61 +49,8 @@ public class ICPMBucketItem extends BucketItem {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        ClipContext.Fluid clip = this.getContent() == Fluids.EMPTY ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE;
-        BlockHitResult hit = Item.getPlayerPOVHitResult(level, player, clip);
-        if (hit.getType() == HitResult.Type.MISS) {
-            return InteractionResult.PASS;
-        }
-        if (hit.getType() != HitResult.Type.BLOCK) {
-            return InteractionResult.PASS;
-        }
-        BlockPos hitPos = hit.getBlockPos();
-        Direction direction = hit.getDirection();
-        BlockPos adj = hitPos.relative(direction);
-        if (!level.mayInteract(player, hitPos) || !player.mayUseItemAt(adj, direction, stack)) {
-            return InteractionResult.FAIL;
-        }
-
-        if (this.getContent() == Fluids.EMPTY) {
-            // 取水/岩浆
-            BlockState state = level.getBlockState(hitPos);
-            Block block = state.getBlock();
-            FluidState fluidState = state.getFluidState();
-            if (fluidState.isSource() && block instanceof BucketPickup) {
-                BucketPickup pickup = (BucketPickup) block;
-                ItemStack picked = pickup.pickupBlock(player, level, hitPos, state);
-                if (!picked.isEmpty()) {
-                    pickup.getPickupSound().ifPresent(s -> player.playSound(s, 1.0f, 1.0f));
-                    level.gameEvent(player, GameEvent.FLUID_PICKUP, hitPos);
-                    player.awardStat(Stats.ITEM_USED.get(this));
-                    Fluid src = fluidState.getType();
-                    ItemStack result;
-                    if (src == Fluids.WATER && ICPMBuckets.waterOf(metal) != null) {
-                        result = new ItemStack(ICPMBuckets.waterOf(metal));
-                    } else if (src == Fluids.LAVA && ICPMBuckets.lavaOf(metal) != null) {
-                        result = new ItemStack(ICPMBuckets.lavaOf(metal));
-                    } else {
-                        result = picked;
-                    }
-                    ItemStack transformed = ItemUtils.createFilledResult(stack, player, result);
-                    return InteractionResult.SUCCESS.heldItemTransformedTo(transformed);
-                }
-            }
-            return InteractionResult.FAIL;
-        } else {
-            // 放置流体
-            BlockState state = level.getBlockState(hitPos);
-            BlockPos target = canBlockContainFluid(player, level, hitPos, state) ? hitPos : adj;
-            if (this.emptyContents(player, level, target, hit)) {
-                this.checkExtraContent(player, level, stack, target);
-                player.awardStat(Stats.ITEM_USED.get(this));
-                ItemStack result = new ItemStack(ICPMBuckets.emptyOf(metal));
-                ItemStack transformed = ItemUtils.createFilledResult(stack, player, result);
-                return InteractionResult.SUCCESS.heldItemTransformedTo(transformed);
-            }
-            return InteractionResult.FAIL;
-        }
+        // R196 水源·桶机制：与原版铁桶一致（接取不耗源头/放流动/创造放源等），见 ICPMBucketRules
+        return ICPMBucketRules.handleUse(level, player, hand);
     }
 
     private boolean canBlockContainFluid(Player player, Level level, BlockPos pos, BlockState state) {

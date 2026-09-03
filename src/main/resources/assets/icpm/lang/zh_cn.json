@@ -574,5 +574,10 @@
   "item.icpm.bottle_of_disenchanting": "去咒药水",
   "insulin.level.1": "§e你的胰岛素抵抗已达轻度：过量糖分会让你头晕目眩。",
   "insulin.level.2": "§6你的胰岛素抵抗已达中度：糖分不再提供饱食，进食高糖即昏眩。",
-  "insulin.level.3": "§c你的胰岛素抵抗已达重度：进食高糖会中毒！"
+  "insulin.level.3": "§c你的胰岛素抵抗已达重度：进食高糖会中毒！",
+  "bucket.icpm.when_filled": "当被盛装时",
+  "bucket.icpm.melt_chance": "熔化概率：%s%%",
+  "bucket.icpm.place_source_hint": "Ctrl+右键：消耗 100 经验放置液体源头",
+  "bucket.icpm.cannot_place_source": "此处无法放置液体源头",
+  "bucket.icpm.need_xp_source": "经验不足：放置液体源头需要 100 经验"
 }

@@ -1,27 +1,29 @@
 {
-	"required": true,
-	"package": "name.icpm.client.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"refmap": "client-icpm-refmap.json",
-	"client": [
-		"GameRendererMixin",
-		"ICPMSilverTooltipMixin",
-		"ClientShutdownWatchdogMixin",
-		"ClientTickMarkerMixin",
-		"NutritionHUDMixin",
-		"GuiFoodLimitMixin",
-		"GuiExperienceLevelMixin",
-		"InventoryScreenCraftMixin",
-		"BloodMoonSkyMixin",
-		"ClientShutdownTracer",
-		"ICPMBloodMoonEyesMixin",
-		"FixedLocalPlayerUuidMixin",
-		"IntegratedServerOwnerFixMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+    "required": true,
+    "package": "name.icpm.client.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "refmap": "client-icpm-refmap.json",
+    "client": [
+        "GameRendererMixin",
+        "ICPMSilverTooltipMixin",
+        "ClientShutdownWatchdogMixin",
+        "ClientTickMarkerMixin",
+        "NutritionHUDMixin",
+        "GuiFoodLimitMixin",
+        "GuiExperienceLevelMixin",
+        "InventoryScreenCraftMixin",
+        "BloodMoonSkyMixin",
+        "ClientShutdownTracer",
+        "ICPMBloodMoonEyesMixin",
+        "FixedLocalPlayerUuidMixin",
+        "IntegratedServerOwnerFixMixin",
+        "BucketCtrlClientMixin",
+        "BucketTooltipMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
+    }
 }

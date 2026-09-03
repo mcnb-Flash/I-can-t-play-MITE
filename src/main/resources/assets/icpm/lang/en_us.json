@@ -442,5 +442,10 @@
   "item.icpm.bottle_of_disenchanting": "Bottle of Disenchanting",
   "insulin.level.1": "Insulin resistance (mild): excess sugar now makes you nauseous.",
   "insulin.level.2": "Insulin resistance (moderate): sugar no longer satiates; eating sweets sickens you.",
-  "insulin.level.3": "Insulin resistance (severe): eating sweets poisons you!"
+  "insulin.level.3": "Insulin resistance (severe): eating sweets poisons you!",
+  "bucket.icpm.when_filled": "When filled",
+  "bucket.icpm.melt_chance": "Chance of bucket melting: %s%%",
+  "bucket.icpm.place_source_hint": "Ctrl + Right Click: place a liquid source (100 XP)",
+  "bucket.icpm.cannot_place_source": "Cannot place a liquid source here",
+  "bucket.icpm.need_xp_source": "Not enough XP: placing a liquid source costs 100 XP"
 }
