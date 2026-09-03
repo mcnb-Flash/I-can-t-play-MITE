@@ -261,13 +261,13 @@ public final class ICPMBucketRules {
                                         BlockState current, Fluid content) {
         if (current.getBlock() instanceof LiquidBlockContainer container
                 && container.canPlaceLiquid(player, level, pos, current, content)) {
-            FluidState flowing = ((FlowingFluid) content).getFlowing(7, false);
+            FluidState flowing = ((FlowingFluid) content).getFlowing(1, false);
             container.placeLiquid(level, pos, current, flowing);
             if (!level.isClientSide()) {
                 registerSettle(level, pos, content, flowing);
             }
         } else {
-            FluidState flowing = ((FlowingFluid) content).getFlowing(7, false);
+            FluidState flowing = ((FlowingFluid) content).getFlowing(1, false);
             BlockState placed = flowing.createLegacyBlock();
             if (!level.setBlock(pos, placed, 11)) {
                 return false;
@@ -329,6 +329,9 @@ public final class ICPMBucketRules {
         }
         if (!sameLayer(cur, entry.placed())) {
             return true; // 已变薄/扩散 → 不再结晶
+        }
+        if (level.getFluidState(pos.below()).getType().isSame(entry.fluid())) {
+            return false; // 下方仍是同种液体=补给/流柱，非密闭 → 继续等
         }
         if (spreadable(level, pos.below(), entry.fluid())
                 || spreadable(level, pos.north(), entry.fluid())
