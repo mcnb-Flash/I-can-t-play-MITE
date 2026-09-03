@@ -1,6 +1,6 @@
 # ICPM（I can't play MITE）对 MITE R196 完成度对比（v2 修正版）
 
-- **对标对象**：Simulectics 的 **Minecraft Is Too Easy（MITE / MC 实在是太简单了）1.6.4 R196**（注意：不是 mcmod 上桶子哥的《MITE-打破一切》整合包）
+- **对标对象**：Avernite 的 **Minecraft Is Too Easy（MITE / MC 实在是太简单了）1.6.4 R196**（注意：不是 mcmod 上桶子哥的《MITE-打破一切》整合包）
 - **盘点方法**：本地 ICPM 源码/数据包**全量关键词扫描**（2265 个文件，22 组特性关键词 × 逐文件比对）+ 关键文件精读（ICPMTension / ICPMFoodProperties / PlayerNutritionManager / ICPMCombatEnchantMixin / ICPMKeyBindings / CreeperExplosionMixin / ItemEntityMixin / CropBlockMixin 等） × MC 百科资料站（minecraftxz《MC实在是太简单了》特性总览 + 1Minecraft MITE 特性列表）逐项交叉核对
 - **盘点日期**：2026-09-02（v2：修正首版误判——首版仅按目录+零星 grep 判定，漏检大量实现；本版全部以源码检索证据为准）
 

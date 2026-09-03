@@ -22,8 +22,10 @@ public abstract class CurseDecayMixin {
     @ModifyVariable(
             method = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;Ljava/util/function/Consumer;)V",
             at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private int icpm$doubleDurabilityLoss(int amount, ServerLevel level, ServerPlayer player,
-                                          Consumer<ItemStack> onBroken) {
+    private int icpm$doubleDurabilityLoss(int amount, int amountAgain, ServerLevel level,
+                                          ServerPlayer player, Consumer<ItemStack> onBroken) {
+        // Mixin @ModifyVariable 处理器签名 = 目标变量值 + 原方法全部参数（含被改参数本身），
+        // 故 amount 重复出现；HEAD 处二者相等，用第一个即可。
         if (ICPMCurseManager.isCursed(player, ICPMCurse.EQUIPMENT_DECAYS_FASTER, true)) {
             return amount * 2;
         }
