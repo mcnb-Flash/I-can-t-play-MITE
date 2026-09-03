@@ -13,6 +13,12 @@
 - **去咒药水**：新物品 `icpm:bottle_of_disenchanting`（R196 ItemBottleOfDisenchanting），饮用即解咒且豁免禁饮。
 - 68 个诅咒语言键（名称/描述/生效/解除，中英）。
 
+㉙ 诅咒机制三项调整（R196 配方 + 即时诅咒 + 施咒前检测）：
+
+- **去咒药水合成配方**（R196 RecipesMITE.java:77：水瓶 + 地狱疣 + 煤 无序合成）：新增 `data/icpm/recipe/bottle_of_disenchanting.json`（玻璃瓶 + 地狱疣 + `#minecraft:coals`；1.21 无独立"水瓶"物品故用玻璃瓶映射，配方语义等价）。
+- **立即诅咒**：施咒不再等 6000 tick——`CURSE_DELAY_TICKS` 改为 0，`curse()` 在 delay≤0 时同步 realize 并施加效果（含禁甲瞬间脱甲与提示），onServerTick 仅作 pending 兜底。
+- **施咒前状态检测**：女巫每次攻击前先查玩家——已有诅咒（生效/待生效）则直接放弃本次掷骰，不再尝试叠加。
+
 **修复：剪羊毛机制空转 + 弓耐久空壳 + 僵尸稀有掉落率偏差（mixin 审计第二轮）· 2026-09-02**
 
 ㉗ 专项审计第二轮（全量精读剩余行为/方块/耐久/客户端 mixin + 字节码实证）确认并修复：

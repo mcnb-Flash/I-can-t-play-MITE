@@ -66,8 +66,8 @@ public final class ICPMCurseManager {
     private static final String TAG_REALIZED = "icpm_curse_realized";
     private static final String TAG_KNOWN = "icpm_curse_known";
 
-    /** 女巫施咒延迟：R196 addCurse(..., 6000) = 5 分钟。 */
-    public static final int CURSE_DELAY_TICKS = 6000;
+    /** 女巫施咒延迟：ICPM 调整为立即诅咒（&lt;=0 即时生效）。R196 原版为 6000 tick（5 分钟）。 */
+    public static final int CURSE_DELAY_TICKS = 0;
 
     private static final Map<UUID, CurseEntry> ENTRIES = new HashMap<>();
     /** 已"学会"效果的玩家（服务端会话内）；防重复发送 desc 提示。 */
@@ -120,7 +120,9 @@ public final class ICPMCurseManager {
 
     // ==================== 施咒 / realize / 解除 ====================
 
-    /** 女巫对玩家施咒（R196 WorldServer.addCurse）。施咒者已死/玩家已咒或有 pending 则拒绝。 */
+    /** 女巫对玩家施咒（R196 WorldServer.addCurse 的守卫语义）。
+     *  玩家已有诅咒（含已生效/未生效）时直接拒绝，不再尝试叠加。
+     *  @param delayTicks &lt;=0 表示立即诅咒（ICPM 调整：不再等待 6000 tick，施咒即生效）。 */
     public static void curse(ServerPlayer player, Entity witch, ICPMCurse curse, int delayTicks) {
         if (witch != null && !witch.isAlive()) {
             return;
@@ -132,7 +134,26 @@ public final class ICPMCurseManager {
         e.curse = curse;
         e.witchUuid = witch == null ? null : witch.getUUID();
         e.realizeAt = ((ServerLevel) player.level()).getGameTime() + Math.max(1, delayTicks);
+        e.realized = delayTicks <= 0; // 立即诅咒：无需等 realize
         ENTRIES.put(player.getUUID(), e);
+        if (e.realized) {
+            applyRealized(player, e);
+        }
+    }
+
+    /** realize 后施加效果本体 + realize 提示（R196 checkCurses realize + onCurseRealized）。 */
+    private static void applyRealized(ServerPlayer player, CurseEntry e) {
+        // 施加无限时长诅咒效果（变体 = amplifier）
+        player.addEffect(new MobEffectInstance(ICPM.WITCH_CURSE_HOLDER, -1,
+                e.curse.id() - 1, false, false, false));
+        player.sendSystemMessage(Component.translatable("curse.realized",
+                Component.translatable(e.curse.titleKey())));
+        if (e.curse == ICPMCurse.CANNOT_WEAR_ARMOR) {
+            dropAllArmor(player); // R196 onCurseRealized
+            e.effectKnown = true;
+            LEARNED.add(player.getUUID());
+            player.sendSystemMessage(Component.translatable(e.curse.descKey()));
+        }
     }
 
     /** 每服务端 tick 检查 pending 到期并施加效果本体（R196 checkCurses realize 部分）。 */
@@ -146,17 +167,7 @@ public final class ICPMCurseManager {
                 continue;
             }
             e.realized = true;
-            // 施加无限时长诅咒效果（变体 = amplifier）
-            player.addEffect(new MobEffectInstance(ICPM.WITCH_CURSE_HOLDER, -1,
-                    e.curse.id() - 1, false, false, false));
-            player.sendSystemMessage(Component.translatable("curse.realized",
-                    Component.translatable(e.curse.titleKey())));
-            if (e.curse == ICPMCurse.CANNOT_WEAR_ARMOR) {
-                dropAllArmor(player); // R196 onCurseRealized
-                e.effectKnown = true;
-                LEARNED.add(player.getUUID());
-                player.sendSystemMessage(Component.translatable(e.curse.descKey()));
-            }
+            applyRealized(player, e);
         }
     }
 

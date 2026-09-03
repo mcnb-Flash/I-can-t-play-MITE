@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:nether_wart",
+    "#minecraft:coals"
+  ],
+  "result": {
+    "count": 1,
+    "id": "icpm:bottle_of_disenchanting"
+  }
+}
