@@ -80,3 +80,7 @@ libs/minecraft-yarn.jar
 # diagnostic disassembler scratch (generated)
 tmp_disasm/
 tmp_*.py
+
+# build logs
+g*.log
+gb*.log
