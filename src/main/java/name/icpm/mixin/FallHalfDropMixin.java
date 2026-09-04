@@ -3,11 +3,8 @@ package name.icpm.mixin;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.resources.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,6 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * 摔落伤半血动物 10% 掉肉 —— R196（Debris/sky 实测）：
  * 生物所受摔落伤害 ≥ 最大生命一半时，只有 10% 概率掉落物品，否则不掉。
  * （针对被动生物 CREATURE；玩家不受此规则约束）
+ *
+ * <p>死亡掉落只走 3 参重载 dropFromLootTable(ServerLevel, DamageSource, boolean)
+ * （4 参重载为外部专用入口，勿注入同名方法）。
  */
 @Mixin(LivingEntity.class)
 public class FallHalfDropMixin {
@@ -37,18 +37,9 @@ public class FallHalfDropMixin {
         }
     }
 
-    @Inject(method = "dropFromLootTable", at = @At("HEAD"), cancellable = true)
-    private void icpm$fallHalfDropGate3(ServerLevel level, DamageSource source, boolean p, CallbackInfo ci) {
-        fallHalfGate(level, source, ci);
-    }
-
-    @Inject(method = "dropFromLootTable", at = @At("HEAD"), cancellable = true)
-    private void icpm$fallHalfDropGate4(ServerLevel level, DamageSource source, boolean p, ResourceKey<LootTable> key, CallbackInfo ci) {
-        fallHalfGate(level, source, ci);
-    }
-
-    @Unique
-    private void fallHalfGate(ServerLevel level, DamageSource source, CallbackInfo ci) {
+    @Inject(method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V",
+            at = @At("HEAD"), cancellable = true)
+    private void icpm$fallHalfDropGate(ServerLevel level, DamageSource source, boolean p, CallbackInfo ci) {
         if (!icpmFallHalfKill) {
             return;
         }
