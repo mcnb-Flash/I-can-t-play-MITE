@@ -53,6 +53,8 @@
         "FurnaceFuelSlotMixin",
         "ChestWormCompostMixin",
         "GrassBlockWormDropsMixin",
+        "GrassSeedsDropsMixin",
+        "WolfTameR196Mixin",
         "GemEdibleMixin",
         "CropBlockMixin",
         "SugarCaneBlockMixin",
