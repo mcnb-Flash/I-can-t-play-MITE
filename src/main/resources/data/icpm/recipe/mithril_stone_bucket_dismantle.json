@@ -1,10 +1,8 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
+  "category": "minecraft:misc",
   "ingredients": [
-    {
-      "item": "icpm:mithril_stone_bucket"
-    }
+    "icpm:mithril_stone_bucket"
   ],
   "result": {
     "id": "icpm:mithril_bucket",
