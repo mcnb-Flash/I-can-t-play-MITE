@@ -60,6 +60,7 @@
         "SugarCaneBlockMixin",
         "FallHalfDropMixin",
         "FragileLandingMixin",
+        "SlimeCorrosionMixin",
         "BoneMealMixin",
         "CoinXpRefundMixin",
         "ICPMCoinCraftingBlockMixin",
