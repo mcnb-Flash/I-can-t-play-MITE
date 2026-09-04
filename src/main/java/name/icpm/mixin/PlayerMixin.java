@@ -8,8 +8,17 @@ import name.icpm.common.PlayerNutritionManager;
 import name.icpm.common.ICPMInsulinResistance;
 import name.icpm.common.PlayerStatsManager;
 import name.icpm.common.PortalPositionStorage;
+import name.icpm.item.ICPMBuckets;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.food.FoodData;
@@ -236,6 +245,44 @@ public class PlayerMixin {
 
         // ICPM 营养不良提示
         icpm$tickNutritionWarning(player);
+
+        // R196：身上岩浆桶遇水冷却 → 石桶（tickPlayerInventory 的 steam_and_hiss）
+        icpm$tickLavaBucketCooling(player);
+    }
+
+    /**
+     * R196 忠实移植（EntityPlayerMP.tickPlayerInventory）：
+     * 玩家身体浸入水中且背包带岩浆桶 → 整桶嘶嘶冷却成石桶（每个岩浆桶独立转换），
+     * 节流每 8 tick 检查一次；仅服务端。
+     */
+    @Unique
+    private void icpm$tickLavaBucketCooling(Player player) {
+        if (!player.isAlive() || !player.isInWater()) {
+            return;
+        }
+        if ((player.tickCount & 0b111) != 0) {
+            return;
+        }
+        Inventory inventory = player.getInventory();
+        boolean any = false;
+        for (int i = 0; i < inventory.getContainerSize(); ++i) {
+            ItemStack slot = inventory.getItem(i);
+            if (slot.isEmpty()) {
+                continue;
+            }
+            Item stone = ICPMBuckets.stoneBucketFromLavaBucket(slot.getItem());
+            if (stone == null) {
+                continue;
+            }
+            inventory.setItem(i, new ItemStack(stone, 1));
+            any = true;
+        }
+        if (any) {
+            ServerLevel serverLevel = (ServerLevel) player.level();
+            var p = player.position();
+            serverLevel.sendParticles(ParticleTypes.CLOUD, p.x, p.y + 1.2, p.z, 6, 0.2, 0.4, 0.2, 0.02);
+            serverLevel.playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 0.7F);
+        }
     }
 
     /**

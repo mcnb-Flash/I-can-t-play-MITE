@@ -877,11 +877,15 @@ object ICPMItems {
     @JvmField val GOLD_STONE_BUCKET: Item = registerBucket("gold_stone_bucket", ICPMStoneBucketItem("gold", makeProperties("gold_stone_bucket", 1).craftRemainder(GOLD_BUCKET)))
 
     // 铁桶已删除：原版 minecraft:bucket/water_bucket/lava_bucket/milk_bucket 即铁桶（行为一致），
-    // 避免与原版重复注册。铁石桶为 ICPM 特有（搬运圆石），保留；
-    // 其用完返还的"铁空桶"映射到原版 bucket（icpm:iron_bucket 已删除，emptyOf("iron") 需指向原版桶）。
+    // 避免与原版重复注册。铁石桶语义同其它石桶（R196：岩浆桶遇水冷却产物，不可倒出，可工作台拆回空桶）；
+    // 其 craftRemainder 返还"铁空桶"映射到原版 bucket（icpm:iron_bucket 已删除，emptyOf("iron") 需指向原版桶）。
     @JvmField val IRON_STONE_BUCKET: Item = registerBucket("iron_stone_bucket", ICPMStoneBucketItem("iron", makeProperties("iron_stone_bucket", 1).craftRemainder(net.minecraft.world.item.Items.BUCKET)))
     init {
+        // 原版桶 = ICPM 铁桶族（R196 铁桶）；水/岩浆/奶桶一并登记以便 ICPMBuckets 索引与冷却转换
         name.icpm.item.ICPMBuckets.register("iron_bucket", net.minecraft.world.item.Items.BUCKET)
+        name.icpm.item.ICPMBuckets.register("iron_water_bucket", net.minecraft.world.item.Items.WATER_BUCKET)
+        name.icpm.item.ICPMBuckets.register("iron_lava_bucket", net.minecraft.world.item.Items.LAVA_BUCKET)
+        name.icpm.item.ICPMBuckets.register("iron_milk_bucket", net.minecraft.world.item.Items.MILK_BUCKET)
     }
 
     @JvmField val ANCIENT_METAL_BUCKET: Item = registerBucket("ancient_metal_bucket", ICPMBucketItem(Fluids.EMPTY, "ancient_metal", makeProperties("ancient_metal_bucket", 1)))

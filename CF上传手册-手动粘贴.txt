@@ -1,0 +1,84 @@
+# CurseForge 创建项目 —— 手动粘贴包（ICPM 1.0.6）
+（字段 → 直接复制右侧内容；下拉项 → 按指引选择）
+
+============================================================
+1. 游戏 (Game)                → Minecraft
+2. 类型 (Type)                → Mod
+3. 加载器 (Loader)            → Fabric   （可只选 Fabric）
+4. 分类 (Category)            → Gameplay Mechanics（游戏机制）或 Adventure and RPG
+5. 主游戏版本 (Primary MC)    → 1.21.11
+6. 项目名称 (Name/Display Name)
+------------------------------------------------------------
+ICPM — I Can't Play MITE (MITE R196 Port for 1.21.11)
+
+7. 摘要/一句话简介 (Summary)（≤ ~140 字符，直接复制）
+------------------------------------------------------------
+A hardcore survival overhaul for Minecraft 1.21.11 (Fabric), faithful to MITE R196: realistic nutrition, living livestock, weighty tools, XP that bites back, seasons, curses and more.
+
+8. 详细描述 (Description / Overview) —— 粘贴到编辑器（先切 Source/HTML 模式或直接粘 MD）
+------------------------------------------------------------
+ICPM ("I Can't Play MITE") is a fan-made, fully re-implemented port of the classic hardcore mod **MITE (Minecraft Is Too Easy, by Avernite)** onto **Minecraft 1.21.11 / Fabric**. Package and internal names are rewritten to avoid conflict; gameplay values follow the original R196 source tables.
+
+## Features
+- **Realistic satiation & nutrition**: dual food meters from the R196 table drive eating, regen and starvation; caps scale with level.
+- **Living livestock**: hunger / thirst / crowding determine animal wellness; neglect them and outputs drop. Spook contagion scatters herds; offspring inherit parents' wellness.
+- **Weighty tools & mining**: R196 mining rules, corrected tiers, negative XP slows you down.
+- **XP that bites back**: XP can go negative (down to -40) with real penalties. Metal anvil fuses enchantment books, smashes books onto gear and renames.
+- **Shield-mounted tools**: craft tool + shield into one; right-click to block and halve incoming damage (consumes only tool durability).
+- **8-tier workbench line**: flint workbench up through adamantite, recipes aligned with R196, craft quality costs XP.
+- **Fire-based cooking**: burn raw meat on combustible blocks with a flint & steel; multi-piece roasting with a discrete cooking window.
+- **Seasons, moon phases & crops**: fertility, plant disease and seasonal behavior.
+- **19 custom enchantments + curses**: witch curses as multi-state effects, curse decay, silver gear mechanics, undead-affinity combat.
+- **New monsters**: dire wolves, earth/fire elementals, hellhounds, gelatinous cubes, giant zombies, miner zombies, skeleton & spider variants.
+- **Buckets that obey physics**: lava/water/milk/stone buckets emit only flowing source; shift-scroll preview; 100 XP to place a source block; scooping never consumes the source.
+- **Bows, arrows & fishing rods**: 9 arrow tiers, bows with R196 draw speeds, faithful fishing rods.
+- **Experienced (XP) level 200 cap**, coin economy, runestones, portals to the underworld, and much more.
+
+## Requirements
+- Minecraft 1.21.11 · Fabric Loader ≥ 0.19.3 · Fabric API · Fabric Language Kotlin · Java 21
+
+## Source
+https://github.com/mcnb-Flash/I-can-t-play-MITE
+
+## License / Disclaimer
+Fan port for personal enjoyment; contains third-party resource-pack artwork. CurseForge license field: pick **All Rights Reserved** if unsure (see step 11).
+
+9. 标签 (Tags)（尽量选现成的）
+------------------------------------------------------------
+Hardcore / Survival / Realism 或 Vanilla+、RPG 类可选
+
+10. 链接 (Links)
+------------------------------------------------------------
+Source / GitHub: https://github.com/mcnb-Flash/I-can-t-play-MITE
+Authors: 78 & DeepSeekAI
+（README 与源码仓库：https://github.com/mcnb-Flash/I-can-t-play-MITE/raw/main/README.md 可转贴为附图）
+
+11. 许可协议 (License)
+------------------------------------------------------------
+推荐 **All Rights Reserved**（因内含第三方 MITE Resource Pack 美术）；
+若你确认代码可公开，再改回 CC0 / MIT（fabric.mod.json 当前声明 CC0-1.0）。
+
+12. 项目图标 (Icon)
+------------------------------------------------------------
+上传文件：C:\Users\Administrator\Desktop\I can't play MITE\src\main\resources\pack.png (128x128)
+或更大规格的 mod logo（建议 512x512 正方形 PNG，可用 pack.png 放大替代）
+
+============================================================
+【创建后的文件上传页（Upload a File / Files 标签）】
+============================================================
+- 文件 (File)：C:\Users\Administrator\Desktop\I can't play MITE\build\libs\[我不能玩MITE]ICPM-1.0.6-fabric.jar
+- 版本号 (Version)：1.0.6
+- Release Type：Release（或 Beta）
+- Minecraft 版本：1.21.11
+- Modloader：Fabric
+- Changelog（粘贴到 changelog 框）：
+------------------------------------------------------------
+1.0.6
+- Fix: armor worn texture glitch — added missing plate-armor layer textures (silver/ancient-metal/mithril/adamantite) restored from MITE Resource Pack.
+- Fix: player interaction/attack reach now matches R196 (block 2.75, entity interaction 2.5, melee 1.5) via separate channels.
+- Fix: startup crashes from mixin target methods declared on parent classes.
+- Fix: witch curse death cleanup; curse decay item transform signature.
+- Port: MITE R196 gameplay onto Minecraft 1.21.11 / Fabric.
+
+（可选）为项目页配图：
+- 项目根 README 截图 / MOD简介.png 等，位于仓库根目录

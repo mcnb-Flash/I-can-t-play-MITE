@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "icpm:iron_stone_bucket"
+    }
+  ],
+  "result": {
+    "id": "minecraft:bucket",
+    "count": 1
+  }
+}

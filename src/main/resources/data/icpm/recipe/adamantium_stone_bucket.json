@@ -1,5 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": ["icpm:adamantium_bucket", "minecraft:cobblestone"],
-  "result": {"id": "icpm:adamantium_stone_bucket", "count": 1}
-}
