@@ -55,6 +55,8 @@
         "GrassBlockWormDropsMixin",
         "GrassSeedsDropsMixin",
         "WolfTameR196Mixin",
+        "HorseFeedR196Mixin",
+        "HorseTemperR196Mixin",
         "GemEdibleMixin",
         "CropBlockMixin",
         "SugarCaneBlockMixin",
