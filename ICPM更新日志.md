@@ -25,6 +25,11 @@
   - 史莱姆打到你：主背包每件 0.05×S 概率（扣工具 100×S×M）；护甲每件 0.25×S 概率（扣 2×S×M），S=史莱姆尺寸。
   - SlimeCorrosionMixin（LivingEntity.hurtServer HEAD 统一处理双方向；vanilla 绿史莱姆与 ICPM 果冻族均生效）。
 
+- **附魔难度系统（A2 第一阶段 · 核心层）**：新增 ICPMEnchantDifficulty——xlsx 全表难度 n（保护~屠宰 38+ 条目，缺省 10）+ R196 公式移植：
+  - 每级消耗难度 = max(n−10,0)+n(lvl−1)+1；经验成本=档位×100；经验预算难度=⌊XP×1.25/100⌋。
+  - buildList：R196 buildEnchantmentList 忠实移植（±25% 浮动、逐词条扣难度并 +5、最多 3 词条、第 2+ 词条 50% 重置等级、书只取 1）。
+  - UI/菜单接入（翡翠附魔台三档显示与 vanilla 词条列表替换）为 L/XL 专项，待下一阶段。
+
 ## 1.0.7（2026-09-04）
 
 **修复：盔甲穿戴贴图错乱 · 触碰距离分通道 v2 · 启动崩溃收口 · 部署 CurseForge（id 1680391）**
