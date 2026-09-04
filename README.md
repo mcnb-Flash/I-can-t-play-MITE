@@ -72,7 +72,7 @@ Built on MITE's design philosophy, ICPM rewrites vanilla's overly forgiving surv
 
 ## Installation
 1. Install Fabric Loader for Minecraft 1.21.11 and the Fabric API + Fabric Language Kotlin.
-2. Download the latest `[我不能玩MITE]ICPM-*.jar` from the releases.
+2. Download the latest `ICPM-*.jar` from the releases.
 3. Place the jar into your `mods/` folder.
 4. Launch the game and start a new (or existing) world.
 

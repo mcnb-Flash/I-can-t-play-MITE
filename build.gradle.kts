@@ -81,8 +81,9 @@ java {
 	targetCompatibility = JavaVersion.VERSION_21
 }
 
-// 直接设定产物文件名: [我不能玩MITE]ICPM-{版本号}.jar（jar 与 remapJar 都设置，避免 Loom 覆盖）
-val modJarBaseName = "[我不能玩MITE]ICPM"
+// 直接设定产物文件名: ICPM-{版本号}-fabric.jar（jar 与 remapJar 都设置，避免 Loom 覆盖）
+// 注意：文件名必须纯 ASCII —— CurseForge 拒绝含中文/空格的文件名
+val modJarBaseName = "ICPM"
 
 tasks.jar {
 	archiveBaseName.set(modJarBaseName)
