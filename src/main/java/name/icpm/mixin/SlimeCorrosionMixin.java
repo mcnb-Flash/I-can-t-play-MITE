@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * 史莱姆/果冻腐蚀 —— R196 忠实移植（EntityGelatinousCube#405 / EntityCubic#361,381 /
@@ -45,7 +46,7 @@ public abstract class SlimeCorrosionMixin {
     }
 
     @Inject(method = "hurtServer", at = @At("HEAD"))
-    private void icpm$slimeCorrosion(ServerLevel level, DamageSource source, float amount, CallbackInfo ci) {
+    private void icpm$slimeCorrosion(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity victim = (LivingEntity) (Object) this;
         if (level.isClientSide()) {
             return;

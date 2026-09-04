@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * 摔落伤半血动物 10% 掉肉 —— R196（Debris/sky 实测）：
@@ -27,7 +28,7 @@ public class FallHalfDropMixin {
     private boolean icpmFallHalfKill = false;
 
     @Inject(method = "hurtServer", at = @At("HEAD"))
-    private void icpm$markFallHalf(ServerLevel level, DamageSource source, float amount, CallbackInfo ci) {
+    private void icpm$markFallHalf(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (source.is(DamageTypes.FALL)
                 && self.getType().getCategory() == MobCategory.CREATURE
