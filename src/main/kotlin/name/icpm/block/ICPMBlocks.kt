@@ -366,7 +366,7 @@ object ICPMBlocks {
                 // 艾德曼矿：R196 y:0-24, 硬度 4.0f, 挖掘等级 4（秘银镐）
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.STONE)
-                    .strength(4.0f, 3.0f)
+                    .strength(4.0f, 3600000.0f)
                     .requiresCorrectToolForDrops()
                     .setId(blockKey)
                 Block(properties)
@@ -375,7 +375,7 @@ object ICPMBlocks {
                 // 深板岩艾德曼矿：y:0-16, 硬度 6.0f, 挖掘等级 4
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.DEEPSLATE)
-                    .strength(6.0f, 3.0f)
+                    .strength(6.0f, 3600000.0f)
                     .sound(SoundType.DEEPSLATE)
                     .requiresCorrectToolForDrops()
                     .setId(blockKey)
@@ -384,7 +384,7 @@ object ICPMBlocks {
             "silver_block" -> {
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
-                    .strength(3.0f, 6.0f)
+                    .strength(3.0f, 3600000.0f)
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .setId(blockKey)
@@ -393,7 +393,7 @@ object ICPMBlocks {
             "ancient_metal_block" -> {
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
-                    .strength(4.0f, 6.0f)
+                    .strength(4.0f, 3600000.0f)
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .setId(blockKey)
@@ -402,7 +402,7 @@ object ICPMBlocks {
             "mithril_block" -> {
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
-                    .strength(5.0f, 6.0f)
+                    .strength(5.0f, 3600000.0f)
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .setId(blockKey)
