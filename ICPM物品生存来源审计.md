@@ -1,52 +1,32 @@
-# ICPM 物品「生存可获得性」审计报告（2026-09-05）
+# ICPM 物品「生存可获得性」审计报告（2026-09-05 · 终版）
 
-> 方法：全部 329 个已注册物品模型 × 全仓库（data 配方/战利品/标签 + 源码掉落/机制消费）交叉引用；
-> 判定「可获得」= 出现在任意 recipe 结果 / loot 表 / 方块挖掘产物 / 代码掉落或容器转换机制。
-> 「零消费」= 除注册文件、创造物品栏、JEI 展示外**不存在任何获取途径**。
+> 方法：329 个已注册物品模型 × data(recipe/loot/tag) + 源码消费 全量交叉。
+> **最终裁决（用户）**：本项目还原**纯净 R196**。仅**马铠系**为真 R196 内容需补来源；
+> 其余（矿石碎块/钢锡铅青铜锭/合金体系/宝石/slime_sphere/icpm:bow 等）均为**衍生 mod（ITF 等）贴图与功能，不计入、不修**。
 
-## 一、真实无来源（注册即死，生存拿不到）
+## 一、真 R196 缺口（需修）
 
-> 修订注记：**矿石碎块 ×8（copper/silver/gold/iron/tin/lead/mithril/adamantium_ore_chunk）属 ITF（MITE 衍生模组）机制，纯净 R196 无此设计 → 已移出本缺口清单**（仅作为 ITF 遗留注册保留，不修）。
-
-### ① 金属锭 ×4 —— 无熔炼配方
-`tin_ingot / lead_ingot / bronze_ingot / steel_ingot`
-> 疑同为 ITF 金属层（R196 金属=铜/银/金/铁/远古金属/秘银/艾德曼），待用户确认后归档。
-
-### ② 宝石 ×6 —— 无矿无掉落
-`ruby / sapphire / topaz / amethyst / opal / peridot`
-
-### ③ 合金体系 ×10 —— 整套未落地
-`alloy_axe / alloy_pickaxe / alloy_shovel / alloy_sword / alloy_hoe / alloy_helmet / alloy_chestplate / alloy_leggings / alloy_boots / alloy_upgrade_template`
-> 疑似预留的下一材料层，无矿石/配方/合成台逻辑。
-
-### ④ 马铠 ×5 —— 无合成配方
+### 马铠 ×5 —— 注册存在但无任何获取途径
 `copper_horse_armor / silver_horse_armor / mithril_horse_armor / ancient_metal_horse_armor / adamantium_horse_armor`
-> R196 马铠可工作台打造（金属块 6 块造型），ICPM 只注册未加配方。
 
-### ⑤ 杂项
-`slime_sphere`（应挂史莱姆/果冻掉落，未接线）、`bow`（icpm:bow 疑似旧版遗留占位，与 vanilla bow 重复）
+R196 事实：
+- `ItemHorseArmor` 材质 = copper / silver / gold / iron+ancient_metal / mithril / adamantium（有效材质表，ICPM 5 种金属各一）
+- **R196/1.6.4 无合成配方**（RecipesMITE 无 horse/barding 条目）→ 按 1.6.4 时代语义 = **宝箱战利品**
 
----
+修复：加入主世界地牢（刷怪笼）箱子 loot（金属阶 稀有度递降），见 `data/minecraft/loot_table/chests/simple_dungeon.json` 新池。
 
-## 二、非缺口（脚本误报，机制/设计上可得）
+## 二、已归档（衍生 mod 内容，不修）
 
-| 类 | 说明 |
+| 组 | 项 |
 |---|---|
-| `*_spawn_egg` ×16 | 刷怪蛋=创造模式专用（设计如此） |
-| 各族 `*_water_bucket / *_lava_bucket / *_stone_bucket` | 空桶接液 / 岩浆桶遇水冷却生成（R196 桶机制，非配方产物） |
-| `core / mantle` | 地下世界结构性方块（世界生成放置，破坏不掉落，符合 R196） |
-| 9 系普通食物/材料 | 已有配方/箱子/作物来源（本次审计判定可获得） |
+| 矿石碎块 ×8 | copper/silver/gold/iron/tin/lead/mithril/adamantium_ore_chunk（ITF 采矿机制） |
+| 金属锭 ×4 | tin/lead/bronze/steel_ingot（ITF 金属层） |
+| 合金系 ×10 | alloy 工具×5 + 盔甲×4 + alloy_upgrade_template |
+| 宝石 ×6 | ruby/sapphire/topaz/amethyst/opal/peridot |
+| 杂项 | slime_sphere（R196 用原版 slime ball，此物无主）、icpm:bow（旧占位） |
 
----
+## 三、非缺口（误报澄清）
 
-## 三、建议修复优先级
+`*_spawn_egg`(创造) · 各族水/岩浆/石桶(R196 桶机制) · core/mantle(结构方块，R196 语义破坏不掉落)
 
-| 档 | 项 | 工作量 |
-|---|---|---|
-| **S（推荐先做）** | 马铠 ×5 加工作台配方（对齐 R196 金属块造型） | 5 个 json，10 分钟 |
-| **M** | 宝石 ×6：加宝石矿块+世界生成+掉落 | 方块+贴图+特征，较大 |
-| **M/L** | 合金/钢/锡/铅/青铜：若同为 ITF 预留则标注非本项目范围；若要做需先定合成链 | 待确认 |
-| **S** | slime_sphere 挂史莱姆掉落；确认 icpm:bow 是否移除 | 小 |
-
-> 注：以上 **25 项**（33−8 chunk）目前只在**创造模式物品栏**可见（物品栏遍历所有注册项）；生存模式完全不可得。
-> 若某类本意就是"后续版本再开"（如合金/宝石/剩余金属锭），先确认是否 ITF 内容；是则移入非本项目范围，纯 R196 直接不做。
+## 四、修复后本报告收敛为：**马铠 ×5（1 个 loot 池）**
