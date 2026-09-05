@@ -125,8 +125,7 @@
         "ICPMArmorValueMixin",
         "VanillaAnvilMenuMixin",
         "WallMonsterPathMixin",
-        "LivestockMeatR196Mixin",
-        "ShearsPlantCutMixin"
+        "LivestockMeatR196Mixin"
     ],
     "injectors": {
         "defaultRequire": 1

@@ -11,7 +11,7 @@
   - `fedFood` 声明于 AbstractHorse（Horse 未覆写）→ @Mixin(AbstractHorse)
 - **修复：4 套板甲穿戴贴图紫黑**（银/远古金属/秘银/艾德曼）——equipment 纹理引用与 PNG 资源统一至 chainmail 系列（板甲=厚链甲语义）。
 - **修复：蓝莓丛右键无法摘果**——交互逻辑回归 R196：有果(age=1)右键摘 1-2 颗并回落空枝；**空枝(age=0)右键不可摘（PASS）**，需等待自然再生（随机刻 1/8）或骨粉催熟；worldgen 显式 Properties 移除改走 defaultBlockState（生成即有果）；注册 `icpm:blueberry_bush` 方块物品（可放置/可剪下携带）。
-- **新增：剪刀剪取植物（R196 ItemShears.onItemRightClick 移植）**——手持任意剪刀（原版/ICPM 铜/金/银/远古金属/秘银/艾德曼）右键 `icpm:blueberry_bush` 等 ICPM 植物 → 整丛剪下以方块物品掉落（可捡起重新放置）+ 剪毛音效 + 耐久 -1（ShearsPlantCutMixin，挂在 ShearsItem.useOn）。
+- **新增：剪刀剪取植物（R196 ItemShears.onItemRightClick 移植）**——手持任意剪刀（原版/ICPM 铜/金/银/远古金属/秘银/艾德曼）右键 `icpm:blueberry_bush` → 整丛剪下以方块物品掉落（可捡起重新放置）+ 剪毛音效 + 耐久 -1（实现于方块 useItemOn 剪刀分支——1.21.11 的 Item.useOn 为不可取消注入点，不能在其上做 HEAD cancel 拦截）。
 - **修复：地狱苦力怕碎片（infernal_creeper_frag）无物品模型**——补齐贴图（源自 MITE RP）+ items/model JSON。
 - **内部质量**：全量 mixin 声明位静态审计（163 对 target/method，对照反汇编）0 隐患；equipment→PNG、blockstate→model、model→texture、worldgen→block 资源引用闭合审计全绿。
 

@@ -11,10 +11,13 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.BiomeTags
 import net.minecraft.util.RandomSource
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.BlockGetter
@@ -48,6 +51,9 @@ object ICPMBlueberryBush {
     @JvmField
     var BLUEBERRY_BUSH_BLOCK: ICPMBlueberryBushBlock? = null
 
+    @JvmField
+    var BLUEBERRY_BUSH_ITEM: net.minecraft.world.item.Item? = null
+
     fun register() {
         val blockKey = ResourceKey.create(Registries.BLOCK, BLUEBERRY_BUSH_ID)
         val props = BlockBehaviour.Properties.of()
@@ -67,6 +73,7 @@ object ICPMBlueberryBush {
         val itemProps = net.minecraft.world.item.Item.Properties().setId(itemKey)
         val blockItem = net.minecraft.world.item.BlockItem(block, itemProps)
         Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem)
+        BLUEBERRY_BUSH_ITEM = blockItem
 
         // 森林 biome：VEGETAL_DECORATION 步骤挂载 placed_feature（json: icpm/worldgen/placed_feature/blueberry_bush.json）
         val placedKey = ResourceKey.create(
@@ -129,7 +136,7 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
         hitResult: BlockHitResult
     ): InteractionResult = rightClickBush(state, level, pos)
 
-    /** 手持物品右键：骨粉催熟空枝；其余任意物品同样可摘果（不 fallback 依赖） */
+    /** 手持物品右键：剪刀剪取整丛；骨粉催熟空枝；其余物品仅在有果时摘取 */
     override fun useItemOn(
         stack: ItemStack,
         state: BlockState,
@@ -139,6 +146,24 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
         hand: InteractionHand,
         hitResult: BlockHitResult
     ): InteractionResult {
+        // R196 ItemShears.onItemRightClick：剪刀右键 = silk 剪下整丛（方块物品掉落，可重放）
+        if (stack.item is net.minecraft.world.item.ShearsItem) {
+            if (level.isClientSide) {
+                return InteractionResult.SUCCESS
+            }
+            val serverLevel = level as ServerLevel
+            val bushItem = ICPMBlueberryBush.BLUEBERRY_BUSH_ITEM
+            if (bushItem != null && bushItem != net.minecraft.world.item.Items.AIR) {
+                Block.popResource(serverLevel, pos, ItemStack(bushItem))
+            }
+            serverLevel.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1.0f, 1.0f)
+            serverLevel.destroyBlock(pos, false)
+            if (!player.abilities.instabuild) {
+                val slot = if (hand == InteractionHand.MAIN_HAND) EquipmentSlot.MAINHAND else EquipmentSlot.OFFHAND
+                stack.hurtAndBreak(1, player, slot)
+            }
+            return InteractionResult.SUCCESS
+        }
         if (stack.`is`(Items.BONE_MEAL)) {
             if (state.getValue(ICPMBlueberryBush.AGE) == 0) {
                 if (!level.isClientSide) {
