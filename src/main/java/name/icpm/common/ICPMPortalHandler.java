@@ -384,6 +384,22 @@ public class ICPMPortalHandler {
                 destX = computed[0];
                 destZ = computed[1];
                 portalToCreate = returnBlock;
+                // 无记忆/非返回组合：目标 x/z 附近（任意深度）可能已存在配对传送门
+                // （如主世界深层 y<=-55 的入口门，对应地下世界门的 ×8 位置），
+                // 必须先全深度复用，避免在目标位置地表盲目新建一扇门。
+                if (returnBlock != null) {
+                    BlockPos existing = findExistingPairedPortal(targetLevel, destX, 0, destZ, returnBlock);
+                    if (existing != null) {
+                        int existingBottomY = existing.getY();
+                        while (existingBottomY > targetLevel.getMinY()
+                                && targetLevel.getBlockState(new BlockPos(existing.getX(), existingBottomY - 1, existing.getZ())).getBlock() == returnBlock) {
+                            existingBottomY--;
+                        }
+                        LOGGER.info("ICPM-Portal: 目标落点 ({},{}) 附近发现已有配对传送门 at {}，复用（不新建）",
+                                destX, destZ, existing);
+                        return new PortalPlan(targetLevel, new int[]{existing.getX(), existingBottomY, existing.getZ()}, null);
+                    }
+                }
             }
         }
 
@@ -396,13 +412,16 @@ public class ICPMPortalHandler {
     }
 
     /**
-     * 在记忆坐标附近查找已存在的配对传送门。找到则返回传送门方块位置，未找到返回 null。
-     * 搜索半径取 PAIRED_SEARCH_RADIUS（含 y），足以覆盖记忆坐标处的传送门框架。
+     * 在目标 x/z 附近查找已存在的配对传送门（y 全深度扫描）。找到则返回传送门方块位置，未找到返回 null。
+     *
+     * y 必须全深度：主世界入口门通常建在 y<=-55 的深层（入口 y 记忆可能缺失/为旧档错误值），
+     * 若 y 只搜 centerY±16，深层已有门会被漏掉 → 后续在地表盲目新建传送门（"返回主世界后地表多一扇门"根因）。
+     * x/z 取 PAIRED_SEARCH_RADIUS（±16），足以覆盖 2×3 门框架。
      */
     private static BlockPos findExistingPairedPortal(ServerLevel level, int centerX, int centerY, int centerZ, Block returnPortalBlock) {
         for (BlockPos pos : BlockPos.betweenClosed(
-                centerX - PAIRED_SEARCH_RADIUS, centerY - PAIRED_SEARCH_RADIUS, centerZ - PAIRED_SEARCH_RADIUS,
-                centerX + PAIRED_SEARCH_RADIUS, centerY + PAIRED_SEARCH_RADIUS, centerZ + PAIRED_SEARCH_RADIUS)) {
+                centerX - PAIRED_SEARCH_RADIUS, level.getMinY(), centerZ - PAIRED_SEARCH_RADIUS,
+                centerX + PAIRED_SEARCH_RADIUS, level.getMaxY(), centerZ + PAIRED_SEARCH_RADIUS)) {
             if (level.getBlockState(pos).getBlock() == returnPortalBlock) {
                 return pos;
             }
@@ -618,13 +637,15 @@ public class ICPMPortalHandler {
     }
 
     /**
-     * 搜索目标位置附近的配对传送门，若无则创建黑曜石框架+传送门方块。
+     * 搜索目标位置附近的配对传送门（y 全深度），若无则创建黑曜石框架+传送门方块。
+     * y 全深度原因同 findExistingPairedPortal：destY 往往是地表落点，深层已有门不能被漏检，
+     * 否则会在每次无记忆/配对失效返回时于地表重复新建门。
      */
     private static void findOrCreatePairedPortal(ServerLevel level, int destX, int destY, int destZ, Block returnPortalBlock) {
         // 搜索附近是否已有配对传送门
         for (BlockPos pos : BlockPos.betweenClosed(
-                destX - PAIRED_SEARCH_RADIUS, destY - PAIRED_SEARCH_RADIUS, destZ - PAIRED_SEARCH_RADIUS,
-                destX + PAIRED_SEARCH_RADIUS, destY + PAIRED_SEARCH_RADIUS, destZ + PAIRED_SEARCH_RADIUS)) {
+                destX - PAIRED_SEARCH_RADIUS, level.getMinY(), destZ - PAIRED_SEARCH_RADIUS,
+                destX + PAIRED_SEARCH_RADIUS, level.getMaxY(), destZ + PAIRED_SEARCH_RADIUS)) {
             if (level.getBlockState(pos).getBlock() == returnPortalBlock) {
                 LOGGER.info("ICPM-Portal: 找到配对传送门 at {}", pos);
                 return;
