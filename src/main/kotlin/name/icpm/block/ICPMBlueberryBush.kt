@@ -62,6 +62,12 @@ object ICPMBlueberryBush {
         Registry.register(BuiltInRegistries.BLOCK, blockKey, block)
         BLUEBERRY_BUSH_BLOCK = block
 
+        // 方块物品注册（可放置/可被剪刀剪下带走；入创造标签由 icpm 物品组管理）
+        val itemKey = ResourceKey.create(Registries.ITEM, BLUEBERRY_BUSH_ID)
+        val itemProps = net.minecraft.world.item.Item.Properties().setId(itemKey)
+        val blockItem = net.minecraft.world.item.BlockItem(block, itemProps)
+        Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem)
+
         // 森林 biome：VEGETAL_DECORATION 步骤挂载 placed_feature（json: icpm/worldgen/placed_feature/blueberry_bush.json）
         val placedKey = ResourceKey.create(
             Registries.PLACED_FEATURE,
@@ -97,15 +103,12 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
     override fun getStateForPlacement(context: net.minecraft.world.item.context.BlockPlaceContext): BlockState =
         defaultBlockState()
 
-    /** 右键交互（空手与手持物品共用）：有果摘果，空枝立即再结果（保证每次右键都有反馈、蓝莓可获取） */
+    /** 右键交互（空手与手持非骨粉物品共用）：仅在有果(age=1)时可摘取；空枝(age=0)返回 PASS（R196 语义：被采后需等自然再生或骨粉） */
     private fun rightClickBush(state: BlockState, level: Level, pos: BlockPos): InteractionResult {
         val age = state.getValue(ICPMBlueberryBush.AGE)
         if (age == 0) {
-            // 空枝：立即挂果，玩家再点即可摘（R196 再生语义的即时化，避免随机刻过慢导致"永远空枝"）
-            if (!level.isClientSide) {
-                level.setBlock(pos, state.setValue(ICPMBlueberryBush.AGE, 1), 2)
-            }
-            return InteractionResult.SUCCESS
+            // 空枝不可摘（R196：结果期过后需要再生/骨粉）
+            return InteractionResult.PASS
         }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS
