@@ -46,6 +46,8 @@
 
 - **蓝莓丛（R196 BlockBush(blueberry) 移植）**：新增 icpm:blueberry_bush 方块（两态 age=1有果/age=0空枝）——右键摘果 1-2 蓝莓 + 切回空枝；骨粉催熟；随机刻 1/40 自然再生；破坏有果态走方块 loot 1-2 蓝莓。贴图取自 `MITE Resource Pack 1.6.41/textures/blocks/bushes/blueberry(_picked).png`。世界生成：`BiomeSelectors.tag(IS_FOREST)` + VEGETAL_DECORATION 挂载 `placed_feature/blueberry_bush.json`（rarity 16 + random_patch 48 tries）→ 森林地表自然生成。文件：方块 ICPMBlueberryBush.kt（object 注册+森林 biome 挂载）+ assets 6 个 json。
 
+- **附魔难度算法服务端接入（A2 收尾）**：ICPMEnchantmentMenuMixin 点击附魔时改用 `ICPMEnchantDifficulty.buildList`（R196 难度预算 ⌊总经验×1.25/100⌋、±25% 浮动、冲突扣难度+5/词条、≤3 词条、书单条）生成词条并扣 XP；候选=可附于目标且非诅咒的全部附魔；空结果回退 vanilla（防呆）。UI 不动。同时修复 LivestockMeatR196Mixin 目标类铁律（dropFromLootTable 声明于 LivingEntity → @Mixin(LivingEntity)+instanceof 守卫，防启动崩）。
+
 ## 1.0.7（2026-09-04）
 
 **修复：盔甲穿戴贴图错乱 · 触碰距离分通道 v2 · 启动崩溃收口 · 部署 CurseForge（id 1680391）**

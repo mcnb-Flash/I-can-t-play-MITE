@@ -1,9 +1,15 @@
 package name.icpm.mixin;
 
+import name.icpm.common.ICPMEnchantDifficulty;
 import name.icpm.common.ICPMEnchantmentHelper;
 import name.icpm.common.ICPMExperience;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -16,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +32,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ICPM 附魔台经验值消耗机制（1.6.4 ContainerEnchantment.enchantItem 移植）
@@ -106,8 +117,12 @@ public abstract class ICPMEnchantmentMenuMixin {
                 return;
             }
             ItemStack result = itemStack;
-            List<EnchantmentInstance> list = acc.invokeGetEnchantmentList(
-                    levelAccess.registryAccess(), result, i, cost);
+            // R196 词条产出（ICPMEnchantDifficulty.buildList，预算=⌊玩家总经验×1.25/100⌋）
+            List<EnchantmentInstance> list = icpm$r196EnchantList((Level) levelAccess, result, player);
+            if (list.isEmpty()) {
+                list = acc.invokeGetEnchantmentList(
+                        levelAccess.registryAccess(), result, i, cost);
+            }
             if (list.isEmpty()) {
                 return;
             }
@@ -173,6 +188,52 @@ public abstract class ICPMEnchantmentMenuMixin {
             menu.broadcastChanges();
             ci.cancel();
         }
+    }
+
+    /**
+     * R196 词条产出：难度预算(buildList) 代替 vanilla 随机附魔。
+     * 候选 = 对目标可用且非诅咒的全部附魔；预算 = ⌊玩家总经验×1.25/100⌋（R196 规则 A）。
+     * 空结果时由调用方回退 vanilla 生成（防呆）。
+     */
+    @Unique
+    private static List<EnchantmentInstance> icpm$r196EnchantList(Level level, ItemStack item, Player player) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return List.of();
+        }
+        Registry<Enchantment> reg = serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        Map<Identifier, Integer> pool = new LinkedHashMap<>();
+        Map<Identifier, Holder<Enchantment>> holderById = new HashMap<>();
+        for (Identifier id : reg.keySet()) {
+            Enchantment enchant = reg.getValue(id);
+            if (enchant == null || !enchant.isSupportedItem(item) || !enchant.canEnchant(item)) {
+                continue;
+            }
+            if (id.getPath().endsWith("_curse")) {
+                continue; // 附魔台不给诅咒（vanilla 语义）
+            }
+            pool.put(id, enchant.getMaxLevel());
+            holderById.put(id, reg.wrapAsHolder(enchant));
+        }
+        if (pool.isEmpty()) {
+            return List.of();
+        }
+        int budget = player.hasInfiniteMaterials()
+                ? 20000
+                : ICPMEnchantDifficulty.difficultyBudgetFromXp(ICPMExperience.getExperience(player));
+        if (budget < 1) {
+            return List.of();
+        }
+        boolean book = item.is(Items.BOOK);
+        List<ICPMEnchantDifficulty.Instance> chosen =
+                ICPMEnchantDifficulty.buildList(serverLevel.random, budget, pool, book);
+        List<EnchantmentInstance> out = new ArrayList<>();
+        for (ICPMEnchantDifficulty.Instance ins : chosen) {
+            Holder<Enchantment> h = holderById.get(ins.enchant);
+            if (h != null) {
+                out.add(new EnchantmentInstance(h, ins.level));
+            }
+        }
+        return out;
     }
 
     /** 是否为原版水瓶（Potion = water，无自定义效果时视为水瓶） */

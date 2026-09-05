@@ -5,6 +5,7 @@ import name.icpm.entity.LivestockState;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
@@ -24,9 +25,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * </pre>
  * 取代 vanilla 常掉 1..3 肉（R196：**不健康动物不掉肉**，这才是"全量"缺口）。
  * 1.21 MushroomCow 继承 Cow，天然覆盖。牛/猪已从屠宰附魔 mixin 剔除避免叠加。
+ *
+ * 注：dropFromLootTable 声明于 LivingEntity（父类），故 @Mixin(LivingEntity) + instanceof 守卫
+ * （ICPM 铁律：继承方法注入必须 @Mixin 声明类）。
  * 羊/鸡/兔：鸡兔按 R196 豁免，羊保持近似（vanilla 肉 + 屠宰 extra；健康门控为已知偏差）。
  */
-@Mixin({Cow.class, Pig.class})
+@Mixin(LivingEntity.class)
 public abstract class LivestockMeatR196Mixin {
 
     @Inject(method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V",
