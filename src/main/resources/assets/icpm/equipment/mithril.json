@@ -1,10 +1,10 @@
 {
   "layers": {
     "humanoid": [
-      { "texture": "icpm:mithril_chainmail" }
+      { "texture": "icpm:mithril" }
     ],
     "humanoid_leggings": [
-      { "texture": "icpm:mithril_chainmail" }
+      { "texture": "icpm:mithril" }
     ]
   }
 }
