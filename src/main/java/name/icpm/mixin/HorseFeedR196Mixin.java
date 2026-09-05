@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,13 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *   野马（未驯服）在“健康喂食”后进入 4000 tick 逆反窗口：此期间再喂任何食物，
  *   马后腿直立拒绝（不消耗食物）；喂食若用于治疗受伤野马则不会触发逆反窗口。
  * </pre>
- * 1.21.11 原版已内置 temper/开食（vanilla Horse.mobInteract → fedFood → handleEating），
+ * 1.21.11 原版已内置 temper/开食（vanilla mobInteract → fedFood → handleEating），
  * 这里只补 R196 差值：健康野马喂食冷却 4000 + 逆反期拒绝进食。
  *
- * 挂 Horse.fedFood（Horse 自身声明，非继承——避免 target-not-found）。
+ * fedFood(Player,ItemStack) 声明于 AbstractHorse（Horse 未覆写，实测反汇编确认）
+ * —— 按铁律 @Mixin 用声明类 AbstractHorse；马/驴/骡同为马科语义一致。
  * 注：逆反窗口存于字段（不持久化），与 R196 倒计时字段同语义（重载后重置）。
  */
-@Mixin(Horse.class)
+@Mixin(AbstractHorse.class)
 public abstract class HorseFeedR196Mixin {
 
     /** 下次允许喂食的 tick 截止（野马逆反窗口） */
@@ -35,7 +36,7 @@ public abstract class HorseFeedR196Mixin {
 
     @Inject(method = "fedFood", at = @At("HEAD"), cancellable = true)
     private void icpm$rebelliousRefuseFeed(Player player, ItemStack stack, CallbackInfoReturnable<InteractionResult> cir) {
-        Horse self = (Horse) (Object) this;
+        AbstractHorse self = (AbstractHorse) (Object) this;
         if (self.isTamed() || self.level().isClientSide()) {
             return;
         }
@@ -54,7 +55,7 @@ public abstract class HorseFeedR196Mixin {
 
     @Inject(method = "fedFood", at = @At("RETURN"))
     private void icpm$wildFeedCooldown(Player player, ItemStack stack, CallbackInfoReturnable<InteractionResult> cir) {
-        Horse self = (Horse) (Object) this;
+        AbstractHorse self = (AbstractHorse) (Object) this;
         if (self.isTamed() || self.level().isClientSide()) {
             return;
         }
