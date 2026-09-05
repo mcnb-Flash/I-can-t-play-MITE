@@ -33,6 +33,15 @@ public interface EnchantmentMenuAccessor {
     @Accessor("enchantmentSeed")
     DataSlot getEnchantmentSeed();
 
+    @Accessor("costs")
+    int[] getCosts();
+
+    @Accessor("enchantClue")
+    int[] getEnchantClue();
+
+    @Accessor("levelClue")
+    int[] getLevelClue();
+
     @Invoker("getEnchantmentList")
     List<EnchantmentInstance> invokeGetEnchantmentList(RegistryAccess registryAccess, ItemStack itemStack, int i, int j);
 }

@@ -128,16 +128,22 @@ public final class ICPMEnchantDifficulty {
     }
 
     /**
-     * R196 buildEnchantmentList 忠实移植（无冲突/可附魔过滤的通用池版本）。
+     * R196 buildEnchantmentList 忠实移植（含冲突剔除）。
      *
-     * @param random        随机源
-     * @param budget        预算难度（adjusted 前，如 125）
-     * @param pool         候选附魔（调用方已做 canEnchantItem 过滤），value=该词条最大等级
-     * @param book         是否为书（只产出 1 个词条，调用方自己挑）
-     * @return 随机词条列表（最多 3 个）
+     * <p>与原版一致：每轮随机取词条前，先剔除与已选词条互斥（exclusive）的候选
+     * （R196 {@code removeEnchantmentsFromMapThatConflict} + {@code Enchantment.canApplyTogether}），
+     * 因此一次产出绝不会同时出现 保护+爆炸保护 / 锋利+亡灵杀手 等原版不可能组合。
+     *
+     * @param random    随机源
+     * @param budget    预算难度（该档档位难度，非玩家经验）
+     * @param pool      候选附魔（调用方已做 canEnchantItem 过滤），value=该词条最大等级
+     * @param book      是否为书（书只产出 1 个词条）
+     * @param conflicts 互斥判定：传入两词条返回 true 表示二者不能共存；可为 null（跳过互斥剔除）
+     * @return 随机词条列表（最多 3 个，互斥保证）
      */
     public static List<Instance> buildList(RandomSource random, int budget,
-                                           Map<Identifier, Integer> pool, boolean book) {
+                                           Map<Identifier, Integer> pool, boolean book,
+                                           java.util.function.BiPredicate<Identifier, Identifier> conflicts) {
         if (budget < 1 || pool == null || pool.isEmpty()) {
             return List.of();
         }
@@ -148,6 +154,18 @@ public final class ICPMEnchantDifficulty {
         List<Identifier> keys = new ArrayList<>(pool.keySet());
 
         while (remaining > 0 && !keys.isEmpty()) {
+            // R196 removeEnchantmentsFromMapThatConflict：先剔除与已选词条冲突（含同 id 自身）的候选
+            if (!picked.isEmpty()) {
+                keys.removeIf(k -> {
+                    for (Instance p : picked) {
+                        // 同 id 亦视为冲突（R196 canApplyTogether(this==other)=false）
+                        if (p.enchant.equals(k) || (conflicts != null && conflicts.test(p.enchant, k))) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
             // 收集当前预算内可达词条 → 最高可达等级
             List<Identifier> affordable = new ArrayList<>();
             List<Integer> bestLevels = new ArrayList<>();
@@ -189,5 +207,11 @@ public final class ICPMEnchantDifficulty {
             return List.of(keep);
         }
         return picked;
+    }
+
+    /** 兼容旧签名（无互斥剔除，仅供无 registry 上下文调用——不建议产出附魔使用） */
+    public static List<Instance> buildList(RandomSource random, int budget,
+                                           Map<Identifier, Integer> pool, boolean book) {
+        return buildList(random, budget, pool, book, null);
     }
 }

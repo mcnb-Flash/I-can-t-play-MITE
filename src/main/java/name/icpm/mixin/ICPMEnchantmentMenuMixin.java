@@ -45,10 +45,23 @@ import java.util.Map;
  * ICPM：附魔【直接消耗经验值】——经验值 = 附魔等级 × 100（R196 Enchantment.getExperienceCost），
  * 判定玩家 totalExperience 是否足够，不足则拒绝附魔。
  *
+ * <p>「所见即所得」：展示层三档词条（enchantClue/levelClue，由 slotsChanged 服务端计算）与点击产出
+ * 使用同一份 R196 词条缓存——放入物品时预生成并存 {@link #icpm$slotLists}，点击按钮直接应用缓存，
+ * 因此 UI 显示的词条就是实际会得到的词条。词条预算 = 该档位难度（menu.costs[i]，书架+物品附魔能力
+ * 驱动），不再使用玩家总经验；产出过程带互斥剔除（exclusive_set），杜绝 保护+爆炸保护 等原版不可能组合。
+ *
  * 注入点：EnchantmentMenu.clickMenuButton（客户端点击附魔按钮时服务端调用）。
  */
 @Mixin(EnchantmentMenu.class)
 public abstract class ICPMEnchantmentMenuMixin {
+
+    /** 三档缓存词条（服务端 slotsChanged 时生成，点击时应用） */
+    @Unique
+    private List<EnchantmentInstance>[] icpm$slotLists;
+
+    /** 缓存对应的物品快照：物品变化需重算 */
+    @Unique
+    private ItemStack icpm$cachedStack = ItemStack.EMPTY;
 
     /** 获取附魔菜单访问器 */
     @Unique
@@ -99,7 +112,7 @@ public abstract class ICPMEnchantmentMenuMixin {
             return;
         }
 
-        // ICPM：经验值判定（cost = 附魔等级 × 100，R196 getExperienceCost）
+        // ICPM：经验值判定（cost = 该档位难度 × 100，R196 getExperienceCost）
         int cost = menu.costs[i];
         if (cost <= 0 || itemStack.isEmpty()) {
             cir.setReturnValue(false);
@@ -116,9 +129,11 @@ public abstract class ICPMEnchantmentMenuMixin {
             if (levelAccess.isClientSide()) {
                 return;
             }
+            ServerLevel serverLevel = (ServerLevel) levelAccess;
             ItemStack result = itemStack;
-            // R196 词条产出（ICPMEnchantDifficulty.buildList，预算=⌊玩家总经验×1.25/100⌋）
-            List<EnchantmentInstance> list = icpm$r196EnchantList((Level) levelAccess, result, player);
+            // R196 词条产出：应用 slotsChanged 时预生成的该档缓存（所见即所得，带互斥剔除）。
+            // 缓存与当前物品不符（极端时序）则即时重算（预算=该档难度 cost）。
+            List<EnchantmentInstance> list = icpm$getSlotList(serverLevel, i, cost, result);
             if (list.isEmpty()) {
                 list = acc.invokeGetEnchantmentList(
                         levelAccess.registryAccess(), result, i, cost);
@@ -187,20 +202,92 @@ public abstract class ICPMEnchantmentMenuMixin {
             }
             menu.broadcastChanges();
             ci.cancel();
+            return;
+        }
+        // 普通物品：服务端在 vanilla 计算完成后 TAIL 用 R196 词条覆盖 clue/levelClue，
+        // 使 UI 三档显示 = 点击实际产出。此处仅标记缓存失效（物品已变化）。
+        if (!ItemStack.isSameItemSameComponents(stack, icpm$cachedStack)) {
+            icpm$slotLists = null;
+            icpm$cachedStack = stack.copy();
         }
     }
 
     /**
-     * R196 词条产出：难度预算(buildList) 代替 vanilla 随机附魔。
-     * 候选 = 对目标可用且非诅咒的全部附魔；预算 = ⌊玩家总经验×1.25/100⌋（R196 规则 A）。
-     * 空结果时由调用方回退 vanilla 生成（防呆）。
+     * slotsChanged TAIL（服务端）：物品放入后立即按 R196 预生成三档词条并缓存，
+     * 同时把每档第一个词条写入 enchantClue/levelClue —— 客户端 UI 悬停/渲染看到的就是
+     * 点击后实际会附上的词条（所见即所得）。预算 = 该档位难度 menu.costs[i]（vanilla 已算好）。
+     */
+    @Inject(method = "slotsChanged", at = @At("TAIL"))
+    private void icpm$generateSlotLists(Container container, CallbackInfo ci) {
+        EnchantmentMenu menu = (EnchantmentMenu) (Object) this;
+        EnchantmentMenuAccessor acc = icpm$accessor();
+        if (container != acc.getEnchantSlots()) {
+            return;
+        }
+        ItemStack stack = container.getItem(0);
+        if (stack.isEmpty() || stack.is(Items.GOLDEN_APPLE) || icpm$isWaterBottle(stack)) {
+            return; // 金苹果/水瓶由 HEAD 分支处理；空物品无需生成
+        }
+        acc.getAccess().execute((levelAccess, blockPos) -> {
+            if (!(levelAccess instanceof ServerLevel serverLevel)) {
+                return;
+            }
+            if (icpm$slotLists != null && ItemStack.isSameItemSameComponents(stack, icpm$cachedStack)) {
+                // 已由 TAIL 生成过且物品未变——但 vanilla TAIL 可能覆盖 clue，需重填。
+                // 为稳妥直接重算（预算同，随机不同但每次放入只触发一次，无碍）。
+            }
+            icpm$cachedStack = stack.copy();
+            icpm$slotLists = new List[3];
+            Registry<Enchantment> reg = serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+            boolean book = stack.is(Items.BOOK);
+            for (int i = 0; i < 3; i++) {
+                int cost = menu.costs[i];
+                menu.enchantClue[i] = -1;
+                menu.levelClue[i] = -1;
+                if (cost <= 0) {
+                    icpm$slotLists[i] = List.of();
+                    continue;
+                }
+                List<EnchantmentInstance> list = icpm$genList(serverLevel, reg, stack, cost, book);
+                icpm$slotLists[i] = list;
+                if (!list.isEmpty()) {
+                    EnchantmentInstance first = list.get(0);
+                    menu.enchantClue[i] = reg.asHolderIdMap().getId(first.enchantment());
+                    menu.levelClue[i] = first.level();
+                }
+            }
+            menu.broadcastChanges();
+        });
+    }
+
+    /**
+     * 读取槽位缓存；若缓存与物品不符则即时重算（极端时序兜底）。
      */
     @Unique
-    private static List<EnchantmentInstance> icpm$r196EnchantList(Level level, ItemStack item, Player player) {
-        if (!(level instanceof ServerLevel serverLevel)) {
+    private List<EnchantmentInstance> icpm$getSlotList(ServerLevel level, int slot, int cost, ItemStack item) {
+        if (icpm$slotLists == null || !ItemStack.isSameItemSameComponents(item, icpm$cachedStack)) {
+            icpm$cachedStack = item.copy();
+            icpm$slotLists = new List[3];
+            Registry<Enchantment> reg = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+            boolean book = item.is(Items.BOOK);
+            for (int i = 0; i < 3; i++) {
+                icpm$slotLists[i] = cost > 0 ? icpm$genList(level, reg, item, cost, book) : List.of();
+            }
+        }
+        if (slot < 0 || slot >= icpm$slotLists.length) {
             return List.of();
         }
-        Registry<Enchantment> reg = serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        return icpm$slotLists[slot];
+    }
+
+    /**
+     * R196 词条生成（带互斥剔除）：候选 = 对目标可用且非诅咒的全部附魔；
+     * 预算 = 该档位难度 cost（档位驱动，R196 buildEnchantmentList 语义）；
+     * 选择过程逐轮剔除与已选词条 exclusive 冲突的候选（R196 removeEnchantmentsFromMapThatConflict）。
+     */
+    @Unique
+    private List<EnchantmentInstance> icpm$genList(ServerLevel level, Registry<Enchantment> reg,
+                                                   ItemStack item, int cost, boolean book) {
         Map<Identifier, Integer> pool = new LinkedHashMap<>();
         Map<Identifier, Holder<Enchantment>> holderById = new HashMap<>();
         for (Identifier id : reg.keySet()) {
@@ -214,18 +301,20 @@ public abstract class ICPMEnchantmentMenuMixin {
             pool.put(id, enchant.getMaxLevel());
             holderById.put(id, reg.wrapAsHolder(enchant));
         }
-        if (pool.isEmpty()) {
+        if (pool.isEmpty() || cost < 1) {
             return List.of();
         }
-        int budget = player.hasInfiniteMaterials()
-                ? 20000
-                : ICPMEnchantDifficulty.difficultyBudgetFromXp(ICPMExperience.getExperience(player));
-        if (budget < 1) {
-            return List.of();
-        }
-        boolean book = item.is(Items.BOOK);
+        // 互斥判定：R196 canApplyTogether → 1.21.11 Enchantment.areCompatible（exclusive_set）
+        java.util.function.BiPredicate<Identifier, Identifier> conflicts = (a, b) -> {
+            Holder<Enchantment> ha = holderById.get(a);
+            Holder<Enchantment> hb = holderById.get(b);
+            if (ha == null || hb == null) {
+                return false;
+            }
+            return !Enchantment.areCompatible(ha, hb);
+        };
         List<ICPMEnchantDifficulty.Instance> chosen =
-                ICPMEnchantDifficulty.buildList(serverLevel.random, budget, pool, book);
+                ICPMEnchantDifficulty.buildList(level.random, cost, pool, book, conflicts);
         List<EnchantmentInstance> out = new ArrayList<>();
         for (ICPMEnchantDifficulty.Instance ins : chosen) {
             Holder<Enchantment> h = holderById.get(ins.enchant);
