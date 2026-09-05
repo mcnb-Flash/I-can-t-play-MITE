@@ -6,13 +6,11 @@
 
 ## 一、真实无来源（注册即死，生存拿不到）
 
-### ① 矿石碎块 ×8 —— 应为"采矿掉落"却从未接线
-`copper_ore_chunk / silver_ore_chunk / gold_ore_chunk / iron_ore_chunk / tin_ore_chunk / lead_ore_chunk / mithril_ore_chunk / adamantium_ore_chunk`
-> R196：矿脉开采掉落对应碎块（chunk），碎块烧炼成锭。ICPM 采矿仍走 vanilla 原矿掉落，chunk 无任何产出点。
+> 修订：**矿石碎块 ×8（copper/silver/gold/iron/tin/lead/mithril/adamantium_ore_chunk）属 ITF（MITE 衍生模组）机制，纯净 R196 无此设计 → 移出缺口（见第四节"非本项目范围"）。**
 
-### ② 金属锭 ×4 —— 无熔炼配方
+### ① 金属锭 ×4 —— 无熔炼配方
 `tin_ingot / lead_ingot / bronze_ingot / steel_ingot`
-> 应为 chunk（或合金冶炼）的熔炼产物，项目无对应 smelting 配方。
+> 疑同为 ITF 金属层（R196 金属=铜/银/金/铁/远古金属/秘银/艾德曼），待用户确认后归档。
 
 ### ③ 宝石 ×6 —— 无矿无掉落
 `ruby / sapphire / topaz / amethyst / opal / peridot`
@@ -46,10 +44,10 @@
 | 档 | 项 | 工作量 |
 |---|---|---|
 | **S（推荐先做）** | 马铠 ×5 加工作台配方（对齐 R196 金属块造型） | 5 个 json，10 分钟 |
-| **S** | 矿石碎块 ×8 → 矿石方块挖掘掉落 chunk（替换原矿掉落或并出）；chunk→熔炼锭配方（tin/lead/bronze/steel 等 4 锭） | loot 表 + smelting json |
+| **S** | （已移除）矿石碎块为 ITF 内容，纯净 R196 不做 | — |
 | **M** | 宝石 ×6：加宝石矿块+世界生成+掉落 | 方块+贴图+特征，较大 |
 | **M/L** | 合金体系：需先定 R196/原创合成链（模板+基材），整条未设计 | 待产品决策 |
 | **S** | slime_sphere 挂史莱姆掉落；确认 icpm:bow 是否移除 | 小 |
 
-> 注：以上 33 项目前只在**创造模式物品栏**可见（物品栏遍历所有注册项）；生存模式完全不可得。
+> 注：以上 **25 项**（33−8 chunk）目前只在**创造模式物品栏**可见（物品栏遍历所有注册项）；生存模式完全不可得。
 > 若某类本意就是"后续版本再开"（如合金/宝石），可在本文档标注 pending 即可，无需立即做。
