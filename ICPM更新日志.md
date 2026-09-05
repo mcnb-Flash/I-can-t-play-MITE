@@ -44,6 +44,8 @@
 
 - **马铠 ×5 生存获取（R196 裁决）**：铜/银/远古金属/秘银/艾德曼马铠入主世界地牢箱子（35% 概率、按金属阶加权）——R196 马铠为宝箱战利品、无合成配方；其余衍生内容（矿碎/合金/宝石/钢锡铅青铜锭等）按用户裁决归档不修。
 
+- **蓝莓丛（R196 BlockBush(blueberry) 移植）**：新增 icpm:blueberry_bush 方块（两态 age=1有果/age=0空枝）——右键摘果 1-2 蓝莓 + 切回空枝；骨粉催熟；随机刻 1/40 自然再生；破坏有果态走方块 loot 1-2 蓝莓。贴图取自 `MITE Resource Pack 1.6.41/textures/blocks/bushes/blueberry(_picked).png`。世界生成：`BiomeSelectors.tag(IS_FOREST)` + VEGETAL_DECORATION 挂载 `placed_feature/blueberry_bush.json`（rarity 16 + random_patch 48 tries）→ 森林地表自然生成。文件：方块 ICPMBlueberryBush.kt（object 注册+森林 biome 挂载）+ assets 6 个 json。
+
 ## 1.0.7（2026-09-04）
 
 **修复：盔甲穿戴贴图错乱 · 触碰距离分通道 v2 · 启动崩溃收口 · 部署 CurseForge（id 1680391）**

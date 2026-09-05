@@ -275,6 +275,9 @@ public class ICPM implements ModInitializer {
         ICPMBlocks.init();
         registerAllBlocks();
 
+        // 蓝莓丛（R196 BlockBush blueberry）：方块 + 森林 worldgen 挂载
+        name.icpm.block.ICPMBlueberryBush.INSTANCE.register();
+
         // 注册方块实体类型
         name.icpm.blockentity.ICPMBlockEntities.INSTANCE.init();
 

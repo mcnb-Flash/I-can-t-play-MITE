@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": { "cross": "icpm:block/blueberry_bush_picked" }
+}
