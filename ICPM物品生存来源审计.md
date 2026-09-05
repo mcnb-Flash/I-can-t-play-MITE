@@ -6,24 +6,24 @@
 
 ## 一、真实无来源（注册即死，生存拿不到）
 
-> 修订：**矿石碎块 ×8（copper/silver/gold/iron/tin/lead/mithril/adamantium_ore_chunk）属 ITF（MITE 衍生模组）机制，纯净 R196 无此设计 → 移出缺口（见第四节"非本项目范围"）。**
+> 修订注记：**矿石碎块 ×8（copper/silver/gold/iron/tin/lead/mithril/adamantium_ore_chunk）属 ITF（MITE 衍生模组）机制，纯净 R196 无此设计 → 已移出本缺口清单**（仅作为 ITF 遗留注册保留，不修）。
 
 ### ① 金属锭 ×4 —— 无熔炼配方
 `tin_ingot / lead_ingot / bronze_ingot / steel_ingot`
 > 疑同为 ITF 金属层（R196 金属=铜/银/金/铁/远古金属/秘银/艾德曼），待用户确认后归档。
 
-### ③ 宝石 ×6 —— 无矿无掉落
+### ② 宝石 ×6 —— 无矿无掉落
 `ruby / sapphire / topaz / amethyst / opal / peridot`
 
-### ④ 合金体系 ×10 —— 整套未落地
+### ③ 合金体系 ×10 —— 整套未落地
 `alloy_axe / alloy_pickaxe / alloy_shovel / alloy_sword / alloy_hoe / alloy_helmet / alloy_chestplate / alloy_leggings / alloy_boots / alloy_upgrade_template`
 > 疑似预留的下一材料层，无矿石/配方/合成台逻辑。
 
-### ⑤ 马铠 ×5 —— 无合成配方
+### ④ 马铠 ×5 —— 无合成配方
 `copper_horse_armor / silver_horse_armor / mithril_horse_armor / ancient_metal_horse_armor / adamantium_horse_armor`
 > R196 马铠可工作台打造（金属块 6 块造型），ICPM 只注册未加配方。
 
-### ⑥ 杂项
+### ⑤ 杂项
 `slime_sphere`（应挂史莱姆/果冻掉落，未接线）、`bow`（icpm:bow 疑似旧版遗留占位，与 vanilla bow 重复）
 
 ---
@@ -44,10 +44,9 @@
 | 档 | 项 | 工作量 |
 |---|---|---|
 | **S（推荐先做）** | 马铠 ×5 加工作台配方（对齐 R196 金属块造型） | 5 个 json，10 分钟 |
-| **S** | （已移除）矿石碎块为 ITF 内容，纯净 R196 不做 | — |
 | **M** | 宝石 ×6：加宝石矿块+世界生成+掉落 | 方块+贴图+特征，较大 |
-| **M/L** | 合金体系：需先定 R196/原创合成链（模板+基材），整条未设计 | 待产品决策 |
+| **M/L** | 合金/钢/锡/铅/青铜：若同为 ITF 预留则标注非本项目范围；若要做需先定合成链 | 待确认 |
 | **S** | slime_sphere 挂史莱姆掉落；确认 icpm:bow 是否移除 | 小 |
 
 > 注：以上 **25 项**（33−8 chunk）目前只在**创造模式物品栏**可见（物品栏遍历所有注册项）；生存模式完全不可得。
-> 若某类本意就是"后续版本再开"（如合金/宝石），可在本文档标注 pending 即可，无需立即做。
+> 若某类本意就是"后续版本再开"（如合金/宝石/剩余金属锭），先确认是否 ITF 内容；是则移入非本项目范围，纯 R196 直接不做。
