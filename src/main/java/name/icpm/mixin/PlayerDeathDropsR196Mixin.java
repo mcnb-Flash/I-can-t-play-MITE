@@ -2,6 +2,7 @@ package name.icpm.mixin;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -15,12 +16,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * R196 将玩家产生的掉落物 age 设为负值（-18000 → 配合 6000 tick 消失阈值，
  * 实际存活远大于原版 5 分钟）。sky 记录「玩家死亡物品消失时间 15 min」。
  *
- * 这里在 Player.dropAllDeathLoot 结束后，把死亡瞬间洒出、刚生成的掉落物
- * age 下调 12000 → 存活 = 12000 + 6000 ≈ 18000 tick = 15 分钟。
- * 只作用于死亡掉落（keepInventory 时 vanilla 不产生掉落，自动跳过），
- * 不碰平时丢出的物品（仍 5 分钟）。
+ * dropAllDeathLoot 声明于 LivingEntity（Player 未覆写）——按项目铁律必须
+ * @Mixin(声明类 LivingEntity) + instanceof Player 守卫，否则启动 target not found。
+ * 在 TAIL 把死亡瞬间洒出、刚生成的掉落物 age 下调 12000 →
+ * 存活 = 12000 + 6000 ≈ 18000 tick = 15 分钟。
+ * 只作用于玩家死亡掉落（keepInventory 时 vanilla 不产生掉落，自动跳过），
+ * 不碰平时丢出的物品（仍 5 分钟）；非玩家生物掉落不受影响。
  */
-@Mixin(Player.class)
+@Mixin(LivingEntity.class)
 public abstract class PlayerDeathDropsR196Mixin {
 
     /** 刚生成判定：age 0~60 tick（死亡掉落生成瞬间） */
@@ -30,8 +33,8 @@ public abstract class PlayerDeathDropsR196Mixin {
 
     @Inject(method = "dropAllDeathLoot", at = @At("TAIL"))
     private void icpm$extendPlayerDeathDropLifetime(ServerLevel level, DamageSource damageSource, CallbackInfo ci) {
-        Player self = (Player) (Object) this;
-        if (self.level().isClientSide()) {
+        Object selfObj = this;
+        if (!(selfObj instanceof Player self) || self.level().isClientSide()) {
             return;
         }
         AABB box = self.getBoundingBox().inflate(3.0, 2.0, 3.0);
