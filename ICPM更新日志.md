@@ -1,5 +1,19 @@
 # 声明：ICPM（I can't play MITE）是 MITE 的二创移植模组，已修改侵权包名等，欢迎提出意见，我会积极改正。
 
+## 1.0.9（2026-09-05）· 稳定性修复：6 个实测崩溃/数据 bug + 全量审计
+
+- **修复：无法创建新世界**——蓝莓丛 worldgen `configured_feature` JSON 结构错误（1.21.11 的 random_patch.config.feature 须为内联 PlacedFeature，需 feature+placement 双层嵌套），导致世界生成注册表加载失败；同步修正 tag 引用的旧方块名 `minecraft:grass` → `short_grass`。
+- **修复：新世界保存/运算完全卡死（Watchdog 崩溃）**——`ICPMTension.getInhabitedTime` 在生物生成(finalizeSpawn)路径同步 `getChunk` 等待区块生成 → 生成线程池自锁死锁；改为 `getChunkNow` 只读已生成区块，绝不阻塞生成。
+- **修复：4 个启动崩溃（Mixin target/回调类型）**
+  - `hurtServer`（返回 boolean）@Inject 误用 `CallbackInfo` → 改 `CallbackInfoReturnable<Boolean>`（FallHalfDrop/SlimeCorrosion）
+  - `dropFromLootTable` 同名重载注入歧义 → 只注入死亡掉落实际路径的 3 参版本
+  - `dropAllDeathLoot` 声明于 LivingEntity → @Mixin(Player) 改 @Mixin(LivingEntity)+instanceof 守卫
+  - `fedFood` 声明于 AbstractHorse（Horse 未覆写）→ @Mixin(AbstractHorse)
+- **修复：4 套板甲穿戴贴图紫黑**（银/远古金属/秘银/艾德曼）——equipment 纹理引用与 PNG 资源统一至 chainmail 系列（板甲=厚链甲语义）。
+- **修复：蓝莓丛右键无法摘果**——worldgen 显式 Properties 改为走 defaultBlockState（生成即有果 age=1）；空枝再生概率 1/40 → 1/8。
+- **修复：地狱苦力怕碎片（infernal_creeper_frag）无物品模型**——补齐贴图（源自 MITE RP）+ items/model JSON。
+- **内部质量**：全量 mixin 声明位静态审计（163 对 target/method，对照反汇编）0 隐患；equipment→PNG、blockstate→model、model→texture、worldgen→block 资源引用闭合审计全绿。
+
 ## 1.0.8（2026-09-04）· R196 冷知识第一批：12 项机制
 
 - **甘蔗生长 R196 化**（BlockReed.updateTick）：生长率 = 0.2×clamp(群系温度−0.2,0,1)（沙漠 100%/高山 20%…）；上方需满亮（白天露天）；整株上限 3 节；AGE 满 15 上方长一节。与底部水源无关。
