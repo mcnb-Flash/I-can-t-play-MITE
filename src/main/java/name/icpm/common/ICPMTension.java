@@ -52,7 +52,11 @@ public final class ICPMTension {
     private static long getInhabitedTime(Level level, BlockPos pos) {
         if (level instanceof ServerLevel sl) {
             try {
-                return sl.getChunk(pos).getInhabitedTime();
+                // 只读"已生成/在内存"的区块——禁止用 getChunk(pos)（会同步 join 等待区块生成，
+                // 而本方法在生物 finalizeSpawn 等世界生成关键路径上被调用 → 生成池自锁死循环，
+                // 表现为新世界创建/保存卡死(Watchdog)。区块未就绪时返回 0（等价全新区块张力）。
+                var chunk = sl.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+                return chunk == null ? 0L : chunk.getInhabitedTime();
             } catch (Exception ignored) {
                 return 0L;
             }
