@@ -10,7 +10,7 @@
   - `dropAllDeathLoot` 声明于 LivingEntity → @Mixin(Player) 改 @Mixin(LivingEntity)+instanceof 守卫
   - `fedFood` 声明于 AbstractHorse（Horse 未覆写）→ @Mixin(AbstractHorse)
 - **修复：4 套板甲穿戴贴图紫黑**（银/远古金属/秘银/艾德曼）——equipment 纹理引用与 PNG 资源统一至 chainmail 系列（板甲=厚链甲语义）。
-- **修复：蓝莓丛右键无法摘果**——worldgen 显式 Properties 改为走 defaultBlockState（生成即有果 age=1）；空枝再生概率 1/40 → 1/8。
+- **修复：蓝莓丛右键无法摘果**——交互逻辑重构：有果(age=1)右键摘 1-2 颗并回落空枝；空枝右键立即挂果（保证任何点击都有反馈、蓝莓可持续获取）；空手与手持任意物品均可交互（骨粉催熟保留）；worldgen 显式 Properties 移除改走 defaultBlockState（生成即有果）；随机再生 1/40 → 1/8。
 - **修复：地狱苦力怕碎片（infernal_creeper_frag）无物品模型**——补齐贴图（源自 MITE RP）+ items/model JSON。
 - **内部质量**：全量 mixin 声明位静态审计（163 对 target/method，对照反汇编）0 隐患；equipment→PNG、blockstate→model、model→texture、worldgen→block 资源引用闭合审计全绿。
 

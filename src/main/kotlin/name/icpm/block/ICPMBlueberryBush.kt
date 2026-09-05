@@ -97,16 +97,15 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
     override fun getStateForPlacement(context: net.minecraft.world.item.context.BlockPlaceContext): BlockState =
         defaultBlockState()
 
-    /** 右键摘果（R196 空手摘蓝莓并重置生长） */
-    override fun useWithoutItem(
-        state: BlockState,
-        level: Level,
-        pos: BlockPos,
-        player: Player,
-        hitResult: BlockHitResult
-    ): InteractionResult {
-        if (state.getValue(ICPMBlueberryBush.AGE) == 0) {
-            return InteractionResult.PASS
+    /** 右键交互（空手与手持物品共用）：有果摘果，空枝立即再结果（保证每次右键都有反馈、蓝莓可获取） */
+    private fun rightClickBush(state: BlockState, level: Level, pos: BlockPos): InteractionResult {
+        val age = state.getValue(ICPMBlueberryBush.AGE)
+        if (age == 0) {
+            // 空枝：立即挂果，玩家再点即可摘（R196 再生语义的即时化，避免随机刻过慢导致"永远空枝"）
+            if (!level.isClientSide) {
+                level.setBlock(pos, state.setValue(ICPMBlueberryBush.AGE, 1), 2)
+            }
+            return InteractionResult.SUCCESS
         }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS
@@ -118,7 +117,16 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
         return InteractionResult.SUCCESS
     }
 
-    /** 骨粉催熟无果丛（R196 fertilize 语义） */
+    /** 空手右键摘果 */
+    override fun useWithoutItem(
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        player: Player,
+        hitResult: BlockHitResult
+    ): InteractionResult = rightClickBush(state, level, pos)
+
+    /** 手持物品右键：骨粉催熟空枝；其余任意物品同样可摘果（不 fallback 依赖） */
     override fun useItemOn(
         stack: ItemStack,
         state: BlockState,
@@ -128,15 +136,19 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
         hand: InteractionHand,
         hitResult: BlockHitResult
     ): InteractionResult {
-        if (stack.`is`(Items.BONE_MEAL) && state.getValue(ICPMBlueberryBush.AGE) == 0) {
-            if (!level.isClientSide) {
-                level.setBlock(pos, state.setValue(ICPMBlueberryBush.AGE, 1), 2)
-                if (!player.abilities.instabuild) {
-                    stack.shrink(1)
+        if (stack.`is`(Items.BONE_MEAL)) {
+            if (state.getValue(ICPMBlueberryBush.AGE) == 0) {
+                if (!level.isClientSide) {
+                    level.setBlock(pos, state.setValue(ICPMBlueberryBush.AGE, 1), 2)
+                    if (!player.abilities.instabuild) {
+                        stack.shrink(1)
+                    }
                 }
+                return InteractionResult.SUCCESS
             }
-            return InteractionResult.SUCCESS
+            return InteractionResult.PASS
         }
-        return InteractionResult.PASS
+        // 手持其它物品：直接走摘取/再生交互
+        return rightClickBush(state, level, pos)
     }
 }
