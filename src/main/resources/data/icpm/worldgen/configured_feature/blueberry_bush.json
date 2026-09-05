@@ -10,7 +10,7 @@
         "config": {
           "to_place": {
             "type": "minecraft:simple_state_provider",
-            "state": { "Name": "icpm:blueberry_bush", "Properties": { "age": "1" } }
+            "state": { "Name": "icpm:blueberry_bush" }
           }
         }
       },

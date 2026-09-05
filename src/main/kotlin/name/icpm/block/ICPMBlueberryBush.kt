@@ -89,7 +89,7 @@ class ICPMBlueberryBushBlock(properties: BlockBehaviour.Properties) : BushBlock(
 
     override fun randomTick(state: BlockState, level: ServerLevel, pos: BlockPos, random: RandomSource) {
         // 无果丛随机再结果（≈R196 自然再生长）
-        if (state.getValue(ICPMBlueberryBush.AGE) == 0 && random.nextInt(40) == 0) {
+        if (state.getValue(ICPMBlueberryBush.AGE) == 0 && random.nextInt(8) == 0) {
             level.setBlock(pos, state.setValue(ICPMBlueberryBush.AGE, 1), 2)
         }
     }
