@@ -2,8 +2,6 @@ package name.icpm.mixin;
 
 import name.icpm.item.ICPMSilverArmor;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.tags.EntityTypeTags;
@@ -15,13 +13,14 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 /**
- * ICPM 银制工具 / 银质盔甲特殊效果 Mixin
+ * ICPM 银制工具特殊效果 Mixin（R196 对齐）
  *
- * 1. 银制工具对亡灵生物有 +2.5 亡灵杀手 I 的额外伤害（ICPM 强制附加效果）
- * 2. 银质盔甲对亡灵生物攻击有 20% 减伤
+ * 银制工具对亡灵生物有 +2.5 亡灵杀手 I 等价伤害（R196：银武器对亡灵/影系增伤，
+ * EntityPlayer#attackEntityAsMob 中 held_item.hasMaterial(silver) 且 target isEntityUndead
+ * → damage ×1.25；此处用与 1.21 Smite I 一致的 +2.5 绝对加成近似）。
  *
- * 通过修改 LivingEntity.hurt 的 amount 参数实现，无需修改附魔系统，
- * 也不会影响其他附魔效果（玩家仍可自由附魔）。
+ * 注：旧实现「银盔甲对亡灵攻击 5%/件 减伤」并非 R196（R196 银甲是对毒时长/吸血吸取/影
+ * 减伤，见 SilverPoisonResistR196Mixin 等），已按 R196 移除。
  */
 @Mixin(LivingEntity.class)
 public class ICPMSilverCombatMixin {
@@ -33,18 +32,9 @@ public class ICPMSilverCombatMixin {
     private static final float SICPM_I_DAMAGE_BONUS = 2.5f;
 
     /**
-     * 银盔甲单件减伤比例
-     */
-    @Unique
-    private static final float SILVER_ARMOR_REDUCTION_PER_PIECE = 0.05f; // 5% / 件，4件 = 20%
-
-    /**
      * 在 hurtServer 内部调用 actuallyHurt 的时机修改最终伤害（index 2）。
      *
      * 关键：@ModifyArgs 只能拦截方法体内部的「方法调用(INVOKE)」，不能修改方法自身参数。
-     * 因此必须把 target 指向 hurtServer 内部的 actuallyHurt(...) 调用，
-     * 而不是 [错误地] 写成 @ModifyArgs(method="hurtServer")（会把目标解析成 hurtServer 自身，
-     * 报 "targetting a non-method insn"）。
      * hurtServer(ServerLevel, DamageSource, float) → actuallyHurt(ServerLevel, DamageSource, float)
      * hurtServer 内 actuallyHurt 有两处调用（冷却分支 / 普通分支），都会命中本拦截，效果一致。
      * args [0]=level [1]=source [2]=amount
@@ -59,15 +49,8 @@ public class ICPMSilverCombatMixin {
         }
         float amount = (float) args.get(2);
 
-        float modified = amount;
-
-        // 1) 银制工具对亡灵生物的强制 Smite I 伤害加成
-        modified = icpm$applySilverSmiteBonus(modified, source, self);
-
-        // 2) 银质盔甲对亡灵生物的 20% 减伤
-        modified = icpm$applySilverArmorReduction(modified, source, self);
-
-        args.set(2, modified);
+        // 银制工具对亡灵生物的强制 Smite I 伤害加成（R196 银武器 vs 亡灵）
+        args.set(2, icpm$applySilverSmiteBonus(amount, source, self));
     }
 
     /**
@@ -100,47 +83,7 @@ public class ICPMSilverCombatMixin {
     }
 
     /**
-     * 当玩家穿戴银质盔甲且被亡灵生物攻击时，按件数减免 20% 伤害（4件=20%）
-     */
-    @Unique
-    private float icpm$applySilverArmorReduction(float amount, DamageSource source, LivingEntity victim) {
-        // 只对玩家生效
-        if (!(victim instanceof Player player)) {
-            return amount;
-        }
-
-        // 攻击者必须是亡灵生物
-        var attackerEntity = source.getEntity();
-        if (attackerEntity == null) {
-            return amount;
-        }
-        // 攻击者本身是亡灵生物，或攻击来源（如箭）来自亡灵生物
-        boolean attackerIsUndead = false;
-        if (attackerEntity instanceof LivingEntity leAttacker) {
-            if (isUndead(leAttacker)) {
-                attackerIsUndead = true;
-            }
-        } else if (source.getDirectEntity() instanceof LivingEntity directAttacker) {
-            if (isUndead(directAttacker)) {
-                attackerIsUndead = true;
-            }
-        }
-        if (!attackerIsUndead) {
-            return amount;
-        }
-
-        int silverPieces = countSilverArmorPieces(player);
-        if (silverPieces <= 0) {
-            return amount;
-        }
-
-        float reduction = amount * SILVER_ARMOR_REDUCTION_PER_PIECE * silverPieces;
-        return Math.max(0.0f, amount - reduction);
-    }
-
-    /**
-     * 判断实体是否为亡灵生物
-     * 使用原版 EntityTypeTags.UNDEAD 标签
+     * 判断实体是否为亡灵生物（原版 EntityTypeTags.UNDEAD）
      */
     @Unique
     private boolean isUndead(LivingEntity entity) {
@@ -153,23 +96,5 @@ public class ICPMSilverCombatMixin {
     @Unique
     private boolean isSilverTool(Item item) {
         return ICPMSilverArmor.isSilverTool(item);
-    }
-
-    /**
-     * 统计玩家身上的银质盔甲件数（最多 4 件）
-     */
-    @Unique
-    private int countSilverArmorPieces(Player player) {
-        int count = 0;
-        for (EquipmentSlot slot : new EquipmentSlot[]{
-            EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
-        }) {
-            ItemStack stack = player.getItemBySlot(slot);
-            if (stack.isEmpty()) continue;
-            if (ICPMSilverArmor.isSilverArmor(stack.getItem())) {
-                count++;
-            }
-        }
-        return count;
     }
 }
