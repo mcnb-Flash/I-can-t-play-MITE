@@ -1,19 +1,30 @@
 # 声明：ICPM（I can't play MITE）是 MITE 的二创移植模组，已修改侵权包名等，欢迎提出意见，我会积极改正。
 
-## 1.0.9（2026-09-05）· 稳定性修复：6 个实测崩溃/数据 bug + 全量审计
+## 1.1.0（2026-09-06）· 稳定性大版本：数据持久化根治 + 附魔/索敌/传送门/饥饿修复
 
-- **修复：无法创建新世界**——蓝莓丛 worldgen `configured_feature` JSON 结构错误（1.21.11 的 random_patch.config.feature 须为内联 PlacedFeature，需 feature+placement 双层嵌套），导致世界生成注册表加载失败；同步修正 tag 引用的旧方块名 `minecraft:grass` → `short_grass`。
-- **修复：新世界保存/运算完全卡死（Watchdog 崩溃）**——`ICPMTension.getInhabitedTime` 在生物生成(finalizeSpawn)路径同步 `getChunk` 等待区块生成 → 生成线程池自锁死锁；改为 `getChunkNow` 只读已生成区块，绝不阻塞生成。
-- **修复：4 个启动崩溃（Mixin target/回调类型）**
-  - `hurtServer`（返回 boolean）@Inject 误用 `CallbackInfo` → 改 `CallbackInfoReturnable<Boolean>`（FallHalfDrop/SlimeCorrosion）
-  - `dropFromLootTable` 同名重载注入歧义 → 只注入死亡掉落实际路径的 3 参版本
-  - `dropAllDeathLoot` 声明于 LivingEntity → @Mixin(Player) 改 @Mixin(LivingEntity)+instanceof 守卫
-  - `fedFood` 声明于 AbstractHorse（Horse 未覆写）→ @Mixin(AbstractHorse)
-- **修复：4 套板甲穿戴贴图紫黑/葡萄叶占位**（银/远古金属/秘银/艾德曼）——equipment 纹理引用改回独立短 id `icpm:{metal}`（与 `*_chainmail*` 链甲区分），并将穿戴层 PNG 从 32×32 占位假货恢复为 R196 原图（`models/armor/*_layer_1/2.png`，64×32，humanoid/humanoid_leggings 双布局），像素级一致。
-- **修复：蓝莓丛右键无法摘果**——交互逻辑回归 R196：有果(age=1)右键摘 1-2 颗并回落空枝；**空枝(age=0)右键不可摘（PASS）**，需等待自然再生（随机刻 1/8）或骨粉催熟；worldgen 显式 Properties 移除改走 defaultBlockState（生成即有果）；注册 `icpm:blueberry_bush` 方块物品（可放置/可剪下携带）。
-- **新增：剪刀剪取植物（R196 ItemShears.onItemRightClick 移植）**——手持任意剪刀（原版/ICPM 铜/金/银/远古金属/秘银/艾德曼）右键 `icpm:blueberry_bush` → 整丛剪下以方块物品掉落（可捡起重新放置）+ 剪毛音效 + 耐久 -1（实现于方块 useItemOn 剪刀分支——1.21.11 的 Item.useOn 为不可取消注入点，不能在其上做 HEAD cancel 拦截）。
-- **修复：地狱苦力怕碎片（infernal_creeper_frag）无物品模型**——补齐贴图（源自 MITE RP）+ items/model JSON。
-- **内部质量**：全量 mixin 声明位静态审计（163 对 target/method，对照反汇编）0 隐患；equipment→PNG、blockstate→model、model→texture、worldgen→block 资源引用闭合审计全绿。
+### 数据持久化（根治"每次重进成就丢失"）
+- **修复：每次重进成就/统计整份清零**——vanilla `PlayerAdvancements.save`/`ServerStatsCounter.save` 用 `Files.newBufferedWriter` **直接截断主文件再写（非原子）**，崩溃/强杀留下 **0 字节空文件** → 下次启动 `MalformedJsonException(line1 col1)` → 成就/统计被当全新玩家重置（背包不丢是因为 playerdata 走 `.dat_old` rename 备份）。修复：两处存档**原子化**（先写 `<file>.tmp` 再 `Files.move(ATOMIC_MOVE)`），启动时自动清理历史 0 字节损坏文件——此后任何崩溃都不再造成成就回退。
+- **修复：ICPM datapack 未被识别**——补齐 `pack.mcmeta`（pack_format 64），确保 advancement/loot/recipe/worldgen 数据被 vanilla 注册。
+
+### 附魔台"名不副实"系列（显示词条 ≠ 实际产出）
+- **修复：附魔显示"锋利"实际得"亡灵杀手"等不符**——1.21.11 客户端放物品时也会本地跑 vanilla 算法重写 enchantClue（与 ICPM R196 词条两套随机源）；客户端 method_17411 改为跳过（三档 costs/clue 完全由服务端 DataSlot 广播驱动），显示=产出 100% 同源；产出带互斥剔除（保护+爆炸保护、锋利+亡灵杀手等原版不可能组合不再共存）。
+- **修复：打开附魔台 NPE 断线**——客户端 `container_set_content` 同步瞬时空槽 `getItem(0)` 可返回 null、以及 @Unique 缓存字段初始化器未注入构造器导致为 null；两处均加判空/惰性初始化防御。
+
+### 生存机制
+- **修复：饱食度非满即持续掉血**——饥饿掉血条件误用 `satiation<=0`（饱腹层先耗尽即掉血）；对齐 R196：`isStarving()=nutrition==0` 才掉血（satiation 空仅为"该吃东西"提示）。
+- **修复：传送门返回后地表多生成一扇门**——配对传送门搜索 y 范围 ±16 → 全深度（主世界入口建于 y≤-55 深层，旧搜索漏检后在地表盲目新建）；无记忆回退路径同样先全深度复用已有门。
+- **复刻：R196 僵尸猪人"靠近索敌"**——未激怒时仅约 6 格内（24÷4）有视线才索敌并立即激怒，激怒后 24 格追击（接入 vanilla NeutralMob anger），探测频率 10 tick 对齐 R196。
+
+### 1.0.9 内未发布修复（随 1.1.0 一并上线）
+- **修复：无法创建新世界**——蓝莓丛 worldgen `configured_feature` JSON 结构错误（1.21.11 random_patch 须内联 PlacedFeature），同步修正 tag 旧方块名 `minecraft:grass` → `short_grass`。
+- **修复：新世界保存/运算完全卡死（Watchdog）**——`ICPMTension.getInhabitedTime` 在生物生成路径同步 `getChunk` 自锁死锁 → 改 `getChunkNow` 只读已生成区块。
+- **修复：4 个启动崩溃（Mixin target/回调类型）**——`hurtServer` 回调类型 / `dropFromLootTable` 重载歧义 / `dropAllDeathLoot` 声明类 / `fedFood` 声明类。
+- **修复：4 套板甲穿戴贴图紫黑/葡萄叶占位**（银/远古金属/秘银/艾德曼）——短 id 改回 `icpm:{metal}`，穿戴层 PNG 从 32×32 占位假货恢复 R196 原图（64×32，humanoid/humanoid_leggings）像素级一致。
+- **修复：蓝莓丛右键交互回归 R196**——有果摘果、空枝右键不可摘（PASS）等随机刻再生/骨粉催熟；worldgen 生成即有果；注册 `icpm:blueberry_bush` 方块物品。
+- **新增：剪刀剪取植物（R196 移植）**——任意剪刀右键 `icpm:blueberry_bush` 整丛剪下掉落+音效+耐久-1（实现于方块 useItemOn 分支）。
+- **修复：金属工作台背包贴图（始祖级）**——补 7 个 `items/{metal}_workbench.json` 1.21.11 渲染入口（models/item 旧路径已废弃）。
+- **修复：地狱苦力怕碎片无物品模型**——补齐贴图+模型 JSON。
+- **内部质量**：全量 mixin 声明位静态审计（168 对 target/method）+ 资源引用闭合审计全绿。
 
 ## 1.0.8（2026-09-04）· R196 冷知识第一批：12 项机制
 
