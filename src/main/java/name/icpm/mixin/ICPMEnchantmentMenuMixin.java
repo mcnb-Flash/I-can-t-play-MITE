@@ -245,7 +245,9 @@ public abstract class ICPMEnchantmentMenuMixin {
         }
         // 普通物品：服务端在 vanilla 计算完成后 TAIL 用 R196 词条覆盖 clue/levelClue，
         // 使 UI 三档显示 = 点击实际产出。此处仅标记缓存失效（物品已变化）。
-        if (!ItemStack.isSameItemSameComponents(stack, icpm$cachedStack)) {
+        // icpm$cachedStack 可能为 null（@Unique 字段初始化器不保证注入所有构造器）→ 惰性判空。
+        ItemStack cached = icpm$cachedStack;
+        if (cached == null || !ItemStack.isSameItemSameComponents(stack, cached)) {
             icpm$slotLists = null;
             icpm$cachedStack = stack.copy();
         }
@@ -308,7 +310,8 @@ public abstract class ICPMEnchantmentMenuMixin {
      */
     @Unique
     private List<EnchantmentInstance> icpm$getSlotList(ServerLevel level, int slot, int cost, ItemStack item) {
-        if (icpm$slotLists == null || !ItemStack.isSameItemSameComponents(item, icpm$cachedStack)) {
+        if (icpm$slotLists == null || icpm$cachedStack == null
+                || !ItemStack.isSameItemSameComponents(item, icpm$cachedStack)) {
             icpm$cachedStack = item.copy();
             icpm$slotLists = new List[3];
             Registry<Enchantment> reg = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
