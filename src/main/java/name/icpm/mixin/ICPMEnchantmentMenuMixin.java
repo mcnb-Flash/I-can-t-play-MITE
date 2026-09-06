@@ -230,6 +230,9 @@ public abstract class ICPMEnchantmentMenuMixin {
             return;
         }
         ItemStack stack = container.getItem(0);
+        if (stack == null) {
+            return; // 容器内容同步瞬时空槽(null)——让 vanilla 自行处理，避免 NPE
+        }
         if (stack.is(Items.GOLDEN_APPLE) || icpm$isWaterBottle(stack)) {
             for (int i = 0; i < 3; i++) {
                 menu.costs[i] = 2;
@@ -261,8 +264,8 @@ public abstract class ICPMEnchantmentMenuMixin {
             return;
         }
         ItemStack stack = container.getItem(0);
-        if (stack.isEmpty() || stack.is(Items.GOLDEN_APPLE) || icpm$isWaterBottle(stack)) {
-            return; // 金苹果/水瓶由 HEAD 分支处理；空物品无需生成
+        if (stack == null || stack.isEmpty() || stack.is(Items.GOLDEN_APPLE) || icpm$isWaterBottle(stack)) {
+            return; // 金苹果/水瓶由 HEAD 分支处理；空/空槽物品无需生成
         }
         acc.getAccess().execute((levelAccess, blockPos) -> {
             if (!(levelAccess instanceof ServerLevel serverLevel)) {
