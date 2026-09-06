@@ -25,6 +25,8 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -62,6 +64,10 @@ public abstract class ICPMEnchantmentMenuMixin {
     /** 缓存对应的物品快照：物品变化需重算 */
     @Unique
     private ItemStack icpm$cachedStack = ItemStack.EMPTY;
+
+    /** 诊断：服务端生成/产出词条日志（不一致排查用） */
+    @Unique
+    private static final Logger LOGGER = LoggerFactory.getLogger("ICPM-Enchant");
 
     /** 获取附魔菜单访问器 */
     @Unique
@@ -130,6 +136,7 @@ public abstract class ICPMEnchantmentMenuMixin {
                 return;
             }
             ServerLevel serverLevel = (ServerLevel) levelAccess;
+            Registry<Enchantment> reg = serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
             ItemStack result = itemStack;
             // R196 词条产出：应用 slotsChanged 时预生成的该档缓存（所见即所得，带互斥剔除）。
             // 缓存与当前物品不符（极端时序）则即时重算（预算=该档难度 cost）。
@@ -158,6 +165,16 @@ public abstract class ICPMEnchantmentMenuMixin {
             for (EnchantmentInstance instance : list) {
                 result.enchant(instance.enchantment(), instance.level());
             }
+            if (player instanceof ServerPlayer) {
+                StringBuilder sb = new StringBuilder();
+                for (EnchantmentInstance ins : list) {
+                    if (sb.length() > 0) sb.append(", ");
+                    sb.append(reg.getKey(ins.enchantment().value()));
+                    sb.append(' ').append(ins.level());
+                }
+                LOGGER.info("CLICK slot={} cost={} applied to {} -> [{}] (clueId={})",
+                        i, cost, result.getItem(), sb, menu.enchantClue[i]);
+            }
 
             // 消耗青金石
             lapis.consume(level, player);
@@ -180,6 +197,25 @@ public abstract class ICPMEnchantmentMenuMixin {
             }
         });
         cir.setReturnValue(true);
+    }
+
+    /**
+     * 阻止【客户端】本地执行 vanilla 词条计算（method_17411 写 costs/enchantClue/levelClue）。
+     *
+     * 关键时序缺陷：客户端放物品也会触发 slotsChanged → 客户端 method_17411 用 vanilla 算法
+     * （基于同步来的 enchantmentSeed）算出"锋利"等词条写入本地 clue 并显示；而服务端 TAIL 用
+     * R196 生成的是另一套词条（如"亡灵杀手"）并经 DataSlot 广播。客户端本地写入与服务端
+     * DataSlot 推送存在竞态/后写覆盖 → UI 显示 vanilla 词条、点击产出 R196 词条 = "名不副实"。
+     *
+     * 修复：客户端跳过 method_17411 —— 三档 costs/enchantClue/levelClue 全部由服务端 DataSlot
+     * 广播驱动（服务端 TAIL 已写 R196 词条并 broadcastChanges），显示与产出 100% 同源。
+     */
+    @Inject(method = "method_17411", at = @At("HEAD"), cancellable = true)
+    private void icpm$skipClientVanillaCalc(ItemStack itemStack, net.minecraft.world.level.Level level,
+                                            net.minecraft.core.BlockPos blockPos, CallbackInfo ci) {
+        if (level.isClientSide()) {
+            ci.cancel();
+        }
     }
 
     /**
@@ -254,6 +290,10 @@ public abstract class ICPMEnchantmentMenuMixin {
                     EnchantmentInstance first = list.get(0);
                     menu.enchantClue[i] = reg.asHolderIdMap().getId(first.enchantment());
                     menu.levelClue[i] = first.level();
+                    LOGGER.info("slot[{}] GEN cost={} -> {} {}", i, cost,
+                            reg.getKey(first.enchantment().value()), first.level());
+                } else {
+                    LOGGER.info("slot[{}] GEN cost={} -> (empty)", i, cost);
                 }
             }
             menu.broadcastChanges();
