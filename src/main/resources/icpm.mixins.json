@@ -126,7 +126,9 @@
         "VanillaAnvilMenuMixin",
         "WallMonsterPathMixin",
         "LivestockMeatR196Mixin",
-        "ICPMZombifiedPiglinAggroMixin"
+        "ICPMZombifiedPiglinAggroMixin",
+        "ICPMAtomicAdvancementSaveMixin",
+        "ICPMAtomicStatsSaveMixin"
     ],
     "injectors": {
         "defaultRequire": 1
