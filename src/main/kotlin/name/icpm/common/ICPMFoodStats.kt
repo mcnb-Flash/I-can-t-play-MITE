@@ -18,8 +18,9 @@ import java.util.UUID
  *   且 nutrition>0）时消耗 nutrition。消耗速率不随活动变化（与 R196 一致，原版 exhaustion 全禁）。
  * - **自然回血**：healProgress 每 tick 累积 (0.0004 + nutrition×0.00002) ×（营养不良×0.25）（睡眠×4），
  *   ≥1.0 回 1 血并 +1.0 hunger（nutrition 越高回血越快）。
- * - **饥饿伤害**：isStarving（satiation==0，R196 EntityPlayer.isStarving()=getSatiation()==0）时
+ * - **饥饿伤害**：isStarving（nutrition==0，R196 EntityPlayer.isStarving()=getNutrition()==0）时
  *   starveProgress 累积 0.002/tick，每 1.0 按难度扣 1 血（血>10 或 困难 或 血>1且普通）。
+ *   （R196 isHungry()=satiation==0 仅为"该吃东西"提示，不扣血。）
  *
  * 载体：每玩家状态存于 Player NBT（load/save，由 PlayerMixin 挂钩）。
  * GUI 显示：foodLevel=nutrition、saturationLevel=satiation（FoodData 仅作显示层，
@@ -152,8 +153,10 @@ object ICPMFoodStats {
         if (player.isSleeping) {
             addHunger(player, s, HUNGER_PER_TICK * SLEEP_HUNGER_MULTIPLIER)
         }
-        // ===== 饥饿伤害：R196 isStarving = satiation==0（EntityPlayer.isStarving） =====
-        if (s.satiation <= 0) {
+        // ===== 饥饿伤害：R196 isStarving = nutrition==0（EntityPlayer.isStarving） =====
+        // 注意：R196 isHungry()=satiation==0（仅提示该吃了，不掉血）；isStarving()=nutrition==0 才掉血。
+        // 旧版误用 satiation<=0 作为掉血条件 → 饱腹层(satiation 先耗尽)一空即便营养条还满也持续掉血。
+        if (s.nutrition <= 0) {
             s.healProgress = 0f
             s.starveProgress += STARVE_PROGRESS_PER_TICK
             if (s.starveProgress >= 1f) {
