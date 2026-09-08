@@ -68,6 +68,28 @@ public final class ICPMCommands {
                                                 Component.literal("You now have " + xp + " experience points"), false);
                                         return 1;
                                     }))));
+
+            // ICPM 创造模式限制：/icpmconfig creative on|off|status（写 config/icpm.json，即时生效）
+            dispatcher.register(Commands.literal("icpmconfig")
+                    .then(Commands.literal("creative")
+                            .then(Commands.literal("on").executes(ctx -> {
+                                ICPMConfig.setCreativeEnabled(true);
+                                ctx.getSource().sendSuccess(() -> Component.literal(
+                                        "[ICPM] 已允许变更为创造模式（enableCreativeMode=true）"), false);
+                                return 1;
+                            }))
+                            .then(Commands.literal("off").executes(ctx -> {
+                                ICPMConfig.setCreativeEnabled(false);
+                                ctx.getSource().sendSuccess(() -> Component.literal(
+                                        "[ICPM] 已禁止变更为创造模式（enableCreativeMode=false）"), false);
+                                return 1;
+                            }))
+                            .then(Commands.literal("status").executes(ctx -> {
+                                boolean v = ICPMConfig.isCreativeEnabled();
+                                ctx.getSource().sendSuccess(() -> Component.literal(
+                                        "[ICPM] enableCreativeMode=" + v), false);
+                                return 1;
+                            }))));
         });
     }
 

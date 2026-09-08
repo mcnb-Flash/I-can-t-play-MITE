@@ -265,6 +265,9 @@ public class ICPM implements ModInitializer {
         // 注册 ICPM 指令（/day /xp）
         name.icpm.common.ICPMCommands.init();
 
+        // 初始化全局配置（config/icpm.json → enableCreativeMode 等）
+        name.icpm.common.ICPMConfig.init();
+
         // 注册成就系统代码触发器（R196 AchievementList 移植）
         name.icpm.common.ICPMAchievementTriggers.init();
 

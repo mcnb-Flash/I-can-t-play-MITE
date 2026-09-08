@@ -48,6 +48,8 @@ dependencies {
     // Loom 会对 modCompileOnly 依赖做映射转换（remap 到本项目所用 official 映射），
     // 否则插件里 ItemStack / RecipeType 等类型会因映射名不一致而编译失败。
     modCompileOnly(files("libs/jei-1.21.11-fabric-27.23.0.71.jar"))
+    // malilib 兼容（仅编译期；运行时若玩家装有 malilib 才注册配置 GUI，未装则降级为 /icpmconfig 命令）
+    modCompileOnly(files("libs/malilib-fabric-1.21.11-0.27.16.jar"))
 }
 
 tasks.processResources {

@@ -128,7 +128,8 @@
         "LivestockMeatR196Mixin",
         "ICPMZombifiedPiglinAggroMixin",
         "ICPMAtomicAdvancementSaveMixin",
-        "ICPMAtomicStatsSaveMixin"
+        "ICPMAtomicStatsSaveMixin",
+        "ICPMCreativeModeGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1
