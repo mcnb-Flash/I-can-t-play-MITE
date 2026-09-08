@@ -1,4 +1,5 @@
 {
+  "enableCreativeMode": "启用创造模式",
   "key.icpm.zoom": "ICPM 缩放",
   "key.icpm.config": "ICPM 配置",
   "itemGroup.icpm.icpm_items": "ICPM 物品",
