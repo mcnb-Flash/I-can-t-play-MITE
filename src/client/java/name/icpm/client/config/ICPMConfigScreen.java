@@ -2,6 +2,7 @@ package name.icpm.client.config;
 
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
+import fi.dy.masa.malilib.gui.GuiConfigsBase.ConfigOptionWrapper;
 import fi.dy.masa.malilib.gui.widgets.WidgetListConfigOptions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,8 +32,10 @@ public class ICPMConfigScreen extends GuiConfigsBase {
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List getConfigs() {
-        return List.of(ICPMMaLiLibConfig.ENABLE_CREATIVE);
+    public List<ConfigOptionWrapper> getConfigs() {
+        // 必须返回 ConfigOptionWrapper 包装（WidgetListConfigOptions 对列表项做强转）；
+        // 直接返回 ConfigBoolean 会在渲染/点击时 ClassCastException
+        return ConfigOptionWrapper.createFor(List.of(ICPMMaLiLibConfig.ENABLE_CREATIVE));
     }
 
     @Override
