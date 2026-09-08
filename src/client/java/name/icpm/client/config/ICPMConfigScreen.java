@@ -3,9 +3,7 @@ package name.icpm.client.config;
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase.ConfigOptionWrapper;
-import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
-import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetListConfigOptions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,9 +13,8 @@ import java.util.List;
 /**
  * ICPM 配置界面（malilib GuiConfigsBase 子类，标签页 UI）。
  *
- * 仿 MITE-ITF-Reborn 风格：顶部一排标签按钮（自然恶意 / 疯狂劲敌 / 天赐福星 /
- * 实验性玩法 / 参数配置 / 杂项）+ 右侧重置/默认顺序按钮 + 下方配置列表。
- * 当前仅 "参数配置" 标签页有实际选项（enableCreativeMode），其余标签为占位。
+ * 顶部一排标签按钮（世界恶意 / 上天眷顾）+ 右侧重置/默认顺序按钮 + 下方配置列表。
+ * 当前仅 "上天眷顾" 标签页有实际选项（enableCreativeMode），"世界恶意" 为占位待开发。
  *
  * 打开方式（装 malilib 后）：
  * 1. 按 "ICPM 配置" 键（默认 H，可在 选项→控制→游戏玩法 修改）
@@ -28,34 +25,30 @@ public class ICPMConfigScreen extends GuiConfigsBase {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("ICPM");
 
-    /** 标签页定义（顺序与截图一致：左→右）。 */
+    /** 标签页定义（仅两个，ICPM 语义命名）：世界恶意=环境/世界对玩家的威胁；上天眷顾=给玩家的增益。 */
     public enum ConfigTab {
-        NATURAL_EVIL("自然恶意"),
-        FRENZY_ENEMY("疯狂劲敌"),
-        HEAVEN_BLESSING("天赐福星"),
-        EXPERIMENTAL_PLAY("实验性玩法"),
-        PARAMETER_CONFIG("参数配置"),
-        MISC("杂项");
+        WORLD_EVIL("世界恶意"),
+        HEAVEN_FAVOR("上天眷顾");
 
         public final String displayName;
         ConfigTab(String displayName) { this.displayName = displayName; }
 
         public static ConfigTab fromOrdinal(int idx) {
             ConfigTab[] all = values();
-            if (idx < 0 || idx >= all.length) return PARAMETER_CONFIG;
+            if (idx < 0 || idx >= all.length) return HEAVEN_FAVOR;
             return all[idx];
         }
     }
 
-    /** 默认标签 = "参数配置"（放 enableCreativeMode 开关）。 */
-    private int currentTab = ConfigTab.PARAMETER_CONFIG.ordinal();
+    /** 默认标签 = "上天眷顾"（放 enableCreativeMode 开关）。 */
+    private int currentTab = ConfigTab.HEAVEN_FAVOR.ordinal();
 
     public ICPMConfigScreen() {
-        this(null, ConfigTab.PARAMETER_CONFIG.ordinal());
+        this(null, ConfigTab.HEAVEN_FAVOR.ordinal());
     }
 
     public ICPMConfigScreen(Screen parent) {
-        this(parent, ConfigTab.PARAMETER_CONFIG.ordinal());
+        this(parent, ConfigTab.HEAVEN_FAVOR.ordinal());
     }
 
     public ICPMConfigScreen(Screen parent, int tabIndex) {
@@ -66,11 +59,11 @@ public class ICPMConfigScreen extends GuiConfigsBase {
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List<ConfigOptionWrapper> getConfigs() {
-        if (ConfigTab.fromOrdinal(this.currentTab) == ConfigTab.PARAMETER_CONFIG) {
+        if (ConfigTab.fromOrdinal(this.currentTab) == ConfigTab.HEAVEN_FAVOR) {
             // 必须返回包装列表（WidgetListConfigOptions 对列表项强转 ConfigOptionWrapper）
             return ConfigOptionWrapper.createFor(List.of(ICPMMaLiLibConfig.ENABLE_CREATIVE));
         }
-        // 其他标签页：占位空列表（避免崩溃；实际选项后续再加）
+        // "世界恶意" 标签页：占位空列表（避免崩溃；实际选项后续再加）
         return ConfigOptionWrapper.createFor(List.of());
     }
 
@@ -94,10 +87,10 @@ public class ICPMConfigScreen extends GuiConfigsBase {
         buildEmptyHint();
     }
 
-    /** 顶部一排标签按钮（截图中的"自然恶意 / 疯狂劲敌 / ..."那一行）。 */
+    /** 顶部标签按钮行（世界恶意 / 上天眷顾）。 */
     private void buildTabButtons() {
         ConfigTab[] tabs = ConfigTab.values();
-        int btnW = 80;
+        int btnW = 100;
         int btnH = 20;
         int spacing = 4;
         int startX = 10;
@@ -130,9 +123,9 @@ public class ICPMConfigScreen extends GuiConfigsBase {
         this.addButton(orderBtn, (b, m) -> { /* 占位：按名称排序选项 */ });
     }
 
-    /** 非参数配置标签页：列表区显示一条"此栏目待开发"的占位提示。 */
+    /** "世界恶意" 标签页：列表区显示一条"此栏目待开发"的占位提示。 */
     private void buildEmptyHint() {
-        if (ConfigTab.fromOrdinal(this.currentTab) == ConfigTab.PARAMETER_CONFIG) {
+        if (ConfigTab.fromOrdinal(this.currentTab) == ConfigTab.HEAVEN_FAVOR) {
             return;
         }
         // 居中提示标签。addLabel(x,y,w,h,color,text) 返回 WidgetLabel，存到屏幕即可。
