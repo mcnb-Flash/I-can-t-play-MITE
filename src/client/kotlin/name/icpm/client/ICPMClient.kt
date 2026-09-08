@@ -40,8 +40,14 @@ object ICPMClient : ClientModInitializer {
         @Suppress("UNUSED_EXPRESSION")
         ICPMKeyBindings.ZOOM
 
+        // malilib 配置接入（经反射安全层；未装 malilib 时静默跳过，用 /icpmconfig 命令）
+        name.icpm.client.config.ICPMConfigAccess.init()
+
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client ->
             client.player?.let { SprintLockManager.tick(it) }
+            while (ICPMKeyBindings.CONFIG.consumeClick()) {
+                name.icpm.client.config.ICPMConfigAccess.openConfig()
+            }
         })
 
         // 注册金属砧界面

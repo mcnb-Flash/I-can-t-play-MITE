@@ -1,4 +1,6 @@
 {
+  "key.icpm.zoom": "ICPM 缩放",
+  "key.icpm.config": "ICPM 配置",
   "itemGroup.icpm.icpm_items": "ICPM 物品",
   "itemGroup.icpm.blocks": "ICPM 方块",
   "container.icpm.metal_anvil": "金属砧",

@@ -14,4 +14,14 @@ object ICPMKeyBindings {
             KeyMapping.Category.GAMEPLAY
         )
     )
+
+    /** 打开 ICPM 配置界面（默认 H；装 malilib 显示配置 GUI，未装则提示用 /icpmconfig） */
+    val CONFIG: KeyMapping = KeyBindingHelper.registerKeyBinding(
+        KeyMapping(
+            "key.icpm.config",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_H,
+            KeyMapping.Category.GAMEPLAY
+        )
+    )
 }
