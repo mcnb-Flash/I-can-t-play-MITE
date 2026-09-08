@@ -65,8 +65,6 @@ public final class ICPMCurseManager {
     private static final String TAG_REALIZE_AT = "icpm_curse_realize_at";
     private static final String TAG_REALIZED = "icpm_curse_realized";
     private static final String TAG_KNOWN = "icpm_curse_known";
-    /** 女巫低吟：永久诅咒的 curse.id（-1 = 无）。独立于普通诅咒槽，随玩家 NBT 保存。 */
-    private static final String TAG_WHISPER = "icpm_whisper_id";
 
     /** 女巫施咒延迟：ICPM 调整为立即诅咒（&lt;=0 即时生效）。R196 原版为 6000 tick（5 分钟）。 */
     public static final int CURSE_DELAY_TICKS = 0;
@@ -75,20 +73,17 @@ public final class ICPMCurseManager {
     /** 已"学会"效果的玩家（服务端会话内）；防重复发送 desc 提示。 */
     private static final Set<UUID> LEARNED = new HashSet<>();
 
-    /** 女巫低吟（witchWhisper 选项）的永久诅咒 id 表：uuid → curse.id；独立于普通诅咒单槽。 */
-    private static final Map<UUID, Integer> WHISPER_CURSE = new HashMap<>();
-
     private ICPMCurseManager() {
     }
 
     // ==================== 查询（效果本体为准） ====================
 
-    /** 是否正被【任一】女巫诅咒命中（含女巫低吟的永久诅咒）。 */
+    /** 是否正被【任一】女巫诅咒命中（普通 witch_curse 或女巫低吟 witch_whisper 效果）。 */
     public static boolean hasAnyCurse(Entity entity) {
-        if (entity instanceof LivingEntity le && le.hasEffect(ICPM.WITCH_CURSE_HOLDER)) {
-            return true;
+        if (!(entity instanceof LivingEntity le)) {
+            return false;
         }
-        return isWhispered(entity);
+        return le.hasEffect(ICPM.WITCH_CURSE_HOLDER) || le.hasEffect(ICPM.WITCH_WHISPER_HOLDER);
     }
 
     /** 是否正被普通（非低吟）诅咒命中——效果槽判定。 */
@@ -101,36 +96,35 @@ public final class ICPMCurseManager {
         return !hasRegularCurse(player) && !hasPending(player);
     }
 
-    /** 是否被女巫低吟永久诅咒。 */
+    /** 是否被女巫低吟永久诅咒（witch_whisper 独立效果在场）。 */
     public static boolean isWhispered(Entity entity) {
-        if (entity == null || entity.level().isClientSide()) {
-            return false;
-        }
-        return WHISPER_CURSE.containsKey(entity.getUUID());
+        return entity instanceof LivingEntity le && le.hasEffect(ICPM.WITCH_WHISPER_HOLDER);
     }
 
-    /** 女巫低吟的诅咒类型（无则 null）。 */
+    /** 女巫低吟的诅咒类型（读独立效果 amplifier；无则 null）。 */
     public static ICPMCurse getWhisperCurse(Entity entity) {
-        if (entity == null || entity.level().isClientSide()) {
+        if (!(entity instanceof LivingEntity le)) {
             return null;
         }
-        Integer id = WHISPER_CURSE.get(entity.getUUID());
-        return id == null ? null : ICPMCurse.fromId(id);
+        MobEffectInstance inst = le.getEffect(ICPM.WITCH_WHISPER_HOLDER);
+        return inst == null ? null : ICPMCurse.fromId(inst.getAmplifier() + 1);
     }
 
     /** 是否正被指定诅咒命中（变体 = amplifier）。effect 检查点以 learnEffect=true 请求时
      *  首次命中发送"学会效果"提示（R196 hasCurse(curse, true)）。
-     *  普通诅咒命中或女巫低吟永久诅咒命中都视为命中。 */
+     *  普通诅咒命中或女巫低吟效果命中都视为命中（低吟=独立效果槽，可双诅咒并存）。 */
     public static boolean isCursed(Entity entity, ICPMCurse curse, boolean learnEffect) {
         if (!(entity instanceof LivingEntity le) || le.level().isClientSide()) {
             return false;
         }
-        MobEffectInstance inst = le.getEffect(ICPM.WITCH_CURSE_HOLDER);
-        boolean hit = inst != null && inst.getAmplifier() + 1 == curse.id();
+        boolean hit = false;
+        MobEffectInstance regular = le.getEffect(ICPM.WITCH_CURSE_HOLDER);
+        if (regular != null && regular.getAmplifier() + 1 == curse.id()) {
+            hit = true;
+        }
         if (!hit) {
-            // 女巫低吟的永久诅咒同样生效（不可祛除/变更类型）
-            Integer w = WHISPER_CURSE.get(entity.getUUID());
-            hit = w != null && w == curse.id();
+            MobEffectInstance whisper = le.getEffect(ICPM.WITCH_WHISPER_HOLDER);
+            hit = whisper != null && whisper.getAmplifier() + 1 == curse.id();
         }
         if (hit && learnEffect && entity instanceof ServerPlayer player && LEARNED.add(player.getUUID())) {
             player.sendSystemMessage(Component.translatable(curse.descKey()));
@@ -215,24 +209,29 @@ public final class ICPMCurseManager {
         }
     }
 
-    /** 女巫低吟：config 开启且该玩家尚无永久诅咒 → 随机定一枚并持久化（仅一次，永不更换）；
-     *  config 关闭 → 移除（效果随 NBT 清除）。普通诅咒槽不受影响。 */
+    /** 女巫低吟：config 开启 → 施加独立的 witch_whisper 效果（amplifier 编码随机类型；无限时长）；
+     *  效果随原版效果栈持久化，重进仍在；config 关闭 → 移除该效果。与普通诅咒槽完全独立。 */
     private static void syncWhisper(ServerPlayer player) {
-        UUID uuid = player.getUUID();
         boolean enabled = name.icpm.common.ICPMConfig.isWitchWhisperEnabled();
-        Integer cur = WHISPER_CURSE.get(uuid);
+        MobEffectInstance cur = player.getEffect(ICPM.WITCH_WHISPER_HOLDER);
         if (enabled) {
             if (cur == null) {
+                // 施加一枚独立的女巫诅咒效果（低吟位），类型随机
                 ICPMCurse curse = ICPMCurse.getRandom(player.getRandom());
-                WHISPER_CURSE.put(uuid, curse.id());
-                LEARNED.add(uuid);
+                player.addEffect(new MobEffectInstance(ICPM.WITCH_WHISPER_HOLDER, -1,
+                        curse.id() - 1, false, false, true));
+                LEARNED.add(player.getUUID());
+                player.sendSystemMessage(Component.translatable("curse.realized",
+                        Component.translatable(curse.titleKey())));
                 player.sendSystemMessage(Component.translatable("message.icpm.whisper_curse",
                         Component.translatable(curse.titleKey())));
-                player.sendSystemMessage(Component.translatable(curse.descKey()));
+                if (curse == ICPMCurse.CANNOT_WEAR_ARMOR) {
+                    dropAllArmor(player);
+                }
             }
         } else {
             if (cur != null) {
-                WHISPER_CURSE.remove(uuid);
+                player.removeEffect(ICPM.WITCH_WHISPER_HOLDER);
             }
         }
     }
@@ -306,9 +305,7 @@ public final class ICPMCurseManager {
             tag.putInt(TAG_REALIZED, e.realized ? 1 : 0);
             tag.putInt(TAG_KNOWN, e.effectKnown ? 1 : 0);
         }
-        // 女巫低吟永久诅咒独立持久化（-1 = 无）
-        Integer w = WHISPER_CURSE.get(player.getUUID());
-        tag.putInt(TAG_WHISPER, w == null ? -1 : w);
+        // 女巫低吟效果本体（witch_whisper）由原版效果栈随玩家 NBT 持久化，无需额外存档
     }
 
     public static void load(Player player, ValueInput tag) {
@@ -329,16 +326,6 @@ public final class ICPMCurseManager {
                     LEARNED.add(uuid);
                 }
                 ENTRIES.put(uuid, e);
-            }
-        }
-        // 女巫低吟永久诅咒恢复
-        if (tag.getInt(TAG_WHISPER).isPresent()) {
-            int w = tag.getInt(TAG_WHISPER).orElse(-1);
-            if (w >= 1 && ICPMCurse.fromId(w) != null) {
-                WHISPER_CURSE.put(uuid, w);
-                LEARNED.add(uuid);
-            } else {
-                WHISPER_CURSE.remove(uuid);
             }
         }
     }

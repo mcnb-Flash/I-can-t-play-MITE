@@ -130,7 +130,8 @@
         "ICPMAtomicAdvancementSaveMixin",
         "ICPMAtomicStatsSaveMixin",
         "ICPMCreativeModeGateMixin",
-        "ICPMTechMiningMixin"
+        "ICPMTechMiningMixin",
+        "ICPMTechAttackMixin"
     ],
     "injectors": {
         "defaultRequire": 1

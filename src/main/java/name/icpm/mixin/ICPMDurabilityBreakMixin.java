@@ -56,7 +56,7 @@ public class ICPMDurabilityBreakMixin {
         // ICPM公式: max(max(int(hardness * 100 * decayRate), int(100 * decayRate / 20)), 1)
         int cost = ICPMDurability.calculateBlockDecay(hardness, blockDecay);
 
-        // 存储待处理的耐久消耗，供 ICPMToolDurabilityMixin 在 hurtAndBreak 中应用
+        // 存储待处理的耐久消耗（层叠在扣损点执行，见 applyIcpmDurabilityCost / ICPMToolDurabilityMixin）
         ICPMMixinShared.setPendingBreakCost(cost);
     }
 
@@ -87,6 +87,8 @@ public class ICPMDurabilityBreakMixin {
      */
     @Unique
     private void applyIcpmDurabilityCost(ItemStack stack, int cost, ServerPlayer player) {
+        // 统一层叠：腐蚀性皮肤诅咒×2 + 技术不佳×(1+0.25档)（叠加在 ICPM R196 公式结果之上）
+        cost = name.icpm.common.ICPMWorldEvil.layerDurability(player, stack, cost);
         int unbreakingLevel = getUnbreakingLevel(player, stack);
         int actualDamage = 0;
 

@@ -29,12 +29,12 @@ public abstract class CurseDecayMixin {
         if (amount <= 0) {
             return amount;
         }
+        // 统一层叠（此 4 参重载 = 所有原版耐久路径的唯一最终扣损汇点，3 参/InteractionHand 均委托到此处）：
+        // 腐蚀性皮肤诅咒(装备加速腐坏) ×2 + 世界恶意「技术不佳」×(1+0.25档)，不做任何工具类型裁剪。
         float mult = 1.0f;
-        // 诅咒：装备加速腐坏 ×2（女巫低吟同类型也计入）
         if (ICPMCurseManager.isCursed(player, ICPMCurse.EQUIPMENT_DECAYS_FASTER, true)) {
             mult *= 2.0f;
         }
-        // 世界恶意「技术不佳」：耐久消耗 ×(1 + 0.25×档)
         mult *= name.icpm.common.ICPMWorldEvil.durabilityMult();
         int r = (int) (amount * mult);
         return r < 1 ? 1 : r;

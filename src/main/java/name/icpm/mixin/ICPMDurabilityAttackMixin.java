@@ -46,6 +46,8 @@ public class ICPMDurabilityAttackMixin {
         // 计算耐久消耗
         int durabilityCost = ICPMDurability.calculateAttackDecay(attackDecay);
 
+        // 层叠在最终扣损点执行：本处逐点 stack.hurtAndBreak(1, …) → 3 参委托 4 参汇点，
+        // 由 CurseDecayMixin 统一 ×(腐蚀×2 × 技术不佳倍率)，故此处保留 R196 原始 cost。
         applyDurabilityCost(heldItem, durabilityCost, player);
     }
 

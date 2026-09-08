@@ -165,6 +165,21 @@ public class ICPM implements ModInitializer {
     );
     public static final net.minecraft.core.Holder<MobEffect> WITCH_CURSE_HOLDER = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(WITCH_CURSE);
 
+    // 女巫低吟（世界恶意选项）：独立于"单诅咒槽"之外的第二枚女巫诅咒效果。
+    // 与 witch_curse 同构（amplifier=curse.id-1 编码类型），但持有独立效果 id → 可与普通诅咒同时存在：
+    // 去咒药水只解 witch_curse，低吟效果不可被解/不可变类型；女巫再咒走普通槽不受其阻挡。
+    public static final MobEffect WITCH_WHISPER = Registry.register(
+            BuiltInRegistries.MOB_EFFECT,
+            id("witch_whisper"),
+            new MobEffect(MobEffectCategory.HARMFUL, 0x3A0066) {
+                @Override
+                public boolean shouldApplyEffectTickThisTick(int tickCount, int amplifier) {
+                    return true;
+                }
+            }
+    );
+    public static final net.minecraft.core.Holder<MobEffect> WITCH_WHISPER_HOLDER = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(WITCH_WHISPER);
+
     // 存储注册名 - 用于重复注册
     private static final List<RegisteredBlock> REGISTERED_BLOCKS = new ArrayList<>();
 

@@ -63,6 +63,8 @@ public abstract class ICPMToolDurabilityMixin {
      */
     @Unique
     private void applyDurabilityCost(ItemStack stack, int cost, ServerPlayer player, EquipmentSlot slot) {
+        // 统一层叠：腐蚀性皮肤诅咒×2 + 技术不佳×(1+0.25档)（叠加在 ICPM R196 公式结果之上）
+        cost = name.icpm.common.ICPMWorldEvil.layerDurability(player, stack, cost);
         int unbreakingLevel = getUnbreakingLevel(player, stack);
         int actualDamage = 0;
 
