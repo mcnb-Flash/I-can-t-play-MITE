@@ -102,7 +102,8 @@ public class ICPMConfigScreen extends GuiConfigsBase {
             final int idx = i;
             ConfigTab t = tabs[i];
             int x = startX + i * (btnW + spacing);
-            ButtonGeneric btn = new ButtonGeneric(x, y, btnW, btnH, t.displayName, (String[]) null);
+            // 注意：hover 数组不可传 null（ButtonGeneric 构造器会读其长度）
+            ButtonGeneric btn = new ButtonGeneric(x, y, btnW, btnH, t.displayName, new String[0]);
             // 当前标签按钮：禁用交互；非当前：点击切换
             btn.setEnabled(i != this.currentTab);
             this.addButton(btn, (button, mouseButton) -> switchTab(idx));
@@ -119,10 +120,10 @@ public class ICPMConfigScreen extends GuiConfigsBase {
         int orderX = this.getScreenWidth() - rightMargin - orderW;
         int resetX = orderX - 4 - resetW;
 
-        ButtonGeneric resetBtn = new ButtonGeneric(resetX, y, resetW, h, "\u27F2", (String[]) null);
+        ButtonGeneric resetBtn = new ButtonGeneric(resetX, y, resetW, h, "\u27F2", new String[0]);
         this.addButton(resetBtn, (b, m) -> { /* 占位：重置该标签选项到默认 */ });
 
-        ButtonGeneric orderBtn = new ButtonGeneric(orderX, y, orderW, h, "默认顺序", (String[]) null);
+        ButtonGeneric orderBtn = new ButtonGeneric(orderX, y, orderW, h, "默认顺序", new String[0]);
         this.addButton(orderBtn, (b, m) -> { /* 占位：按名称排序选项 */ });
     }
 

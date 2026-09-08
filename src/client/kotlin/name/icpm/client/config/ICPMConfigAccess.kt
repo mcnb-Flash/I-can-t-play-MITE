@@ -25,7 +25,7 @@ object ICPMConfigAccess {
         try {
             Class.forName(SCREEN).getMethod("registerIfLoaded").invoke(null)
         } catch (t: Throwable) {
-            LOG.warn("[ICPM] malilib config init failed (ignored): {}", t.toString())
+            LOG.warn("[ICPM] malilib config init failed (ignored)", t)
         }
     }
 
@@ -36,7 +36,8 @@ object ICPMConfigAccess {
         try {
             Class.forName(SCREEN).getMethod("open", Screen::class.java).invoke(null, null)
         } catch (t: Throwable) {
-            LOG.warn("[ICPM] open malilib config failed (ignored): {}", t.toString())
+            // 打印完整堆栈（含反射 InvocationTargetException 的真实根因）
+            LOG.warn("[ICPM] open malilib config failed", t)
         }
     }
 }
