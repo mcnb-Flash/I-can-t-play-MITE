@@ -26,9 +26,17 @@ public abstract class CurseDecayMixin {
                                           ServerPlayer player, Consumer<ItemStack> onBroken) {
         // Mixin @ModifyVariable 处理器签名 = 目标变量值 + 原方法全部参数（含被改参数本身），
         // 故 amount 重复出现；HEAD 处二者相等，用第一个即可。
-        if (ICPMCurseManager.isCursed(player, ICPMCurse.EQUIPMENT_DECAYS_FASTER, true)) {
-            return amount * 2;
+        if (amount <= 0) {
+            return amount;
         }
-        return amount;
+        float mult = 1.0f;
+        // 诅咒：装备加速腐坏 ×2（女巫低吟同类型也计入）
+        if (ICPMCurseManager.isCursed(player, ICPMCurse.EQUIPMENT_DECAYS_FASTER, true)) {
+            mult *= 2.0f;
+        }
+        // 世界恶意「技术不佳」：耐久消耗 ×(1 + 0.25×档)
+        mult *= name.icpm.common.ICPMWorldEvil.durabilityMult();
+        int r = (int) (amount * mult);
+        return r < 1 ? 1 : r;
     }
 }

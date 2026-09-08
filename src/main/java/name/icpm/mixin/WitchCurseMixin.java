@@ -37,8 +37,8 @@ public abstract class WitchCurseMixin {
         if (!(target instanceof ServerPlayer player)) {
             return;
         }
-        // 施咒前状态检测：已有诅咒则不再尝试
-        if (ICPMCurseManager.hasAnyCurse(player) || ICPMCurseManager.hasPending(player)) {
+        // 施咒前状态检测：普通诅咒槽空闲才尝试（女巫低吟的永久诅咒不占槽，可叠加）
+        if (!ICPMCurseManager.curseSlotFree(player)) {
             return;
         }
         Witch witch = (Witch) (Object) this;

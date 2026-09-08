@@ -1,4 +1,11 @@
 {
+  "message.icpm.poor_technique_off": "You regained your skill. Poor Technique removed.",
+  "message.icpm.poor_technique_on": "Poor technique: durability loss +%s%%, attack & mining speed -%s%%.",
+  "message.icpm.whisper_remains": "The Witch's Whisper curse still lingers... the regular curse has been lifted.",
+  "message.icpm.whisper_curse": "Witch's Whisper: you are permanently cursed [%s]! Curse-cure potions cannot remove or change it.",
+  "poorTechnique": "Poor Technique",
+  "nightmareEra": "Nightmare Era",
+  "witchWhisper": "Witch's Whisper",
   "enableCreativeMode": "Enable Creative Mode",
   "key.icpm.zoom": "ICPM Zoom",
   "key.icpm.config": "ICPM Config",

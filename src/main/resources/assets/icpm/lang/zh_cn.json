@@ -1,4 +1,11 @@
 {
+  "message.icpm.poor_technique_off": "你重新找回了手感，「技术不佳」已解除。",
+  "message.icpm.poor_technique_on": "技艺生疏：耐久消耗 +%s%%，攻击力/挖掘速度 -%s%%。",
+  "message.icpm.whisper_remains": "女巫低吟的永久诅咒依然萦绕不去……普通诅咒已被解除。",
+  "message.icpm.whisper_curse": "女巫低吟：你被永久诅咒【%s】！去咒药水无法解除，也无法变更类型。",
+  "poorTechnique": "技术不佳",
+  "nightmareEra": "噩梦时代",
+  "witchWhisper": "女巫低吟",
   "enableCreativeMode": "启用创造模式",
   "key.icpm.zoom": "ICPM 缩放",
   "key.icpm.config": "ICPM 配置",

@@ -430,6 +430,9 @@ public class ICPM implements ModInitializer {
         // R196 桶：流动液块密闭沉降成源（scheduleBlockChange moving→still）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
                 name.icpm.item.ICPMBucketRules::onServerTick);
+        // 世界恶意（噩梦时代夜锁 + 技术不佳攻击力修饰）——须先于月相广播注册，保证同 tick 状态已同步
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(
+                name.icpm.common.ICPMWorldEvil::onServerTick);
 
         // 月相机制：血月强制降雨 + 月相变化广播（R196 World.isBloodMoon/isBlueMoon/isHarvestMoon）
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {

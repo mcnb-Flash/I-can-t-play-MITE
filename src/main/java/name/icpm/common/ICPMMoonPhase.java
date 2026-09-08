@@ -9,14 +9,35 @@ import net.minecraft.world.level.dimension.DimensionType;
  */
 public final class ICPMMoonPhase {
 
+    /** 噩梦时代开关（服务端每 tick 由 ICPMWorldEvil 同步）。开启后每日 80% 概率为血月。 */
+    private static boolean NIGHTMARE = false;
+
     /** 月相编号 0-7（0=满月，4=新月，R196 getMoonPhase） */
     public static int phase(long dayTime) {
         return (int) ((dayTime / 24000L + 1L) % 8L);
     }
 
-    /** 血月（R196：day/32 == 0 且非蓝月） */
+    /** 服务端同步噩梦时代开关（ICPMWorldEvil.onServerTick 调用）。 */
+    public static void setNightmare(boolean enabled) {
+        NIGHTMARE = enabled;
+    }
+
+    public static boolean isNightmare() {
+        return NIGHTMARE;
+    }
+
+    /** 噩梦时代：确定性伪随机 80% 血月日（同一天恒定，跨天/重启不变）。 */
+    private static boolean rollBloodDay(long day) {
+        return ((day * 7L + 3L) % 10L) < 8L;
+    }
+
+    /** 血月（R196：day/32 == 0 且非蓝月；噩梦时代：每日 80%）。 */
     public static boolean isBloodMoon(long dayTime) {
-        return (dayTime / 24000L + 1L) % 32L == 0L && !isBlueMoon(dayTime);
+        long day = dayTime / 24000L + 1L;
+        if (NIGHTMARE) {
+            return rollBloodDay(day);
+        }
+        return day % 32L == 0L && !isBlueMoon(dayTime);
     }
 
     /** 蓝月（R196：day/128 == 0） */
@@ -41,12 +62,16 @@ public final class ICPMMoonPhase {
         return isHarvestMoon(level.getDayTime());
     }
 
-    /** 血月之夜：血月日（day%32==0 且非蓝月）当晚 20:00 起，至次日 6:00 前（整夜） */
+    /** 血月之夜：噩梦时代整夜恒为血月夜；否则按 R196（血月日 20:00 起至次日 6:00 前）。 */
     public static boolean isBloodMoonNight(Level level) {
         return isBloodMoonNight(level.getDayTime());
     }
 
     public static boolean isBloodMoonNight(long dayTime) {
+        if (NIGHTMARE) {
+            // 世界始终处于夜晚段 → 只要当日命中 80% 血月判定即整夜血月
+            return isBloodMoon(dayTime);
+        }
         long day = dayTime / 24000L + 1L;
         long t = dayTime % 24000L;
         long d = day % 32L;

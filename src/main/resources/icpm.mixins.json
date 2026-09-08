@@ -129,7 +129,8 @@
         "ICPMZombifiedPiglinAggroMixin",
         "ICPMAtomicAdvancementSaveMixin",
         "ICPMAtomicStatsSaveMixin",
-        "ICPMCreativeModeGateMixin"
+        "ICPMCreativeModeGateMixin",
+        "ICPMTechMiningMixin"
     ],
     "injectors": {
         "defaultRequire": 1

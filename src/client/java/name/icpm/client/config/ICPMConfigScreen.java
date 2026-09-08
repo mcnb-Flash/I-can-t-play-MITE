@@ -59,12 +59,15 @@ public class ICPMConfigScreen extends GuiConfigsBase {
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List<ConfigOptionWrapper> getConfigs() {
-        if (ConfigTab.fromOrdinal(this.currentTab) == ConfigTab.HEAVEN_FAVOR) {
-            // 必须返回包装列表（WidgetListConfigOptions 对列表项强转 ConfigOptionWrapper）
-            return ConfigOptionWrapper.createFor(List.of(ICPMMaLiLibConfig.ENABLE_CREATIVE));
-        }
-        // "世界恶意" 标签页：占位空列表（避免崩溃；实际选项后续再加）
-        return ConfigOptionWrapper.createFor(List.of());
+        // 必须返回包装列表（WidgetListConfigOptions 对列表项强转 ConfigOptionWrapper）
+        return switch (ConfigTab.fromOrdinal(this.currentTab)) {
+            case WORLD_EVIL -> ConfigOptionWrapper.createFor(List.of(
+                    ICPMMaLiLibConfig.WITCH_WHISPER,
+                    ICPMMaLiLibConfig.NIGHTMARE_ERA,
+                    ICPMMaLiLibConfig.POOR_TECHNIQUE));
+            case HEAVEN_FAVOR -> ConfigOptionWrapper.createFor(List.of(
+                    ICPMMaLiLibConfig.ENABLE_CREATIVE));
+        };
     }
 
     @Override
