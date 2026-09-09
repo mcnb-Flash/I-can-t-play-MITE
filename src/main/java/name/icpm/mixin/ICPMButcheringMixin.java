@@ -50,13 +50,14 @@ public abstract class ICPMButcheringMixin {
             }
             return;
         }
-        // R196：鸡不受屠宰影响（其余被动动物受影响）；牛/猪已由 LivestockMeatR196Mixin 全量公式出肉（含屠宰加成）
+        // R196：鸡不受屠宰影响（其余被动动物受影响）；牛/猪/羊已由 LivestockMeatR196Mixin 全量公式出肉（含屠宰加成）
         if (!(victim instanceof Animal)
                 || victim instanceof Chicken
                 || victim instanceof Rabbit
                 || victim instanceof Cow
                 || victim instanceof MushroomCow
-                || victim instanceof Pig) {
+                || victim instanceof Pig
+                || victim instanceof Sheep) {
             return;
         }
         Item meat = meatFor(victim);

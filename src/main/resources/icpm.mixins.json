@@ -131,7 +131,8 @@
         "ICPMAtomicStatsSaveMixin",
         "ICPMCreativeModeGateMixin",
         "ICPMTechMiningMixin",
-        "ICPMTechAttackMixin"
+        "ICPMTechAttackMixin",
+        "ICPMR196TargetingMixin"
     ],
     "injectors": {
         "defaultRequire": 1
