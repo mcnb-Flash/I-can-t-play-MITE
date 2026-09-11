@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:water_bowl",
+    "minecraft:carrot",
+    "minecraft:potato",
+    "minecraft:beetroot"
+  ],
+  "result": {
+    "id": "icpm:vegetable_soup",
+    "count": 1
+  }
+}

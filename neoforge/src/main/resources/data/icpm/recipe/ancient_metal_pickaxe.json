@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", " S ", " S "],
+  "key": {"I": "icpm:ancient_metal_ingot", "S": "minecraft:stick"},
+  "result": {"id": "icpm:ancient_metal_pickaxe", "count": 1}
+}

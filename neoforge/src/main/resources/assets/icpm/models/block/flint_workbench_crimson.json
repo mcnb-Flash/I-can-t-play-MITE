@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/crimson_stem",
+    "down": "minecraft:block/crimson_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/crimson_stem",
+    "south": "minecraft:block/crimson_stem",
+    "east": "minecraft:block/crimson_stem",
+    "west": "minecraft:block/crimson_stem"
+  }
+}

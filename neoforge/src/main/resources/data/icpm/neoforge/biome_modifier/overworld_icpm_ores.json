@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "icpm:ore_silver",
+    "icpm:ore_mithril",
+    "icpm:ore_adamantium"
+  ],
+  "step": "underground_ores"
+}

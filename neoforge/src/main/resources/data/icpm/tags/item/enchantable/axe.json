@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:axes",
+    "icpm:adamantium_axe",
+    "icpm:adamantium_battle_axe",
+    "icpm:adamantium_hatchet",
+    "icpm:ancient_metal_axe",
+    "icpm:ancient_metal_battle_axe",
+    "icpm:ancient_metal_hatchet",
+    "icpm:copper_battle_axe",
+    "icpm:copper_hatchet",
+    "icpm:flint_axe",
+    "icpm:flint_hatchet",
+    "icpm:gold_battle_axe",
+    "icpm:gold_hatchet",
+    "icpm:mithril_axe",
+    "icpm:mithril_battle_axe",
+    "icpm:mithril_hatchet",
+    "icpm:netherite_battle_axe",
+    "icpm:netherite_hatchet",
+    "icpm:silver_axe",
+    "icpm:silver_battle_axe",
+    "icpm:silver_hatchet"
+  ]
+}

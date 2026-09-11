@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " I ",
+    "IBI",
+    " I "
+  ],
+  "key": {
+    "I": "icpm:ancient_metal_ingot",
+    "B": "minecraft:bow"
+  },
+  "result": {
+    "id": "icpm:ancient_metal_bow",
+    "count": 1
+  }
+}

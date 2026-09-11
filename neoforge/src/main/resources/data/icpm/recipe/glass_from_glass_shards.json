@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "icpm:glass_shard"
+  },
+  "result": {
+    "id": "minecraft:glass",
+    "count": 1
+  }
+}

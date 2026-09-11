@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "layer0":  "icpm:item/emerald_shard"
+                 },
+    "parent":  "minecraft:item/generated"
+}

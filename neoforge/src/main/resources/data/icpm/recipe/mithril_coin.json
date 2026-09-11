@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N"
+  ],
+  "key": {
+    "N": "icpm:mithril_nugget"
+  },
+  "result": {
+    "id": "icpm:mithril_coin",
+    "count": 1
+  }
+}

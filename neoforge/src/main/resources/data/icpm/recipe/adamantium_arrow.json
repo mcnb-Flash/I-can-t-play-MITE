@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "X",
+    "#",
+    "Y"
+  ],
+  "key": {
+    "#": "minecraft:stick",
+    "X": "icpm:adamantium_nugget",
+    "Y": "minecraft:feather"
+  },
+  "result": {
+    "id": "icpm:adamantium_arrow",
+    "count": 4
+  }
+}

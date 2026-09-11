@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:flint_shovel",
+    "icpm:silver_shovel",
+    "icpm:ancient_metal_shovel",
+    "icpm:mithril_shovel",
+    "icpm:adamantium_shovel",
+    "icpm:copper_mattock",
+    "icpm:gold_mattock",
+    "icpm:iron_mattock",
+    "icpm:silver_mattock",
+    "icpm:ancient_metal_mattock",
+    "icpm:mithril_mattock",
+    "icpm:adamantium_mattock",
+    "icpm:netherite_mattock"
+  ]
+}

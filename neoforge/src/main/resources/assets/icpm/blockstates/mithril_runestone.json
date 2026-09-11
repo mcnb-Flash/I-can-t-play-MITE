@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "variant=0": { "model": "icpm:block/mithril_runestone" },
+    "variant=1": { "model": "icpm:block/mithril_runestone" },
+    "variant=2": { "model": "icpm:block/mithril_runestone" },
+    "variant=3": { "model": "icpm:block/mithril_runestone" },
+    "variant=4": { "model": "icpm:block/mithril_runestone" },
+    "variant=5": { "model": "icpm:block/mithril_runestone" },
+    "variant=6": { "model": "icpm:block/mithril_runestone" },
+    "variant=7": { "model": "icpm:block/mithril_runestone" },
+    "variant=8": { "model": "icpm:block/mithril_runestone" },
+    "variant=9": { "model": "icpm:block/mithril_runestone" },
+    "variant=10": { "model": "icpm:block/mithril_runestone" },
+    "variant=11": { "model": "icpm:block/mithril_runestone" },
+    "variant=12": { "model": "icpm:block/mithril_runestone" },
+    "variant=13": { "model": "icpm:block/mithril_runestone" },
+    "variant=14": { "model": "icpm:block/mithril_runestone" },
+    "variant=15": { "model": "icpm:block/mithril_runestone" }
+  }
+}

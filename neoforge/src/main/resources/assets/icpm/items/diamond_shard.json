@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/diamond_shard",
+                  "type":  "minecraft:model"
+              }
+}

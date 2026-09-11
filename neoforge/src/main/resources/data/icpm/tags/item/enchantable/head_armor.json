@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:enchantable/head_armor",
+    "icpm:adamantium_chainmail_helmet",
+    "icpm:adamantium_helmet",
+    "icpm:ancient_metal_chainmail_helmet",
+    "icpm:ancient_metal_helmet",
+    "icpm:copper_chainmail_helmet",
+    "icpm:gold_chainmail_helmet",
+    "icpm:iron_chainmail_helmet",
+    "icpm:mithril_chainmail_helmet",
+    "icpm:mithril_helmet",
+    "icpm:silver_chainmail_helmet",
+    "icpm:silver_helmet"
+  ]
+}

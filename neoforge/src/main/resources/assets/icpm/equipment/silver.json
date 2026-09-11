@@ -1,0 +1,10 @@
+{
+  "layers": {
+    "humanoid": [
+      { "texture": "icpm:silver" }
+    ],
+    "humanoid_leggings": [
+      { "texture": "icpm:silver" }
+    ]
+  }
+}

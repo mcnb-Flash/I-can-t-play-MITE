@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["NNN", "NNN", "NNN"],
+  "key": {"N": "icpm:silver_nugget"},
+  "result": {"id": "icpm:silver_ingot", "count": 1}
+}

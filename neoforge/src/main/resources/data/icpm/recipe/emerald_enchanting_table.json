@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " B ",
+    "E#E",
+    "###"
+  ],
+  "key": {
+    "B": "minecraft:book",
+    "E": "minecraft:emerald",
+    "#": "minecraft:obsidian"
+  },
+  "result": {
+    "id": "icpm:emerald_enchanting_table",
+    "count": 1
+  }
+}

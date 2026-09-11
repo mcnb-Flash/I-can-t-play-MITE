@@ -1,0 +1,20 @@
+{
+  "anvil_cost": 1,
+  "description": {
+    "translate": "enchantment.icpm.true_flight"
+  },
+  "max_cost": {
+    "base": 12,
+    "per_level_above_first": 22
+  },
+  "max_level": 5,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 5
+  },
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#icpm:enchantable/bow",
+  "weight": 10
+}

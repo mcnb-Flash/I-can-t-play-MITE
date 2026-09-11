@@ -180,6 +180,12 @@ public class ICPM implements ModInitializer {
     );
     public static final net.minecraft.core.Holder<MobEffect> WITCH_WHISPER_HOLDER = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(WITCH_WHISPER);
 
+    /** R196 Block.spark（火花）：燧石打火的中间态方块（无对应物品）。 */
+    public static Block SPARK;
+
+    /** R196 枯死作物：旱死（未成熟）与疫病致死的目标方块（无对应物品）。 */
+    public static Block DEAD_CROP;
+
     // 存储注册名 - 用于重复注册
     private static final List<RegisteredBlock> REGISTERED_BLOCKS = new ArrayList<>();
 
@@ -582,6 +588,34 @@ public class ICPM implements ModInitializer {
     }
 
     private void registerAllBlocks() {
+        // R196 Block.spark（火花）：燧石打火的中间态方块 —— 放置 2 tick 后若邻格可燃则变火，否则消失。
+        // 无对应 BlockItem（R196 同，玩家不可获得），故不进 BLOCK_NAMES、不注册物品。
+        SPARK = Registry.register(BuiltInRegistries.BLOCK, id("spark"),
+                new name.icpm.block.ICPMSparkBlock(
+                        net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                                .mapColor(net.minecraft.world.level.material.MapColor.FIRE)
+                                .replaceable()
+                                .noCollision()
+                                .instabreak()
+                                .lightLevel(state -> 15)
+                                .sound(net.minecraft.world.level.block.SoundType.WOOL)
+                                .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)
+                                .setId(ResourceKey.create(Registries.BLOCK, id("spark")))));
+
+        // R196 枯死作物（BlockCropsDead/BlockPotatoDead/BlockCarrotDead/BlockOnionDead 忠实移植）：
+        // 旱死（未成熟）与疫病致死（BlockCrops:89/97）的目标方块。无 BlockItem、无随机刻、骨粉无效、
+        // 破坏无掉落（空 loot_table data/icpm/loot_table/blocks/dead_crop.json）。视觉阶段用
+        // MITE RP 1.6.41 的 crops/wheat/dead/0-6 纹理。
+        DEAD_CROP = Registry.register(BuiltInRegistries.BLOCK, id("dead_crop"),
+                name.icpm.block.ICPMDeadCropBlock.INSTANCE = new name.icpm.block.ICPMDeadCropBlock(
+                        net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                                .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
+                                .noCollision()
+                                .instabreak()
+                                .sound(net.minecraft.world.level.block.SoundType.CROP)
+                                .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)
+                                .setId(ResourceKey.create(Registries.BLOCK, id("dead_crop")))));
+
         // 在这里直接使用名字注册，避免通过 BuiltInRegistries.BLOCK.getKey 反查
         for (String name : ICPMBlocks.BLOCK_NAMES) {
             Block block = ICPMBlocks.createAndRegister(name);

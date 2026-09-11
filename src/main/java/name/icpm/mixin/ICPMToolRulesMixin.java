@@ -6,6 +6,9 @@ import name.icpm.block.ICPMFurnaceBlock;
 import name.icpm.block.ICPMBlocks;
 import name.icpm.block.ICPMTagRegistry;
 import name.icpm.common.ICPMExperience;
+import name.icpm.common.ICPMToolRulesData.BlockRequirement;
+import name.icpm.common.ICPMToolRulesData.ToolInfo;
+import name.icpm.common.ICPMToolRulesData.ToolType;
 import name.icpm.item.ICPMItems;
 import name.icpm.item.ICPMToolProperties;
 import net.minecraft.core.BlockPos;
@@ -87,15 +90,15 @@ public class ICPMToolRulesMixin {
         ToolInfo tool = icpm$getToolInfo(player.getMainHandItem());
         BlockRequirement req = icpm$getBlockRequirement(state);
 
-        boolean haveTool = tool.type != ToolType.HAND;
+        boolean haveTool = tool.type() != ToolType.HAND;
         // 仅当手持工具类型正确且等级达标才算“有效工具”。
         // R196：类型/等级不对的工具 getStrVsBlock<=1，退化为 1.0（慢但可破坏）。
-        boolean correct = haveTool && tool.type == req.toolType && tool.level >= req.level;
+        boolean correct = haveTool && tool.type() == req.toolType() && tool.level() >= req.level();
 
         // R196：requiresTool 方块（石头/矿石/矿物块等）必须用【正确类型且等级达标】的工具，
         // 否则不可破坏（-1）。原实现"类型/等级不对 -> 慢速 1.0 可破坏"在 1.21.11 实测导致
         // 低等级工具能挖高等级矿石（如铜战锤挖秘银矿），违背 MITE 硬核语义，故收紧为不可破坏。
-        if (req.requiresTool && (!haveTool || !correct)) {
+        if (req.requiresTool() && (!haveTool || !correct)) {
             cir.setReturnValue(-1.0f);
             cir.cancel();
             return;
@@ -815,28 +818,7 @@ public class ICPMToolRulesMixin {
         return 1.0f;
     }
 
-    /**
-     * 工具类型枚举
-     */
-    @Unique
-    private enum ToolType {
-        HAND, PICKAXE, AXE, SHOVEL, HOE
-    }
-
-    /**
-     * 工具信息记录
-     */
-    @Unique
-    private record ToolInfo(ToolType type, float level) {
-    }
-
-    /**
-     * 方块破坏要求记录
-     * - toolType：需要的工具类型（HAND 表示无类型限制）
-     * - level：需要的最低挖掘等级
-     * - requiresTool：空手是否“不可破坏”（R196 的 material.requiresTool，如石头/矿石）
-     */
-    @Unique
-    private record BlockRequirement(ToolType toolType, float level, boolean requiresTool) {
-    }
+    // 注：ToolType / ToolInfo / BlockRequirement 原定义在本 mixin 内（@Unique 嵌套类型）。
+    // Sponge Mixin 禁止「mixin 包嵌套类型被注入方法字节码引用」（IllegalClassLoadError 风险，
+    // NeoForge 端已踩坑），2026-09-11 外移至 name.icpm.common.ICPMToolRulesData（双树共用）。
 }

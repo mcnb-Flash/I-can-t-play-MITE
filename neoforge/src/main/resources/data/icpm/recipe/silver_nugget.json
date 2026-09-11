@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": ["icpm:silver_ingot"],
+  "result": {"id": "icpm:silver_nugget", "count": 9}
+}

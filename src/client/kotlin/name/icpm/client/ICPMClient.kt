@@ -3,6 +3,7 @@ package name.icpm.client
 import name.icpm.ICPM
 import name.icpm.client.gui.ICPMWorkbenchScreen
 import name.icpm.client.gui.MetalAnvilScreen
+import name.icpm.client.hud.NutritionHUD
 import name.icpm.client.network.InventoryCraftSyncHandler
 import name.icpm.client.network.NutritionSyncHandler
 import name.icpm.client.renderer.GelatinousCubeRenderer
@@ -30,6 +31,8 @@ import name.icpm.entity.ICPMEntities
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.gui.screens.MenuScreens
 import net.minecraft.client.renderer.entity.ThrownItemRenderer
 import net.minecraft.resources.Identifier
@@ -58,6 +61,16 @@ object ICPMClient : ClientModInitializer {
         
         // 注册营养值同步网络包处理器
         NutritionSyncHandler.register()
+
+        // 营养值 HUD：旧 NutritionHUDMixin 注入的 Gui.renderHotbarAndDecorations 调用点在
+        // 1.21.11 已随 Gui 分层化被删除（注入 0 目标 → InjectionError），改用 Fabric HUD 层 API，
+        // 注册在经验条层之后（与 NeoForge 端 RegisterGuiLayersEvent.registerAbove(EXPERIENCE_LEVEL) 对等）。
+        HudElementRegistry.attachElementAfter(
+            VanillaHudElements.EXPERIENCE_LEVEL,
+            Identifier.fromNamespaceAndPath("icpm", "nutrition_hud")
+        ) { graphics, _ ->
+            NutritionHUD.render(graphics, graphics.guiWidth(), graphics.guiHeight())
+        }
 
         // 注册背包合成进度同步网络包处理器
         InventoryCraftSyncHandler.register()

@@ -1,0 +1,6 @@
+{
+  "textures": {
+    "layer0": "icpm:item/alloy_hoe"
+  },
+  "parent": "minecraft:item/handheld"
+}

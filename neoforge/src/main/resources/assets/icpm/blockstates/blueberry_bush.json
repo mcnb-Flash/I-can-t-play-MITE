@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "age=0": { "model": "icpm:block/blueberry_bush_picked" },
+    "age=1": { "model": "icpm:block/blueberry_bush" }
+  }
+}

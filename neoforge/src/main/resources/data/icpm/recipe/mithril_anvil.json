@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "icpm:mithril_block",
+    "i": "icpm:mithril_ingot"
+  },
+  "pattern": [
+    "III",
+    " i ",
+    "iii"
+  ],
+  "result": {
+    "count": 1,
+    "id": "icpm:mithril_anvil"
+  }
+}

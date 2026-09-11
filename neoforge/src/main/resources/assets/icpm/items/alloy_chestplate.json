@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/alloy_chestplate",
+                  "type":  "minecraft:model"
+              }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "icpm:quartz_shard"
+  },
+  "result": {
+    "id": "minecraft:quartz",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:silver_boots",
+    "icpm:ancient_metal_boots",
+    "icpm:mithril_boots",
+    "icpm:adamantium_boots",
+    "icpm:copper_chainmail_boots",
+    "icpm:gold_chainmail_boots",
+    "icpm:iron_chainmail_boots",
+    "icpm:silver_chainmail_boots",
+    "icpm:ancient_metal_chainmail_boots",
+    "icpm:mithril_chainmail_boots",
+    "icpm:adamantium_chainmail_boots"
+  ]
+}

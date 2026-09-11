@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/bamboo_block",
+    "down": "minecraft:block/bamboo_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/bamboo_block",
+    "south": "minecraft:block/bamboo_block",
+    "east": "minecraft:block/bamboo_block",
+    "west": "minecraft:block/bamboo_block"
+  }
+}

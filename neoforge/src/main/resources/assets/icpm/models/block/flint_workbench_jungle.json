@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/jungle_log",
+    "down": "minecraft:block/jungle_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/jungle_log",
+    "south": "minecraft:block/jungle_log",
+    "east": "minecraft:block/jungle_log",
+    "west": "minecraft:block/jungle_log"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "???",
+    "? ?",
+    "???"
+  ],
+  "key": {
+    "?": "icpm:ancient_metal_ingot"
+  },
+  "result": {
+    "id": "icpm:ancient_metal_strongbox",
+    "count": 1
+  }
+}

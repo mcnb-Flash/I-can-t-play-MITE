@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "minecraft:misc",
+  "ingredients": [
+    "icpm:mithril_stone_bucket"
+  ],
+  "result": {
+    "id": "icpm:mithril_bucket",
+    "count": 1
+  }
+}

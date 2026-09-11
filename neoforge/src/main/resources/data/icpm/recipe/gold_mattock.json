@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    " SI",
+    " S "
+  ],
+  "key": {
+    "I": "minecraft:gold_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:gold_mattock",
+    "count": 1
+  }
+}

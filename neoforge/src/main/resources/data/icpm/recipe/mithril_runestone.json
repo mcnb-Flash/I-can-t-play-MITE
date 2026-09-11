@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " n ",
+    "n#n",
+    " n "
+  ],
+  "key": {
+    "n": "icpm:mithril_nugget",
+    "#": "minecraft:obsidian"
+  },
+  "result": {
+    "id": "icpm:mithril_runestone",
+    "count": 1
+  }
+}

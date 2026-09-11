@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:bow",
+    "icpm:ancient_metal_bow",
+    "icpm:mithril_bow"
+  ]
+}

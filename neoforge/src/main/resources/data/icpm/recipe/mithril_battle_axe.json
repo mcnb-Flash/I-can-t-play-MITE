@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I I",
+    "IAI",
+    " A "
+  ],
+  "key": {
+    "I": "icpm:mithril_ingot",
+    "A": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:mithril_battle_axe",
+    "count": 1
+  }
+}

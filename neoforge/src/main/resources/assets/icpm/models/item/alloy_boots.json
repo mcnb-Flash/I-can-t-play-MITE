@@ -1,0 +1,6 @@
+{
+    "textures":  {
+                     "layer0":  "icpm:item/alloy_boots"
+                 },
+    "parent":  "minecraft:item/generated"
+}

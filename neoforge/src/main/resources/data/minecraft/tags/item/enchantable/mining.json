@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:copper_shears",
+    "icpm:gold_shears",
+    "icpm:silver_shears",
+    "icpm:ancient_metal_shears",
+    "icpm:mithril_shears",
+    "icpm:adamantium_shears"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:enchantable/foot_armor",
+    "icpm:adamantium_boots",
+    "icpm:adamantium_chainmail_boots",
+    "icpm:ancient_metal_boots",
+    "icpm:ancient_metal_chainmail_boots",
+    "icpm:copper_chainmail_boots",
+    "icpm:gold_chainmail_boots",
+    "icpm:iron_chainmail_boots",
+    "icpm:mithril_boots",
+    "icpm:mithril_chainmail_boots",
+    "icpm:silver_boots",
+    "icpm:silver_chainmail_boots"
+  ]
+}

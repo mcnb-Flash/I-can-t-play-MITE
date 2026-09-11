@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_left_open",
+  "textures": {
+    "bottom": "icpm:block/ancient_metal_door_bottom",
+    "top": "icpm:block/ancient_metal_door_top"
+  }
+}

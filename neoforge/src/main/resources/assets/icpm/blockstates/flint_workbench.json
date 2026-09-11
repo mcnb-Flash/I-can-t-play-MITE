@@ -1,0 +1,37 @@
+{
+  "variants": {
+    "wood=0": {
+      "model": "icpm:block/flint_workbench_oak"
+    },
+    "wood=1": {
+      "model": "icpm:block/flint_workbench_spruce"
+    },
+    "wood=2": {
+      "model": "icpm:block/flint_workbench_birch"
+    },
+    "wood=3": {
+      "model": "icpm:block/flint_workbench_jungle"
+    },
+    "wood=4": {
+      "model": "icpm:block/flint_workbench_acacia"
+    },
+    "wood=5": {
+      "model": "icpm:block/flint_workbench_dark_oak"
+    },
+    "wood=6": {
+      "model": "icpm:block/flint_workbench_mangrove"
+    },
+    "wood=7": {
+      "model": "icpm:block/flint_workbench_cherry"
+    },
+    "wood=8": {
+      "model": "icpm:block/flint_workbench_bamboo"
+    },
+    "wood=9": {
+      "model": "icpm:block/flint_workbench_crimson"
+    },
+    "wood=10": {
+      "model": "icpm:block/flint_workbench_warped"
+    }
+  }
+}

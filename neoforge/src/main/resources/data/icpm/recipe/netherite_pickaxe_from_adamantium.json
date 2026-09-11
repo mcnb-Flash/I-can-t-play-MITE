@@ -1,0 +1,10 @@
+{
+    "addition": "minecraft:netherite_ingot",
+    "template": "minecraft:netherite_upgrade_smithing_template",
+    "result":  {
+                   "id":  "minecraft:netherite_pickaxe",
+                   "count":  1
+               },
+    "type":  "minecraft:smithing_transform",
+    "base": "icpm:adamantium_pickaxe"
+}

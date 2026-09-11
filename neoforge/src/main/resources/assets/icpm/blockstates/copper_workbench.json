@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "icpm:block/copper_workbench" }
+  }
+}

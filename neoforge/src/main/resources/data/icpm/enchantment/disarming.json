@@ -1,0 +1,20 @@
+{
+  "anvil_cost": 1,
+  "description": {
+    "translate": "enchantment.icpm.disarming"
+  },
+  "max_cost": {
+    "base": 25,
+    "per_level_above_first": 40
+  },
+  "max_level": 5,
+  "min_cost": {
+    "base": 2,
+    "per_level_above_first": 12
+  },
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#icpm:enchantable/sword",
+  "weight": 5
+}

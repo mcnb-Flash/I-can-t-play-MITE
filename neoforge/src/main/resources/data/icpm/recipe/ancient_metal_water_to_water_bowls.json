@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:bowl",
+    "minecraft:bowl",
+    "minecraft:bowl",
+    "icpm:ancient_metal_water_bucket"
+  ],
+  "result": {
+    "id": "icpm:water_bowl",
+    "count": 4
+  }
+}

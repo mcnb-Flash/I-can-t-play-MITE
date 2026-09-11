@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "icpm:item/pudding_spawn_egg"
+  }
+}

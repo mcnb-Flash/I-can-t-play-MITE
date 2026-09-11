@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "icpm:flint_fragment"
+  },
+  "result": {
+    "id": "minecraft:flint",
+    "count": 1
+  }
+}

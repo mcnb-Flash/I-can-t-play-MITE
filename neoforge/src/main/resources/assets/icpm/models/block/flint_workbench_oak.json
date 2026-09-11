@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "minecraft:block/oak_log",
+    "down": "minecraft:block/oak_planks",
+    "up": "icpm:block/crafting_table/flint/top",
+    "north": "minecraft:block/oak_log",
+    "south": "minecraft:block/oak_log",
+    "east": "minecraft:block/oak_log",
+    "west": "minecraft:block/oak_log"
+  }
+}

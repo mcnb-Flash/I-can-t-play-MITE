@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:hoes",
+    "icpm:adamantium_hoe",
+    "icpm:adamantium_mattock",
+    "icpm:adamantium_scythe",
+    "icpm:ancient_metal_hoe",
+    "icpm:ancient_metal_mattock",
+    "icpm:ancient_metal_scythe",
+    "icpm:copper_mattock",
+    "icpm:copper_scythe",
+    "icpm:gold_mattock",
+    "icpm:gold_scythe",
+    "icpm:mithril_hoe",
+    "icpm:mithril_mattock",
+    "icpm:mithril_scythe",
+    "icpm:netherite_mattock",
+    "icpm:netherite_scythe",
+    "icpm:silver_hoe",
+    "icpm:silver_mattock",
+    "icpm:silver_scythe"
+  ]
+}

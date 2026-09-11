@@ -1,0 +1,111 @@
+{
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "has_precipitation": false,
+  "carvers": ["minecraft:cave", "minecraft:cave_extra_underground", "icpm:canyon_underworld"],
+  "features": [
+    [],
+    [],
+    [],
+    [
+      "icpm:underworld_monster_room"
+    ],
+    [],
+    [],
+    [
+      "minecraft:ore_gravel",
+      "minecraft:ore_dirt",
+      "minecraft:ore_iron_small",
+      "minecraft:ore_iron_middle",
+      "minecraft:ore_gold",
+      "minecraft:ore_redstone",
+      "minecraft:ore_lapis",
+      "minecraft:ore_diamond_buried",
+      "minecraft:ore_copper",
+      "minecraft:ore_emerald",
+      "minecraft:ore_coal_upper",
+      "minecraft:ore_coal_lower",
+      "icpm:ore_silver_underworld",
+      "icpm:ore_mithril_underworld",
+      "icpm:ore_adamantium_underworld"
+    ],
+    [],
+    [
+      "icpm:spring_water_sparse"
+    ],    []
+  ],
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [
+      {
+        "type": "minecraft:zombie",
+        "weight": 100,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:skeleton",
+        "weight": 200,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:spider",
+        "weight": 100,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:creeper",
+        "weight": 100,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:slime",
+        "weight": 100,
+        "minCount": 4,
+        "maxCount": 4
+      },
+      {
+        "type": "minecraft:enderman",
+        "weight": 10,
+        "minCount": 1,
+        "maxCount": 4
+      }
+    ],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "spawn_costs": {},
+  "effects": {
+    "sky_color": 7254527,
+    "fog_color": 3344392,
+    "water_color": 4159204,
+    "water_fog_color": 329011,
+    "ambient_sound": "minecraft:ambient.cave",
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "music": {
+      "sound": "minecraft:music.nether.nether_wastes",
+      "min_delay": 12000,
+      "max_delay": 24000,
+      "replace_current_music": false
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:ash"
+      },
+      "probability": 0.00625
+    }
+  },
+  "_comment": "地下世界生物群系 R141 重构 - 自然矿洞：minecraft:cave/cave_extra_underground 小型溶洞 + icpm:canyon_underworld 大峡谷（Y 用 above_bottom 相对维度底，自动落到深板岩区）。深板岩区改为随机水源 icpm:spring_water_sparse（每区块至多 2 个、限定深板岩区 -56~0），而非原先 per-chunk 25 次全高度灌满。所有矿石（除煤/绿宝石/下界石英），骷髅生成率翻倍(200)。刷怪笼由 icpm:underworld_monster_room 控制（古尸/古尸守卫）。"
+}

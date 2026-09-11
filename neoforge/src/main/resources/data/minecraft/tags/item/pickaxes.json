@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:silver_pickaxe",
+    "icpm:ancient_metal_pickaxe",
+    "icpm:mithril_pickaxe",
+    "icpm:adamantium_pickaxe",
+    "icpm:copper_war_hammer",
+    "icpm:gold_war_hammer",
+    "icpm:iron_war_hammer",
+    "icpm:silver_war_hammer",
+    "icpm:ancient_metal_war_hammer",
+    "icpm:mithril_war_hammer",
+    "icpm:adamantium_war_hammer",
+    "icpm:netherite_war_hammer"
+  ]
+}

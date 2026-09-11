@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/alloy_upgrade_template",
+                  "type":  "minecraft:model"
+              }
+}

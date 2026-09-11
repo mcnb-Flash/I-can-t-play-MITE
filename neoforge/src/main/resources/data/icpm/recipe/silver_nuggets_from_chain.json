@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:silver_chain"
+  ],
+  "result": {
+    "id": "icpm:silver_nugget",
+    "count": 4
+  }
+}

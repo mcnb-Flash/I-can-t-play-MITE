@@ -1,0 +1,40 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+issueTrackerURL="https://github.com/mcnb-Flash/I-can-t-play-MITE/issues"
+
+[[mods]]
+modId="icpm"
+version="1.1.1"
+displayName="I can't play mite (ICPM)"
+description='''A hardcore survival mod for Minecraft 1.21.11 NeoForge. Port of the Fabric build.'''
+authors="78"
+[[mods.dependencies]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21.11.45,)"
+    ordering="NONE"
+    side="BOTH"
+[[mods.dependencies]]
+    modId="java"
+    type="required"
+    versionRange="[21,)"
+    ordering="NONE"
+    side="BOTH"
+
+# Kotlin 运行时前置（Kotlin for Forge，NeoForge 端等价于 Fabric 的 fabric-language-kotlin）
+# 6.x 为 NeoForge 专属线，支持 MC 1.21.9–1.21.11；提供 kotlin-stdlib / reflect / serialization / coroutines。
+# 缺失会 NoClassDefFoundError: kotlin/enums/EnumEntriesKt。用户需在 mods 目录安装 kotlinforforge-6.x-all.jar。
+[[mods.dependencies]]
+    modId="kotlinforforge"
+    type="required"
+    versionRange="[6.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# Mixin 配置（jar 根 *.mixins.json）
+[[mixins]]
+config = "icpm.mixins.json"
+
+[[mixins]]
+config = "icpm.client.mixins.json"

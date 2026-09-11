@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "icpm:block/ancient_metal_strongbox"
+    },
+    "facing=south": {
+      "model": "icpm:block/ancient_metal_strongbox",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "icpm:block/ancient_metal_strongbox",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "icpm:block/ancient_metal_strongbox",
+      "y": 90
+    }
+  }
+}

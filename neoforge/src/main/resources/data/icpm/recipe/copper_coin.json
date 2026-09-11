@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "N"
+  ],
+  "key": {
+    "N": "minecraft:copper_nugget"
+  },
+  "result": {
+    "id": "icpm:copper_coin",
+    "count": 1
+  }
+}

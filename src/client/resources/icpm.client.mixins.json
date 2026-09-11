@@ -8,7 +8,6 @@
         "ICPMSilverTooltipMixin",
         "ClientShutdownWatchdogMixin",
         "ClientTickMarkerMixin",
-        "NutritionHUDMixin",
         "GuiFoodLimitMixin",
         "GuiExperienceLevelMixin",
         "InventoryScreenCraftMixin",

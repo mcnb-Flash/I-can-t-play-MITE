@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.2,
+  "ingredient": "icpm:worm",
+  "result": {
+    "id": "icpm:cooked_worm"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "# #",
+    "###"
+  ],
+  "key": {
+    "#": "minecraft:netherrack"
+  },
+  "result": {
+    "id": "icpm:netherrack_furnace",
+    "count": 1
+  }
+}

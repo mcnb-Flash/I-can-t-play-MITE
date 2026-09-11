@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "0": {
+      "model": "icpm:block/dead_crop_stage0"
+    },
+    "1": {
+      "model": "icpm:block/dead_crop_stage1"
+    },
+    "2": {
+      "model": "icpm:block/dead_crop_stage2"
+    },
+    "3": {
+      "model": "icpm:block/dead_crop_stage3"
+    },
+    "4": {
+      "model": "icpm:block/dead_crop_stage4"
+    },
+    "5": {
+      "model": "icpm:block/dead_crop_stage5"
+    },
+    "6": {
+      "model": "icpm:block/dead_crop_stage6"
+    },
+    "7": {
+      "model": "icpm:block/dead_crop_stage6"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "minecraft:misc",
+  "ingredients": [
+    "icpm:gold_stone_bucket"
+  ],
+  "result": {
+    "id": "icpm:gold_bucket",
+    "count": 1
+  }
+}

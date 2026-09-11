@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "icpm:block/mantle",
+    "particle": "icpm:block/mantle"
+  }
+}

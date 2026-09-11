@@ -1,0 +1,24 @@
+{
+  "ambient_light": 0.1,
+  "bed_works": false,
+  "coordinate_scale": 1.0,
+  "effects": "minecraft:nether",
+  "has_ceiling": true,
+  "has_raids": false,
+  "has_skylight": false,
+  "height": 192,
+  "infiniburn": "#minecraft:infiniburn_overworld",
+  "logical_height": 192,
+  "min_y": -64,
+  "monster_spawn_light_level": {
+    "type": "minecraft:uniform",
+    "max_inclusive": 7,
+    "min_inclusive": 0
+  },
+  "monster_spawn_block_light_limit": 0,
+  "natural": false,
+  "piglin_safe": false,
+  "respawn_anchor_works": true,
+  "ultrawarm": true,
+  "_comment": "地下世界重构 - min_y 与 height 必须均为 16 的倍数（引擎硬约束）。选 min_y=-64, height=192（y -64~127，共192层），顶部127保持不变。基岩天花板由 noise_settings 的 surface_rule 负责（below_top 0~4 = y123~127）。地幔+基岩地板由 ICPMUnderworldBedrock 逐列代码生成，落在 y -60~-55（维度最底为 -64，其下4层为噪声石头但被基岩封死，玩家无法到达）。深板岩层由 surface_rule 的 vertical_gradient(icpm:deepslate) 负责：y<=0 为深板岩、0~8 过渡、>8 为石头，符合现代高版本特性。"
+}

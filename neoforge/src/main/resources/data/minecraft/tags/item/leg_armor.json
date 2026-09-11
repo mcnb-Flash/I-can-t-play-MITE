@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:silver_leggings",
+    "icpm:ancient_metal_leggings",
+    "icpm:mithril_leggings",
+    "icpm:adamantium_leggings",
+    "icpm:copper_chainmail_leggings",
+    "icpm:gold_chainmail_leggings",
+    "icpm:iron_chainmail_leggings",
+    "icpm:silver_chainmail_leggings",
+    "icpm:ancient_metal_chainmail_leggings",
+    "icpm:mithril_chainmail_leggings",
+    "icpm:adamantium_chainmail_leggings"
+  ]
+}

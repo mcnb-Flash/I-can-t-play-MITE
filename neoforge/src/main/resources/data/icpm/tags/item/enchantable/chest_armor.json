@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:enchantable/chest_armor",
+    "icpm:adamantium_chainmail_chestplate",
+    "icpm:adamantium_chestplate",
+    "icpm:ancient_metal_chainmail_chestplate",
+    "icpm:ancient_metal_chestplate",
+    "icpm:copper_chainmail_chestplate",
+    "icpm:gold_chainmail_chestplate",
+    "icpm:iron_chainmail_chestplate",
+    "icpm:mithril_chainmail_chestplate",
+    "icpm:mithril_chestplate",
+    "icpm:silver_chainmail_chestplate",
+    "icpm:silver_chestplate"
+  ]
+}

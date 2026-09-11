@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:water_bowl",
+    "minecraft:chicken",
+    "minecraft:carrot"
+  ],
+  "result": {
+    "id": "icpm:chicken_soup",
+    "count": 1
+  }
+}

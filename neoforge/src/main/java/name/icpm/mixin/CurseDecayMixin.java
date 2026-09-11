@@ -1,0 +1,42 @@
+package name.icpm.mixin;
+
+import name.icpm.curse.ICPMCurse;
+import name.icpm.curse.ICPMCurseManager;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+
+import java.util.function.Consumer;
+
+/**
+ * 诅咒：装备加速腐坏 —— R196 ItemStack.damageItem（玩家持有诅咒时 damage ×2）。
+ * 1.21.11 各受损路径汇聚到 ItemStack.hurtAndBreak(int, ServerLevel, ServerPlayer, Consumer)，
+ * 此处直接把伤害值翻倍（仅该 4 参重载，避免与其它重载重复计入）。
+ */
+@Mixin(ItemStack.class)
+public abstract class CurseDecayMixin {
+
+    @ModifyVariable(
+            method = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;Ljava/util/function/Consumer;)V",
+            at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private int icpm$doubleDurabilityLoss(int amount, int amountAgain, ServerLevel level,
+                                          ServerPlayer player, Consumer<ItemStack> onBroken) {
+        // Mixin @ModifyVariable 处理器签名 = 目标变量值 + 原方法全部参数（含被改参数本身），
+        // 故 amount 重复出现；HEAD 处二者相等，用第一个即可。
+        if (amount <= 0) {
+            return amount;
+        }
+        // 统一层叠（此 4 参重载 = 所有原版耐久路径的唯一最终扣损汇点，3 参/InteractionHand 均委托到此处）：
+        // 腐蚀性皮肤诅咒(装备加速腐坏) ×2 + 世界恶意「技术不佳」×(1+0.25档)，不做任何工具类型裁剪。
+        float mult = 1.0f;
+        if (ICPMCurseManager.isCursed(player, ICPMCurse.EQUIPMENT_DECAYS_FASTER, true)) {
+            mult *= 2.0f;
+        }
+        mult *= name.icpm.common.ICPMWorldEvil.durabilityMult();
+        int r = (int) (amount * mult);
+        return r < 1 ? 1 : r;
+    }
+}

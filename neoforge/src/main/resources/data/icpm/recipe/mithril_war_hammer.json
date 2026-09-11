@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "ISI",
+    " S "
+  ],
+  "key": {
+    "I": "icpm:mithril_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:mithril_war_hammer",
+    "count": 1
+  }
+}

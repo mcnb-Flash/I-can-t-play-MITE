@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:pickaxes",
+    "icpm:adamantium_battle_axe",
+    "icpm:adamantium_pickaxe",
+    "icpm:ancient_metal_battle_axe",
+    "icpm:ancient_metal_pickaxe",
+    "icpm:mithril_battle_axe",
+    "icpm:mithril_pickaxe",
+    "icpm:silver_battle_axe",
+    "icpm:silver_pickaxe"
+  ]
+}

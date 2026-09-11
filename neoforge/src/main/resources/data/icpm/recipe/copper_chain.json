@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " ? ",
+    "? ?",
+    " ? "
+  ],
+  "key": {
+    "?": "minecraft:copper_nugget"
+  },
+  "result": {
+    "id": "icpm:copper_chain",
+    "count": 1
+  }
+}

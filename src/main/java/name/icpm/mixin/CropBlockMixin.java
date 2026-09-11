@@ -53,39 +53,35 @@ public abstract class CropBlockMixin {
         boolean onFarmland = below.is(Blocks.FARMLAND);
         boolean wet = isWetFarmland(level, pos.below());
 
-        // ===== 干湿规则（R196：下方未湿润 → f=0）=====
+        // ===== 干湿规则（R196 BlockCrops.updateTick:83-92：growth_rate==0 且耕地无水）=====
+        // R196 语义：5%/随机刻 —— 已成熟 → 按原版掉落表掉落收获物后变空气（setDrought 标记）；
+        // 未成熟 → 转枯死作物方块（保留生长进度，无掉落、骨粉无效、无随机刻）。
         if (onFarmland && !wet) {
-            // 0.95 概率直接结束本随机刻
-            if (random.nextFloat() < 0.95f) {
-                ci.cancel();
-                return;
-            }
-            // 5% 深入：已成熟 → 干旱掉落（作物死亡）
-            if (mature) {
-                ItemStack seed = new ItemStack(((CropBlockAccessor) (Object) this).icpm$getBaseSeedId());
-                if (!seed.isEmpty()) {
-                    Block.popResource(level, pos, seed);
-                }
-                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            if (random.nextFloat() < 0.05f) {
                 ICPMPlantDisease.cure(dim, pos);
+                if (mature) {
+                    // R196 dropBlockAsEntityItem(new BlockBreakInfo(...).setDrought())：按原版掉落表掉收获物
+                    Block.dropResources(state, level, pos);
+                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                } else {
+                    level.setBlock(pos, name.icpm.block.ICPMDeadCropBlock.placeState(state.getValue(CropBlock.AGE)), 3);
+                }
                 ci.cancel();
                 return;
             }
-            // 未成熟：本次不生长，等下次随机刻
+            // 0.95 概率直接结束本随机刻（不生长）
             ci.cancel();
             return;
         }
 
         if (ICPMPlantDisease.isDiseased(dim, pos)) {
-            // 患病作物不生长
             ci.cancel();
-            // B1 枯萎死亡：每随机刻 1/64 直接死亡并掉种子（R196 枯萎作物死亡逻辑）
+            // B1 疫病致死（R196 BlockCrops:93-97）：每随机刻 1/64 转枯死作物方块
+            //（成熟的进度 -1，未成熟保持进度）；R196 无掉落。
             if (random.nextInt(64) == 0) {
-                ItemStack seed = new ItemStack(((CropBlockAccessor) (Object) this).icpm$getBaseSeedId());
-                if (!seed.isEmpty()) {
-                    Block.popResource(level, pos, seed);
-                }
-                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                int age = state.getValue(CropBlock.AGE);
+                int deadAge = mature ? Math.max(0, age - 1) : age;
+                level.setBlock(pos, name.icpm.block.ICPMDeadCropBlock.placeState(deadAge), 3);
                 ICPMPlantDisease.cure(dim, pos);
                 return;
             }
@@ -94,6 +90,7 @@ public abstract class CropBlockMixin {
                 BlockPos neighbor = pos.relative(dir);
                 BlockState nState = level.getBlockState(neighbor);
                 if (nState.getBlock() instanceof CropBlock
+                        && !(nState.getBlock() instanceof name.icpm.block.ICPMDeadCropBlock)
                         && !ICPMPlantDisease.isDiseased(dim, neighbor)
                         && nState.getValue(CropBlock.AGE) < CropBlock.MAX_AGE
                         && random.nextInt(32) == 0) {

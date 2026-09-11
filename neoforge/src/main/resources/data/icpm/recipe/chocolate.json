@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:sugar",
+    "minecraft:cocoa_beans"
+  ],
+  "result": {
+    "id": "icpm:chocolate",
+    "count": 1
+  }
+}

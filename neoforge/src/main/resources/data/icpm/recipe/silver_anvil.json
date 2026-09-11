@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "icpm:silver_block",
+    "i": "icpm:silver_ingot"
+  },
+  "pattern": [
+    "III",
+    " i ",
+    "iii"
+  ],
+  "result": {
+    "count": 1,
+    "id": "icpm:silver_anvil"
+  }
+}

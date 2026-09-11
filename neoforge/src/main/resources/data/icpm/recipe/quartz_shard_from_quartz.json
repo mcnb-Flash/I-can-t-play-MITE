@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:quartz"
+  ],
+  "result": {
+    "id": "icpm:quartz_shard",
+    "count": 9
+  }
+}

@@ -1,0 +1,29 @@
+{
+    "required": true,
+    "package": "name.icpm.client.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "refmap": "client-icpm-refmap.json",
+    "client": [
+        "GameRendererMixin",
+        "ICPMSilverTooltipMixin",
+        "ClientShutdownWatchdogMixin",
+        "ClientTickMarkerMixin",
+        "GuiFoodLimitMixin",
+        "GuiExperienceLevelMixin",
+        "InventoryScreenCraftMixin",
+        "BloodMoonSkyMixin",
+        "ClientShutdownTracer",
+        "ICPMBloodMoonEyesMixin",
+        "FixedLocalPlayerUuidMixin",
+        "IntegratedServerOwnerFixMixin",
+        "BucketCtrlClientMixin",
+        "BucketTooltipMixin",
+        "EnchantmentMenuClientMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "# #",
+    "###"
+  ],
+  "key": {
+    "#": "minecraft:sandstone"
+  },
+  "result": {
+    "id": "icpm:sandstone_furnace",
+    "count": 1
+  }
+}

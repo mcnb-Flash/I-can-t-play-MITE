@@ -1,0 +1,6 @@
+{
+    "model":  {
+                  "model":  "icpm:item/alloy_helmet",
+                  "type":  "minecraft:model"
+              }
+}

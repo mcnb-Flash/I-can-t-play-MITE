@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:silver_hoe",
+    "icpm:ancient_metal_hoe",
+    "icpm:mithril_hoe",
+    "icpm:adamantium_hoe",
+    "icpm:copper_scythe",
+    "icpm:gold_scythe",
+    "icpm:iron_scythe",
+    "icpm:silver_scythe",
+    "icpm:ancient_metal_scythe",
+    "icpm:mithril_scythe",
+    "icpm:adamantium_scythe",
+    "icpm:netherite_scythe"
+  ]
+}

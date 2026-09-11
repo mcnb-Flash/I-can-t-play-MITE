@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "count": 1,
+      "id": "minecraft:cooked_cod"
+    },
+    "title": {
+      "translate": "advancements.icpm.cook_fish.title"
+    },
+    "description": {
+      "translate": "advancements.icpm.cook_fish.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "parent": "icpm:fishing_rod",
+  "criteria": {
+    "get_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:cooked_cod",
+              "minecraft:cooked_salmon"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_item"
+    ]
+  ]
+}

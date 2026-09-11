@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  /",
+    " /|",
+    "/?|"
+  ],
+  "key": {
+    "/": "minecraft:stick",
+    "|": "#icpm:cords",
+    "?": "icpm:flint_fragment"
+  },
+  "result": {
+    "id": "icpm:flint_fishing_rod",
+    "count": 1
+  }
+}

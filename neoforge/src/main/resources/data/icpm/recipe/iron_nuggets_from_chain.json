@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:iron_chain"
+  ],
+  "result": {
+    "id": "minecraft:iron_nugget",
+    "count": 4
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SI ",
+    "S I",
+    "S  "
+  ],
+  "key": {
+    "I": "minecraft:gold_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:gold_scythe",
+    "count": 1
+  }
+}

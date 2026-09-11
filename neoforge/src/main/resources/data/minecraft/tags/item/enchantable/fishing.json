@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "icpm:flint_fishing_rod",
+    "icpm:obsidian_fishing_rod",
+    "icpm:copper_fishing_rod",
+    "icpm:silver_fishing_rod",
+    "icpm:gold_fishing_rod",
+    "icpm:iron_fishing_rod",
+    "icpm:ancient_metal_fishing_rod",
+    "icpm:mithril_fishing_rod",
+    "icpm:adamantium_fishing_rod"
+  ]
+}

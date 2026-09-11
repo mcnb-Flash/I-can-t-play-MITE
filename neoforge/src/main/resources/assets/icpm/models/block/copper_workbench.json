@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/crafting_table",
+  "textures": {
+    "particle": "icpm:block/crafting_table/copper/front",
+    "down": "minecraft:block/oak_planks",
+    "up": "minecraft:block/crafting_table_top",
+    "north": "icpm:block/crafting_table/copper/front",
+    "south": "icpm:block/crafting_table/copper/front",
+    "east": "icpm:block/crafting_table/copper/side",
+    "west": "icpm:block/crafting_table/copper/side"
+  }
+}

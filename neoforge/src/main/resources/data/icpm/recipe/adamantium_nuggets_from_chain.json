@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:adamantium_chain"
+  ],
+  "result": {
+    "id": "icpm:adamantium_nugget",
+    "count": 4
+  }
+}

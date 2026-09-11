@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["A"],
+  "key": {"A": "minecraft:bedrock"},
+  "result": {"id": "minecraft:bedrock", "count": 1}
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "minecraft:misc",
+  "ingredients": [
+    "icpm:adamantium_stone_bucket"
+  ],
+  "result": {
+    "id": "icpm:adamantium_bucket",
+    "count": 1
+  }
+}

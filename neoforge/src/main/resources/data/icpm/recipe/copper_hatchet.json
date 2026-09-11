@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IS",
+    "S "
+  ],
+  "key": {
+    "I": "minecraft:copper_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "icpm:copper_hatchet",
+    "count": 1
+  }
+}

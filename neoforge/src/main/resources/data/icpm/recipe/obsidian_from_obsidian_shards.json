@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "icpm:obsidian_shard"
+  },
+  "result": {
+    "id": "minecraft:obsidian",
+    "count": 1
+  }
+}

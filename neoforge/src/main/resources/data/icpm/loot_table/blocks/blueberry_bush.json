@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "icpm:blueberry",
+          "weight": 1,
+          "functions": [
+            { "function": "minecraft:set_count", "count": { "type": "minecraft:uniform", "min": 1.0, "max": 2.0 } }
+          ],
+          "conditions": [
+            { "condition": "minecraft:block_state_property", "block": "icpm:blueberry_bush", "properties": { "age": "1" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

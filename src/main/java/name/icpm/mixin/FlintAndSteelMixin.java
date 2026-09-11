@@ -2,7 +2,6 @@ package name.icpm.mixin;
 
 import name.icpm.block.HellPortalBlock;
 import name.icpm.block.ICPMBlocks;
-import name.icpm.common.CombustionHandler;
 import name.icpm.block.ReturnPortalBlock;
 import name.icpm.block.UnderworldPortalBlock;
 import name.icpm.common.ICPMPortalHandler;
@@ -14,12 +13,16 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.FlintAndSteelItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,7 +51,7 @@ public class FlintAndSteelMixin {
         }
 
         if (!level.getBlockState(pos).is(Blocks.OBSIDIAN)) {
-            icpm$handleCombustion(context, cir);
+            icpm$handleSpark(context, cir);
             return;
         }
 
@@ -151,40 +154,56 @@ public class FlintAndSteelMixin {
         }
     }
 
-    // ===================== Combustion (R196 combustion state machine) =====================
+    // ===================== R196 ItemFlintAndSteel.onItemRightClick（火花） =====================
 
     /**
-     * R196 风格的点火：非可燃方块无法点燃；可燃方块短燃（植物除外），第 5 次起正常，满 8 次烧毁。
+     * R196 忠实语义（ItemFlintAndSteel.onItemRightClick）：
+     * <pre>
+     * if (rc.getBlockHit() == Block.tnt)                     → 引爆 TNT
+     * else if (rc.isNeighborAirBlock() &amp;&amp; 玩家可编辑该相邻格) → 放置 Block.spark
+     * else                                                   → 无事发生（返回 false）
+     * 走 spark/TNT 分支时：播放 fire.ignite 音效 + 手持物扣 1 点耐久
+     * </pre>
+     * 火花（{@link name.icpm.block.ICPMSparkBlock}）自行在 2 tick 内决定「变火 or 消失」，
+     * 因此这里不做任何可燃性判断 —— 与 R196 一致：放在任何空气格都行，烧不起来就白烧一次耐久。
+     *
+     * <p>TNT：现代由 {@code TntBlock.useItemOn} 在方块层处理（先于物品 useOn），无需在此重复。
+     * <p>现代补充（1.6.4 尚无这些方块，不可照搬火花逻辑）：营火/蜡烛点燃交回原版，
+     * 否则右键未点燃的营火会被火花抢走而永远点不着。
      */
-    private void icpm$handleCombustion(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+    private void icpm$handleSpark(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        BlockPos firePos = pos.relative(context.getClickedFace());
+        BlockState clicked = level.getBlockState(pos);
 
-        if (!CombustionHandler.isCombustible(level, pos)) {
-            // 非可燃方块无法点燃
-            cir.setReturnValue(InteractionResult.FAIL);
+        // 营火/蜡烛（1.6.4 不存在）→ 交回原版 FlintAndSteelItem.useOn
+        if (CampfireBlock.canLight(clicked) || CandleBlock.canLight(clicked) || CandleCakeBlock.canLight(clicked)) {
             return;
         }
 
-        int count = CombustionHandler.registerIgnition(level, pos);
-        if (level.getBlockState(firePos).isAir()) {
-            level.setBlock(firePos, Blocks.FIRE.defaultBlockState(), 3);
+        // R196: rc.isNeighborAirBlock()
+        BlockPos sparkPos = pos.relative(context.getClickedFace());
+        if (!level.getBlockState(sparkPos).isAir()) {
+            return;
         }
 
-        if (CombustionHandler.isPlant(level, pos)) {
-            // 植物（草/树叶等）按正常火处理，不参与短燃
-        } else if (count < CombustionHandler.NORMAL_FROM) {
-            CombustionHandler.markShort(level, firePos);
-        } else if (count >= CombustionHandler.BURN_UP_AT) {
-            CombustionHandler.markDestroy(level, firePos);
+        // R196: rc.canPlayerEditNeighborOfBlockHit(player, heldItem)
+        Player player = context.getPlayer();
+        if (player != null
+                && !(level.mayInteract(player, sparkPos)
+                     && player.mayUseItemAt(sparkPos, context.getClickedFace(), context.getItemInHand()))) {
+            return;
         }
-        // count 在 [5,7]：正常火，不特殊处理
 
-        level.playSound(null, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+        // R196: rc.setNeighborBlock(Block.spark)（仅服务端；客户端已在方法入口提前返回）
+        level.setBlock(sparkPos, name.icpm.ICPM.SPARK.defaultBlockState(), 11);
+
+        // R196: playSoundAtEntity(player, "fire.ignite", ...) + tryDamageHeldItem(DamageSource.generic, 1)
+        level.playSound(null, sparkPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F,
+                level.getRandom().nextFloat() * 0.4F + 0.8F);
         ItemStack stack = context.getItemInHand();
-        if (context.getPlayer() != null) {
-            stack.hurtAndBreak(1, context.getPlayer(), EquipmentSlot.MAINHAND);
+        if (player != null) {
+            stack.hurtAndBreak(1, player, context.getHand().asEquipmentSlot());
         }
         cir.setReturnValue(InteractionResult.SUCCESS);
     }
