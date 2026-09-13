@@ -6,8 +6,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,12 +39,18 @@ public abstract class ZombieMiteDropMixin {
         if (!recentlyHit) {
             return;
         }
-        // 基础概率：村民僵尸 1/50，标准 1/200（R196 dropRareDrop 的 rand.nextInt(200)==0 语义）
+        // 基础概率上限：村民僵尸 50、标准 200（R196 getBaseChanceOfRareDrop）
         boolean villager = self instanceof ZombieVillager;
         int base = villager ? 50 : 200;
-        // ⚠️ 修复：原实现 nextInt(base)>=5 返回 → 概率变为 5/base（1/40、1/10），
-        // 与注释/R196 差 5 倍。改为 nextInt(base)==0 才是 1/base。
-        if (self.getRandom().nextInt(base) != 0) {
+        // R196 dropFewItems：nextInt(base) < 5 + looting*2（标准 5/200=1/40、村民 5/50=1/10，受抢夺 +2/级）
+        int looting = 0;
+        if (source.getDirectEntity() instanceof LivingEntity attacker) {
+            looting = attacker.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                    .get(Enchantments.LOOTING)
+                    .map(holder -> EnchantmentHelper.getEnchantmentLevel(holder, attacker))
+                    .orElse(0);
+        }
+        if (self.getRandom().nextInt(base) >= 5 + looting * 2) {
             return;
         }
         Item[] pool = villager ? VILLAGER_DROPS() : STANDARD_DROPS();

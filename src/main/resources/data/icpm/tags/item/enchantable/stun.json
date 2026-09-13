@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "#icpm:enchantable/war_hammer",
+    "icpm:wood_cudgel"
+  ]
+}

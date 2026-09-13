@@ -1,9 +1,7 @@
 package name.icpm.entity.monster
 
-import name.icpm.common.ICPMMaterialHelper
+import name.icpm.entity.ai.ZombieDigGoal
 import name.icpm.item.ICPMItems
-import net.minecraft.core.BlockPos
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.DifficultyInstance
@@ -23,23 +21,22 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal
 import net.minecraft.world.entity.monster.Monster
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.ServerLevelAccessor
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.state.BlockState
-import org.jspecify.annotations.Nullable
 
 /**
  * 矿工僵尸（ICPM 血月机制新增实体）。
  *
  * - 手持铁镐或铁战锤；穿戴铜 ~ 远古金属随机金属的四件锁链装备
- * - 可挖掘任意「挖掘等级 <= 3」的方块（石头/铜/银/金/铁/远古金属/黑曜石等，
- *   秘银4、艾德曼5、钻石4 不可挖；基岩等不可破坏方块除外）
- * - 挖掘速度 = 玩家手持对应工具速度的 3/4（约每刻进度 toolSpeed / (hardness * 30) * 0.75）
+ * - **挖掘行为完全交给 R196 忠实实现 [ZombieDigGoal]**（原 `EntityAnimalWatcher` 机制）：
+ *   只在「已锁定目标、距离合适、却无路径可接近」时挖开挡路方块——典型是挖掉玩家脚下支柱、
+ *   或挖穿墙壁；冷却 = `300 × 方块硬度 ÷ (1 + 工具速度 × 0.5)`（R196 getCooloffForBlock），
+ *   每 tick 递减冷却、到 0 时进度 +1，累计 10 次破坏方块（R196 partiallyDestroyBlock）。
+ *   R196 里挖掘是「僵尸」类怪的通用能力，并不是某个专属实体，故本实体与普通僵尸共用同一套规则。
+ *   （此前自创的「3×3×3 扫描 + 无条件挖掘 + 3/4 速度 + 等级≤3」实现已整体废弃。）
+ * - 手持剑 / 短棒 / 镰刀时按 R196 规则不挖掘（本实体始终持镐或战锤，故正常挖掘）
  * - 非血月仅矿洞（非露天）刷新；血月之夜地面也会刷新
  */
 class MinerZombieEntity(type: EntityType<out MinerZombieEntity>, level: Level) : Monster(type, level) {
@@ -76,26 +73,13 @@ class MinerZombieEntity(type: EntityType<out MinerZombieEntity>, level: Level) :
             ICPMItems.GOLD_CHAINMAIL_BOOTS, ICPMItems.IRON_CHAINMAIL_BOOTS,
             ICPMItems.ANCIENT_METAL_CHAINMAIL_BOOTS
         )
-
-        /** 挖掘等级上限（铁镐 / 铁战锤 = 3 级） */
-        private const val MAX_MINE_LEVEL = 3
-
-        /** 挖掘速度系数：玩家手持对应工具的 3/4 */
-        private const val MINE_SPEED_FACTOR = 0.75f
-
-        /** 挖掘检查间隔（tick） */
-        private const val MINE_INTERVAL = 5
     }
-
-    /** 当前正在挖掘的方块位置 */
-    private var miningPos: BlockPos? = null
-
-    /** 当前挖掘进度（0 ~ 1） */
-    private var miningProgress: Float = 0f
 
     override fun registerGoals() {
         goalSelector.addGoal(1, FloatGoal(this))
         goalSelector.addGoal(2, MeleeAttackGoal(this, 1.0, false))
+        // R196 挖掘 AI（EntityAnimalWatcher 机制）：与移动并列，排在闲逛之前
+        goalSelector.addGoal(3, ZombieDigGoal(this))
         goalSelector.addGoal(4, WaterAvoidingRandomStrollGoal(this, 0.8))
         goalSelector.addGoal(5, LookAtPlayerGoal(this, Player::class.java, 8.0f))
         goalSelector.addGoal(6, RandomLookAroundGoal(this))
@@ -119,89 +103,6 @@ class MinerZombieEntity(type: EntityType<out MinerZombieEntity>, level: Level) :
         this.setItemSlot(EquipmentSlot.LEGS, ItemStack(LEGS_METALS[random.nextInt(LEGS_METALS.size)]))
         this.setItemSlot(EquipmentSlot.FEET, ItemStack(BOOTS_METALS[random.nextInt(BOOTS_METALS.size)]))
         return data
-    }
-
-    override fun tick() {
-        super.tick()
-        val serverLevel = level()
-        if (serverLevel !is ServerLevel) return
-        if (tickCount % MINE_INTERVAL != 0) return
-        tryMine(serverLevel)
-    }
-
-    /**
-     * 挖掘逻辑：锁定一个周围可挖方块并累积破坏进度，
-     * 进度满后破坏并播放破坏音效/粒子。
-     */
-    private fun tryMine(serverLevel: ServerLevel) {
-        val target = findMineableBlock(serverLevel) ?: run {
-            clearMining(serverLevel)
-            return
-        }
-        if (miningPos != target) {
-            miningPos = target
-            miningProgress = 0f
-        }
-
-        val state = serverLevel.getBlockState(target)
-        val hardness = state.getDestroySpeed(serverLevel, target)
-        if (hardness < 0f) { // 不可破坏（基岩/屏障等）
-            clearMining(serverLevel)
-            return
-        }
-        // 玩家手持对应工具每刻进度 ≈ toolSpeed / (hardness * 30)；矿工僵尸为 3/4
-        val toolSpeed = getMainHandItem().getDestroySpeed(state).coerceAtLeast(0.5f)
-        val rate = (toolSpeed / (hardness * 30f)) * MINE_SPEED_FACTOR * MINE_INTERVAL
-        miningProgress += rate
-
-        // 破坏裂纹动画（0~10 级）
-        serverLevel.destroyBlockProgress(id, target, (miningProgress * 10f).toInt().coerceIn(0, 10))
-
-        if (miningProgress >= 1f) {
-            serverLevel.levelEvent(2001, target, Block.getId(state))
-            serverLevel.destroyBlock(target, true, this, 0)
-            clearMining(serverLevel)
-        }
-    }
-
-    private fun clearMining(serverLevel: ServerLevel) {
-        if (miningPos != null) {
-            serverLevel.destroyBlockProgress(id, miningPos!!, -1)
-        }
-        miningPos = null
-        miningProgress = 0f
-    }
-
-    /**
-     * 在自身周围 3x3x3 范围内寻找第一个可挖掘方块。
-     * 排除脚下（避免挖空自己站立的方块）。
-     */
-    private fun findMineableBlock(serverLevel: ServerLevel): BlockPos? {
-        val center = blockPosition()
-        val below = center.below()
-        for (dx in -1..1) {
-            for (dy in -1..1) {
-                for (dz in -1..1) {
-                    val pos = center.offset(dx, dy, dz)
-                    if (pos == below) continue
-                    val state = serverLevel.getBlockState(pos)
-                    if (!isMineable(state, serverLevel, pos)) continue
-                    return pos
-                }
-            }
-        }
-        return null
-    }
-
-    /** 判定方块是否可被矿工僵尸挖掘（挖掘等级 <= 3 且可破坏） */
-    private fun isMineable(state: BlockState, serverLevel: ServerLevel, pos: BlockPos): Boolean {
-        if (state.isAir) return false
-        // 不可破坏方块（基岩/屏障/水等硬度为负或 0 的特殊方块）
-        val hardness = state.getDestroySpeed(serverLevel, pos)
-        if (hardness < 0f) return false
-        if (state.`is`(Blocks.BEDROCK) || state.`is`(Blocks.BARRIER)) return false
-        // 挖掘等级 <= 3
-        return ICPMMaterialHelper.getMinHarvestLevel(state.block) <= MAX_MINE_LEVEL
     }
 
     override fun getAmbientSound(): SoundEvent = SoundEvents.ZOMBIE_AMBIENT

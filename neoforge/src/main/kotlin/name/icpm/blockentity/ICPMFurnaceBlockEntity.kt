@@ -216,7 +216,7 @@ class ICPMFurnaceBlockEntity(
         if (isLit() && hasInput) {
             val recipe = getRecipe(input)
             val inputOk = !isLargeItem(input) || acceptsLargeItems
-            if (inputOk && recipe != null && heatLevel >= getHeatLevelRequired(input)) {
+            if (inputOk && recipe != null && heatLevel >= getHeatLevelRequired(input) && icpmCanSmelt(input)) {
                 cookingTimer++
                 if (cookingTimer >= cookingTotalTime) {
                     cookingTimer = 0
@@ -356,10 +356,27 @@ class ICPMFurnaceBlockEntity(
         return holder.value().cookingTime()
     }
 
+    /**
+     * R196 `FurnaceRecipes.getSmeltingResult:37` 的沙特殊门控：
+     * 沙只有在堆叠 >= 4 时才能烧炼（否则返回 null），否则会出现"燃料空烧"。
+     */
+    private fun icpmCanSmelt(input: ItemStack): Boolean {
+        if (input.`is`(Items.SAND)) {
+            return input.count >= 4
+        }
+        return true
+    }
+
     /** 烧炼产出（原版 canBurn + burn 合并，含热量已在外层校验） */
     private fun burnRecipe(registryAccess: RegistryAccess, recipe: RecipeHolder<SmeltingRecipe>, input: ItemStack): Boolean {
-        val result = recipe.value().assemble(SingleRecipeInput(input), registryAccess)
+        var result = recipe.value().assemble(SingleRecipeInput(input), registryAccess)
         if (result.isEmpty) return false
+        // R196 FurnaceRecipes:37 —— 沙：heat 1 → 砂岩；heat >= 2 → 玻璃（每次消耗 4 个沙，见 smeltItem:293）
+        var consumption = 1
+        if (input.`is`(Items.SAND)) {
+            result = ItemStack(if (heatLevel == 1) Items.SANDSTONE else Items.GLASS)
+            consumption = 4
+        }
         val output = items[2]
         if (output.isEmpty) {
             items[2] = result.copy()
@@ -370,7 +387,17 @@ class ICPMFurnaceBlockEntity(
         } else {
             return false
         }
-        input.shrink(1)
+        input.shrink(minOf(consumption, input.count))
+        // R196 TileEntityFurnace.smeltItem:295-302 —— 黏土→砖：额外多转化最多 3 个黏土为砖
+        if (input.`is`(Items.CLAY_BALL) && result.`is`(Items.BRICK)) {
+            val out = items[2]
+            val space = minOf(getMaxStackSize(), out.maxStackSize) - out.count
+            val extra = minOf(space, input.count, 3)
+            if (extra > 0) {
+                out.grow(extra)
+                input.shrink(extra)
+            }
+        }
         return true
     }
 

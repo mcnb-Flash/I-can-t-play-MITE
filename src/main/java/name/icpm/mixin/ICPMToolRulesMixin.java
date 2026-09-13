@@ -91,28 +91,30 @@ public class ICPMToolRulesMixin {
         BlockRequirement req = icpm$getBlockRequirement(state);
 
         boolean haveTool = tool.type() != ToolType.HAND;
-        // 仅当手持工具类型正确且等级达标才算“有效工具”。
-        // R196：类型/等级不对的工具 getStrVsBlock<=1，退化为 1.0（慢但可破坏）。
+        // 手持工具类型正确且等级达标 = R196 ItemTool.isEffectiveAgainstBlock（材质与等级均满足）。
         boolean correct = haveTool && tool.type() == req.toolType() && tool.level() >= req.level();
 
-        // R196：requiresTool 方块（石头/矿石/矿物块等）必须用【正确类型且等级达标】的工具，
-        // 否则不可破坏（-1）。原实现"类型/等级不对 -> 慢速 1.0 可破坏"在 1.21.11 实测导致
-        // 低等级工具能挖高等级矿石（如铜战锤挖秘银矿），违背 MITE 硬核语义，故收紧为不可破坏。
-        if (req.requiresTool() && (!haveTool || !correct)) {
+        // R196 语义（EntityPlayer.getRelativeBlockHardness:954）：
+        //   if (hardness < 0 || getCurrentPlayerStrVsBlock(...) <= 0) return -1;   → 拒绝挖掘
+        // 工具类型不符或等级不足时，R196 的 strVsBlock 落到 <=0 分支 ⇒ 该方块【完全不产生挖掘进度】，
+        // 因此 requiresTool 方块（石头/矿石/原木/深板岩等）必须用正确类型且等级达标的工具才可破坏。
+        if (req.requiresTool() && !correct) {
             cir.setReturnValue(-1.0f);
             cir.cancel();
             return;
         }
 
-        boolean effective = correct;
-        // 必须 cancel，否则原版 getDestroyProgress 体会在注入后继续执行并返回，覆盖掉这里的值
-        cir.setReturnValue(icpm$calculateICPMProgress(state, player, hardness, effective));
+        cir.setReturnValue(icpm$calculateICPMProgress(state, player, hardness, correct));
         cir.cancel();
     }
 
     @Unique
     private float icpm$calculateICPMProgress(BlockState state, Player player, float hardness, boolean effective) {
-        // 有效工具（类型正确且等级达标）用材质基础速度；无效工具（类型/等级不对或空手）按 R196 退化为 1.0（慢但可破坏）。
+        // R196 每 tick 挖掘增量（EntityPlayer:975）：
+        //   getDamageVsBlock = getRelativeStrVsBlock / 512
+        //   getRelativeStrVsBlock = 1 / (hardness / strVsBlock) = strVsBlock / hardness
+        //   → 增量 = strVsBlock / hardness / 512（有正确工具时 strVsBlock 取材质速度，否则 1.0）
+        // 零硬度方块在 R196 走 getRelativeStrVsBlock 的 ==0 分支返回 512 → 512/512 = 1.0 瞬破。
         float strVsBlock = 1.0f;
         if (effective) {
             strVsBlock = icpm$getToolStrVsBlock(player.getMainHandItem());

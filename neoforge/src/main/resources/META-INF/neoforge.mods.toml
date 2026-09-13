@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/mcnb-Flash/I-can-t-play-MITE/issues"
 
 [[mods]]
 modId="icpm"
-version="1.1.1"
+version="1.1.2"
 displayName="I can't play mite (ICPM)"
 description='''A hardcore survival mod for Minecraft 1.21.11 NeoForge. Port of the Fabric build.'''
 authors="78"

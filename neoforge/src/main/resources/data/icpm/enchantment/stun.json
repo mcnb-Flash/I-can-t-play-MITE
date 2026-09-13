@@ -15,6 +15,6 @@
   "slots": [
     "mainhand"
   ],
-  "supported_items": "#icpm:enchantable/war_hammer",
+  "supported_items": "#icpm:enchantable/stun",
   "weight": 8
 }

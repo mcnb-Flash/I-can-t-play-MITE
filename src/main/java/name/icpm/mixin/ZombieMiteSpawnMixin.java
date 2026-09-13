@@ -5,9 +5,11 @@ import name.icpm.common.ICPMTension;
 import name.icpm.entity.ICPMEntities;
 import name.icpm.entity.ai.ZombieMiteState;
 import name.icpm.entity.monster.GiantZombieEntity;
+import name.icpm.item.ICPMItems;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -16,11 +18,18 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 僵尸系：生成时按 MITE 规则设置聪明（1/8 天生）与首领（张力×0.05，maxHealth 加成）。
@@ -84,5 +93,60 @@ public abstract class ZombieMiteSpawnMixin {
                 self.setHealth(self.getMaxHealth());
             }
         }
+
+        // ==================== R196 addRandomWeapon：随机持械 ====================
+        // R196 EntityZombie.addRandomWeapon：普通 5%、村民 20% 概率持械；按天数和权重从池中抽取。
+        // 注：R196 池为「锈铁系」工具（shovel/hatchet/sword/dagger/shears/scythe/hoe/mattock/pickaxe），
+        // ICPM 未实现锈铁工具物品（RUSTED_IRON 材料无对应工具），按 R196 材料表同档（tier 4，与铜同档）
+        // 以铜系工具替代；木质物品用原版木系工具。权重与天数门槛（10/20）严格照 R196。
+        if (!self.getMainHandItem().isEmpty()) {
+            return;
+        }
+        boolean villager = self instanceof ZombieVillager;
+        float chance = villager ? 0.2f : 0.05f;
+        if (self.getRandom().nextFloat() >= chance) {
+            return;
+        }
+        long day = (self.level().getGameTime() + 6000L) / 24000L + 1L;
+        List<Item> items = new ArrayList<>();
+        List<Integer> weights = new ArrayList<>();
+        addWeighted(items, weights, Items.WOODEN_SHOVEL, 1);          // shovelWood
+        addWeighted(items, weights, Items.COPPER_SHOVEL, 2);          // shovelRustedIron(w2)
+        if (day >= 10L) {
+            addWeighted(items, weights, ICPMItems.COPPER_HATCHET, 1); // hatchetRustedIron
+        }
+        if (villager) {
+            addWeighted(items, weights, ICPMItems.COPPER_SHEARS, 1);  // shearsRustedIron
+            addWeighted(items, weights, ICPMItems.COPPER_SCYTHE, 1);  // scytheRustedIron
+            if (day >= 10L) {
+                addWeighted(items, weights, Items.COPPER_HOE, 1);       // hoeRustedIron
+                addWeighted(items, weights, ICPMItems.COPPER_MATTOCK, 1);// mattockRustedIron
+            }
+            if (day >= 20L) {
+                addWeighted(items, weights, Items.COPPER_PICKAXE, 1);   // pickaxeRustedIron
+            }
+        } else {
+            addWeighted(items, weights, ICPMItems.WOOD_CUDGEL, 1);    // cudgelWood
+            addWeighted(items, weights, Items.WOODEN_SWORD, 1);       // clubWood
+            addWeighted(items, weights, Items.COPPER_SWORD, 1);       // swordRustedIron
+            addWeighted(items, weights, ICPMItems.COPPER_DAGGER, 1);  // daggerRustedIron
+        }
+        int total = 0;
+        for (int w : weights) {
+            total += w;
+        }
+        int roll = self.getRandom().nextInt(total);
+        for (int i = 0; i < items.size(); i++) {
+            roll -= weights.get(i);
+            if (roll < 0) {
+                self.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(items.get(i)));
+                break;
+            }
+        }
+    }
+
+    private static void addWeighted(List<Item> items, List<Integer> weights, Item item, int weight) {
+        items.add(item);
+        weights.add(weight);
     }
 }

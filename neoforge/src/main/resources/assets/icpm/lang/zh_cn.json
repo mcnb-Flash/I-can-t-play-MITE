@@ -547,7 +547,7 @@
   "item.icpm.infernal_creeper_spawn_egg": "地狱苦力怕刷怪蛋",
   "item.icpm.dire_wolf_spawn_egg": "恐狼刷怪蛋",
   "item.icpm.hoary_silverfish_spawn_egg": "灰银鱼刷怪蛋",
-  "curse.realized": "你被女巫诅咒了!",
+  "curse.realized": "你被女巫诅咒了：%s",
   "curse.lifted": "诅咒已被解除。",
   "curse.equipmentDecay.name": "装备迅速腐坏",
   "curse.cantHoldBreath.name": "无法屏息",
@@ -589,5 +589,9 @@
   "bucket.icpm.melt_chance": "熔化概率：%s%%",
   "bucket.icpm.place_source_hint": "Ctrl+右键：消耗 100 经验放置液体源头",
   "bucket.icpm.cannot_place_source": "此处无法放置液体源头",
-  "bucket.icpm.need_xp_source": "经验不足：放置液体源头需要 100 经验"
+  "bucket.icpm.need_xp_source": "经验不足：放置液体源头需要 100 经验",
+  "effect.icpm.witch_curse": "女巫诅咒",
+  "effect.icpm.witch_whisper": "女巫低吟",
+  "curse.active.regular": "当前女巫诅咒：【%s】—— %s",
+  "curse.active.whisper": "女巫低吟（永久）：【%s】—— %s"
 }

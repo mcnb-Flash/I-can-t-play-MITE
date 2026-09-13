@@ -36,6 +36,7 @@ abstract class ICPMSkeletonVariant(type: EntityType<out ICPMSkeletonVariant>, le
     companion object {
         fun createAttributes(): AttributeSupplier.Builder = Skeleton.createAttributes()
             .add(Attributes.ATTACK_DAMAGE, 4.0)
+            .add(Attributes.FOLLOW_RANGE, 40.0)
     }
 
     protected abstract val healthValue: Double
@@ -43,6 +44,9 @@ abstract class ICPMSkeletonVariant(type: EntityType<out ICPMSkeletonVariant>, le
     protected abstract val moveSpeedValue: Double
     protected open val isRanged: Boolean = true
     protected open val armorValue: Double = 0.0
+
+    /** R196 骷髅族 followRange 40。 */
+    protected open val followRangeValue: Double = 40.0
 
     override fun finalizeSpawn(
         level: ServerLevelAccessor,
@@ -55,6 +59,7 @@ abstract class ICPMSkeletonVariant(type: EntityType<out ICPMSkeletonVariant>, le
         this.getAttribute(Attributes.ATTACK_DAMAGE)?.baseValue = attackValue
         this.getAttribute(Attributes.MOVEMENT_SPEED)?.baseValue = moveSpeedValue
         this.getAttribute(Attributes.ARMOR)?.baseValue = armorValue
+        this.getAttribute(Attributes.FOLLOW_RANGE)?.baseValue = followRangeValue
         this.setHealth(healthValue.toFloat())
         if (!isRanged) {
             this.setItemSlot(EquipmentSlot.MAINHAND, meleeWeapon())
@@ -84,11 +89,11 @@ abstract class ICPMSkeletonVariant(type: EntityType<out ICPMSkeletonVariant>, le
     protected open fun isExplosionImmune(): Boolean = false
 }
 
-/** 长逝骷髅（远程弓手，箭带缓慢；R196：必定穿戴远古金属链甲全套） */
+/** 长逝骷髅（远程弓手；R196 `EntityLongdead.java:26-46` —— HP 12 / 攻击 6 / 移速 0.29 / followRange 40；远古金属链甲全套） */
 class LongdeadEntity(type: EntityType<out LongdeadEntity>, level: Level) : ICPMSkeletonVariant(type, level) {
-    override val healthValue: Double = 18.0
-    override val attackValue: Double = 4.0
-    override val moveSpeedValue: Double = 0.22
+    override val healthValue: Double = 12.0
+    override val attackValue: Double = 6.0
+    override val moveSpeedValue: Double = 0.29
     override val isRanged: Boolean = true
 
     override fun meleeWeapon(): ItemStack = ItemStack(Items.BOW)
@@ -100,20 +105,13 @@ class LongdeadEntity(type: EntityType<out LongdeadEntity>, level: Level) : ICPMS
         this.setItemSlot(EquipmentSlot.LEGS, ItemStack(ICPMItems.ANCIENT_METAL_CHAINMAIL_LEGGINGS))
         this.setItemSlot(EquipmentSlot.FEET, ItemStack(ICPMItems.ANCIENT_METAL_CHAINMAIL_BOOTS))
     }
-
-    override fun performRangedAttack(target: LivingEntity, velocity: Float) {
-        super.performRangedAttack(target, velocity)
-        if (level() is ServerLevel) {
-            target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, 140, 0))
-        }
-    }
 }
 
-/** 长逝守卫（近战持斧，高伤害；R196：必定穿戴远古金属链甲全套） */
+/** 长逝守卫（近战；R196 `EntityLongdeadGuardian` 继承 EntityLongdead → HP 24 / 攻击 8 / 移速 0.29；远古金属链甲全套） */
 class LongdeadGuardianEntity(type: EntityType<out LongdeadGuardianEntity>, level: Level) : ICPMSkeletonVariant(type, level) {
     override val healthValue: Double = 24.0
-    override val attackValue: Double = 7.0
-    override val moveSpeedValue: Double = 0.24
+    override val attackValue: Double = 8.0
+    override val moveSpeedValue: Double = 0.29
     override val isRanged: Boolean = false
     override val armorValue: Double = 4.0
 
@@ -152,20 +150,49 @@ class LongdeadGuardianEntity(type: EntityType<out LongdeadGuardianEntity>, level
     }
 }
 
-/** 骨领主（近战持剑，高血量极速；生成时随机手持远古金属战锤或远古金属剑） */
+/**
+ * 骨领主（R196 `EntityBoneLord.java:37-44` —— HP 20 / 攻击 5 / 移速 0.26 / followRange 40；
+ * 召唤随从链见 tick）。R196 武器/护甲为【锈铁】系（ICPM 未注册锈铁物品，暂用远古金属替代，另记缺口）。
+ */
 class BoneLordEntity(type: EntityType<out BoneLordEntity>, level: Level) : ICPMSkeletonVariant(type, level) {
-    override val healthValue: Double = 60.0
-    override val attackValue: Double = 10.0
-    override val moveSpeedValue: Double = 0.3
+    override val healthValue: Double = 20.0
+    override val attackValue: Double = 5.0
+    override val moveSpeedValue: Double = 0.26
     override val isRanged: Boolean = false
     override val armorValue: Double = 6.0
 
     override fun meleeWeapon(): ItemStack =
         if (random.nextBoolean()) ItemStack(ICPMItems.ANCIENT_METAL_WAR_HAMMER)
         else ItemStack(ICPMItems.ANCIENT_METAL_SWORD)
+
+    // R196 EntityBoneLord.num_troops_summoned（召唤普通骷髅随从，≤6）
+    private var numTroopsSummoned = 0
+
+    override fun tick() {
+        super.tick()
+        if (!level().isClientSide) {
+            numTroopsSummoned = r196BoneLordTick(this, EntityType.SKELETON, numTroopsSummoned)
+        }
+    }
+
+    override fun addAdditionalSaveData(output: net.minecraft.world.level.storage.ValueOutput) {
+        super.addAdditionalSaveData(output)
+        if (numTroopsSummoned > 0) output.putInt("num_troops_summoned", numTroopsSummoned)
+    }
+
+    override fun readAdditionalSaveData(input: net.minecraft.world.level.storage.ValueInput) {
+        super.readAdditionalSaveData(input)
+        numTroopsSummoned = input.getInt("num_troops_summoned").orElse(0)
+    }
 }
 
-/** 湮灭骷髅（重型远程，射速快） */
+/**
+ * 湮灭骷髅（重型远程，射速快）。
+ *
+ * ⚠ R196 无对应实体（全库无 "annihilation"）：最接近的是 `EntitySkeleton` type 2
+ * （木短棒近战骷髅，HP 6 / 攻击 4 / 移速 0.3，day≥10 起有概率换锈铁匕首/剑）。
+ * 本实体属 **ICPM 自增**，非 R196 移植项，暂保留现状不做数值对齐。
+ */
 class AnnihilationSkeletonEntity(type: EntityType<out AnnihilationSkeletonEntity>, level: Level) : ICPMSkeletonVariant(type, level) {
     override val healthValue: Double = 26.0
     override val attackValue: Double = 6.0

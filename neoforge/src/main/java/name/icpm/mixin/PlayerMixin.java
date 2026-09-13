@@ -6,6 +6,7 @@ import name.icpm.common.ICPMFoodStats;
 import name.icpm.common.ICPMHealProgressManager;
 import name.icpm.common.PlayerNutritionManager;
 import name.icpm.common.ICPMInsulinResistance;
+import name.icpm.common.ICPMVillagerReputation;
 import name.icpm.common.PlayerStatsManager;
 import name.icpm.common.PortalPositionStorage;
 import name.icpm.item.ICPMBuckets;
@@ -121,6 +122,7 @@ public class PlayerMixin {
         ICPMFoodStats.load(player, tag);
         PortalPositionStorage.load(player, tag);
         ICPMInsulinResistance.load(player, tag);
+        ICPMVillagerReputation.load(player, tag);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
@@ -133,6 +135,7 @@ public class PlayerMixin {
         ICPMFoodStats.save(player, tag);
         PortalPositionStorage.save(player, tag);
         ICPMInsulinResistance.save(player, tag);
+        ICPMVillagerReputation.save(player, tag);
     }
 
     /**

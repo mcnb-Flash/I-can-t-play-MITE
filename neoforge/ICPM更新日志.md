@@ -5,6 +5,14 @@
 > 本文件为 **NeoForge 端**更新日志（对应产物 `[内测]ICPM-1.1.1-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
 > 两端共享绝大部分源码（双树结构），本日志只记录 NeoForge 端的差异与落地情况。
 
+## 1.1.2（2026-09-13）· 与 Fabric 端同步：怪物特性收口 + 近战公式与工具攻击全量校准
+
+> 本端与 Fabric 端共享绝大部分源码。本轮 NeoForge 特有的落地见下，其余改动（工具基准攻击校准、近战乘区补全、弱击、小刀 ÷4、变种数值、挖掘门控、熔炉比率、僵尸掉落/持械、骨领主召唤链、熄灯等）与根目录 `ICPM更新日志.md` 的 1.1.2 栏目完全一致，不再重复。
+
+- **村民声望系统（NeoForge 侧注册）**——新增 `ICPMVillagerReputation.kt` 与 3 个 mixin（`ICPMVillagerReputationMixin` / `ICPMVillagerTradeMixin` / `ICPMIronGolemReputationMixin`），并补入本端 `icpm.mixins.json`。
+- **凝胶立方族自然生成（NeoForge 侧注册）**——Jelly / Blob / Ooze / Pudding 四个实体在 `RegisterSpawnPlacementsEvent` 中注册刷怪规则，并在 `data/icpm/neoforge/biome_modifier/spawn_icpm_monsters.json` 追加四条刷怪条目（权重 8 / 6 / 6 / 4）。
+- **版本号同步提升至 1.1.2**（`neoforge/build.gradle.kts` + `neoforge.mods.toml`），产物 `ICPM-Neoforge-1.1.2.jar`。
+
 ## 1.1.1（2026-09-09 ~ 09-11）· NeoForge 1.21.11 移植落地 + R196 逐值审计纠偏 + 火花/枯死作物忠实移植 + 贴图去相似化
 
 NeoForge 端自 1.1.1 起独立分发。本版本包含三部分：**平台移植**（NeoForge 21.11 时序模型适配）、**R196 忠实度纠偏**（与 Fabric 端同步）、**NeoForge 特有坑位修复**。

@@ -731,6 +731,17 @@ object ICPMEntities {
             1,
             4
         )
+        // 凝胶立方族：R196 暗处/地下（Y<40）生成；权取中等避免泛滥（酸性 ooze/pudding 更稀有）
+        for ((type, weight) in listOf(JELLY to 6, BLOB to 5, OOZE to 3, PUDDING to 2)) {
+            BiomeModifications.addSpawn(
+                BiomeSelectors.all(),
+                MobCategory.MONSTER,
+                type,
+                weight,
+                1,
+                2
+            )
+        }
     }
 
     /**

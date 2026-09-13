@@ -442,6 +442,16 @@ object ICPMEntities {
         evt.register(INFERNAL_CREEPER, g, hm, ::checkNetherOrUnderworldSpawnRules, op)
         evt.register(DIRE_WOLF, g, hm, ::checkICPMVariantSpawnRules, op)
         evt.register(HOARY_SILVERFISH, g, hm, ::checkHoarySilverfishSpawnRules, op)
+        // 凝胶立方族：暗处/酸性脚下石头（R196 EntityCubic.getCanSpawnHere）
+        evt.register(JELLY, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        evt.register(BLOB, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        evt.register(OOZE, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        evt.register(PUDDING, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        // 凝胶立方族：暗处/酸性脚下石头（R196 EntityCubic.getCanSpawnHere）
+        evt.register(JELLY, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        evt.register(BLOB, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        evt.register(OOZE, g, hm, ::checkGelatinousCubeSpawnRules, op)
+        evt.register(PUDDING, g, hm, ::checkGelatinousCubeSpawnRules, op)
     }
 
     /**

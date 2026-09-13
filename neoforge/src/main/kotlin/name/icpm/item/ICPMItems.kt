@@ -263,23 +263,23 @@ object ICPMItems {
 
     // 燧石工具 (基于 R196 原版：仅铲子、短斧、斧子)
     @JvmField val FLINT_SHOVEL: Item = register("flint_shovel",
-        ShovelItem(FLINT_TIER, 0f, -3.0f, makeProperties("flint_shovel", 1)
+        ShovelItem(FLINT_TIER, 1f, -3.0f, makeProperties("flint_shovel", 1)
             .durability(miteDurability(FLINT_MAT_DUR, SHOVEL_COMPONENTS))))
     @JvmField val FLINT_HATCHET: Item = register("flint_hatchet",
-        AxeItem(FLINT_TIER, 1f, -3.2f, makeProperties("flint_hatchet", 1)
+        AxeItem(FLINT_TIER, 2f, -3.2f, makeProperties("flint_hatchet", 1)
             .durability(miteDurability(FLINT_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val FLINT_AXE: Item = register("flint_axe",
-        AxeItem(FLINT_TIER, 2f, -3.0f, makeProperties("flint_axe", 1)
+        AxeItem(FLINT_TIER, 3f, -3.0f, makeProperties("flint_axe", 1)
             .durability(miteDurability(FLINT_MAT_DUR, AXE_COMPONENTS))))
 
-    // 小刀 (Knife) - 1.18.2: Icpm_fjv (dagger子类，伤害再-2)，flint_knife(400, FLINT, 2.5F, 0.0F)
-    // 最终伤害 = (2.5-2.0)+0.5 = 1.0，攻速 = 4.0+0.0 = 4.0
+    // 小刀 (Knife) - R196 ItemKnife：getBaseDamageVsEntity() = 剑4 - 匕首2 - 小刀1 = 1.0
+    // 总量 = 玩家基础1.0 + 基准1.0 + 燧石材质1.0 = 3.0，攻速 4.0
     @JvmField val FLINT_KNIFE: Item = register("flint_knife",
-        Item(makeProperties("flint_knife", 1).sword(FLINT_TIER, -1.0f, 0.0f)
+        Item(makeProperties("flint_knife", 1).sword(FLINT_TIER, 1f, 0.0f)
             .durability(miteDurability(FLINT_MAT_DUR, KNIFE_COMPONENTS))))
 
-    // 黑曜石小刀 (Obsidian Knife) - 1.18.2: obsidian_knife(800, FLINT, 3.5F, 0.0F)
-    // 最终伤害 = (3.5-2.0)+0.5 = 2.0，攻速 = 4.0
+    // 黑曜石小刀 (Obsidian Knife) - R196 Material.obsidian 攻击加值 2.0，耐久 4×1×2.0×100 = 800
+    // 总量 = 1.0 + 1.0 + 2.0 = 4.0（差值由 ICPMTechAttackMixin 在结算口补足）
     @JvmField val OBSIDIAN_KNIFE: Item = register("obsidian_knife",
         Item(makeProperties("obsidian_knife", 1).sword(FLINT_TIER, 1f, 0.0f)
             .durability(800)))
@@ -292,23 +292,23 @@ object ICPMItems {
 
     // ========== 铜制特殊工具 ==========
     @JvmField val COPPER_HATCHET: Item = register("copper_hatchet",
-        AxeItem(COPPER_TIER, 1f, -3.2f, makeProperties("copper_hatchet", 1)
+        AxeItem(COPPER_TIER, 2f, -3.2f, makeProperties("copper_hatchet", 1)
             .durability(miteDurability(COPPER_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val COPPER_DAGGER: Item = register("copper_dagger",
-        Item(makeProperties("copper_dagger", 1).sword(COPPER_TIER, 1f, -1.8f)
+        Item(makeProperties("copper_dagger", 1).sword(COPPER_TIER, 2f, -1.8f)
             .durability(miteDurability(COPPER_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val COPPER_SCYTHE: Item = register("copper_scythe",
-        HoeItem(COPPER_TIER, 0f, -2.0f, makeProperties("copper_scythe", 1)
+        HoeItem(COPPER_TIER, 1f, -2.0f, makeProperties("copper_scythe", 1)
             .durability(miteDurability(COPPER_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val WOOD_CUDGEL: Item = register("wood_cudgel", Item(makeProperties("wood_cudgel", 1)))
     @JvmField val COPPER_WAR_HAMMER: Item = register("copper_war_hammer",
-        Item(makeProperties("copper_war_hammer", 1).pickaxe(COPPER_TIER, 1f, -3.5f)
+        Item(makeProperties("copper_war_hammer", 1).pickaxe(COPPER_TIER, 2f, -3.5f)
             .durability(miteDurability(COPPER_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val COPPER_BATTLE_AXE: Item = register("copper_battle_axe",
-        AxeItem(COPPER_TIER, 3f, -3.2f, makeProperties("copper_battle_axe", 1)
+        AxeItem(COPPER_TIER, 4f, -3.2f, makeProperties("copper_battle_axe", 1)
             .durability(miteDurability(COPPER_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val COPPER_MATTOCK: Item = register("copper_mattock",
-        ShovelItem(COPPER_TIER, 0f, -3.0f, makeProperties("copper_mattock", 1)
+        ShovelItem(COPPER_TIER, 1f, -3.0f, makeProperties("copper_mattock", 1)
             .durability(miteDurability(COPPER_MAT_DUR, MATTOCK_COMPONENTS))))
     @JvmField val COPPER_SHEARS: Item = register("copper_shears",
         ShearsItem(makeProperties("copper_shears", 1)
@@ -321,22 +321,22 @@ object ICPMItems {
 
     // ========== 金制特殊工具 ==========
     @JvmField val GOLD_HATCHET: Item = register("gold_hatchet",
-        AxeItem(GOLD_TIER, 1f, -3.2f, makeProperties("gold_hatchet", 1)
+        AxeItem(GOLD_TIER, 2f, -3.2f, makeProperties("gold_hatchet", 1)
             .durability(miteDurability(GOLD_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val GOLD_DAGGER: Item = register("gold_dagger",
-        Item(makeProperties("gold_dagger", 1).sword(GOLD_TIER, 1f, -1.8f)
+        Item(makeProperties("gold_dagger", 1).sword(GOLD_TIER, 2f, -1.8f)
             .durability(miteDurability(GOLD_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val GOLD_SCYTHE: Item = register("gold_scythe",
-        HoeItem(GOLD_TIER, 0f, -2.0f, makeProperties("gold_scythe", 1)
+        HoeItem(GOLD_TIER, 1f, -2.0f, makeProperties("gold_scythe", 1)
             .durability(miteDurability(GOLD_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val GOLD_WAR_HAMMER: Item = register("gold_war_hammer",
-        Item(makeProperties("gold_war_hammer", 1).pickaxe(GOLD_TIER, 1f, -3.5f)
+        Item(makeProperties("gold_war_hammer", 1).pickaxe(GOLD_TIER, 2f, -3.5f)
             .durability(miteDurability(GOLD_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val GOLD_BATTLE_AXE: Item = register("gold_battle_axe",
-        AxeItem(GOLD_TIER, 3f, -3.2f, makeProperties("gold_battle_axe", 1)
+        AxeItem(GOLD_TIER, 4f, -3.2f, makeProperties("gold_battle_axe", 1)
             .durability(miteDurability(GOLD_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val GOLD_MATTOCK: Item = register("gold_mattock",
-        ShovelItem(GOLD_TIER, 0f, -3.0f, makeProperties("gold_mattock", 1)
+        ShovelItem(GOLD_TIER, 1f, -3.0f, makeProperties("gold_mattock", 1)
             .durability(miteDurability(GOLD_MAT_DUR, MATTOCK_COMPONENTS))))
     @JvmField val GOLD_SHEARS: Item = register("gold_shears",
         ShearsItem(makeProperties("gold_shears", 1)
@@ -349,39 +349,39 @@ object ICPMItems {
     @JvmField val SILVER_INGOT: Item = register("silver_ingot", Item(makeProperties("silver_ingot", 64)))
 
     @JvmField val SILVER_SHOVEL: Item = register("silver_shovel",
-        ShovelItem(SILVER_TIER, 0f, -3.0f, makeProperties("silver_shovel", 1)
+        ShovelItem(SILVER_TIER, 1f, -3.0f, makeProperties("silver_shovel", 1)
             .durability(miteDurability(SILVER_MAT_DUR, SHOVEL_COMPONENTS))))
     @JvmField val SILVER_AXE: Item = register("silver_axe",
-        AxeItem(SILVER_TIER, 2f, -3.0f, makeProperties("silver_axe", 1)
+        AxeItem(SILVER_TIER, 3f, -3.0f, makeProperties("silver_axe", 1)
             .durability(miteDurability(SILVER_MAT_DUR, AXE_COMPONENTS))))
     @JvmField val SILVER_HOE: Item = register("silver_hoe",
-        HoeItem(SILVER_TIER, 0f, -2.0f, makeProperties("silver_hoe", 1)
+        HoeItem(SILVER_TIER, 1f, -2.0f, makeProperties("silver_hoe", 1)
             .durability(miteDurability(SILVER_MAT_DUR, HOE_COMPONENTS))))
     @JvmField val SILVER_PICKAXE: Item = register("silver_pickaxe",
-        Item(makeProperties("silver_pickaxe", 1).pickaxe(SILVER_TIER, 1f, -2.8f)
+        Item(makeProperties("silver_pickaxe", 1).pickaxe(SILVER_TIER, 2f, -2.8f)
             .durability(miteDurability(SILVER_MAT_DUR, PICKAXE_COMPONENTS))))
     @JvmField val SILVER_SWORD: Item = register("silver_sword",
-        Item(makeProperties("silver_sword", 1).sword(SILVER_TIER, 3f, -2.4f)
+        Item(makeProperties("silver_sword", 1).sword(SILVER_TIER, 4f, -2.4f)
             .durability(miteDurability(SILVER_MAT_DUR, SWORD_COMPONENTS))))
 
     // ========== 银制特殊工具 (R196 原版) ==========
     @JvmField val SILVER_HATCHET: Item = register("silver_hatchet",
-        AxeItem(SILVER_TIER, 1f, -3.2f, makeProperties("silver_hatchet", 1)
+        AxeItem(SILVER_TIER, 2f, -3.2f, makeProperties("silver_hatchet", 1)
             .durability(miteDurability(SILVER_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val SILVER_DAGGER: Item = register("silver_dagger",
-        Item(makeProperties("silver_dagger", 1).sword(SILVER_TIER, 1f, -1.8f)
+        Item(makeProperties("silver_dagger", 1).sword(SILVER_TIER, 2f, -1.8f)
             .durability(miteDurability(SILVER_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val SILVER_WAR_HAMMER: Item = register("silver_war_hammer",
-        Item(makeProperties("silver_war_hammer", 1).pickaxe(SILVER_TIER, 1f, -3.5f)
+        Item(makeProperties("silver_war_hammer", 1).pickaxe(SILVER_TIER, 2f, -3.5f)
             .durability(miteDurability(SILVER_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val SILVER_BATTLE_AXE: Item = register("silver_battle_axe",
-        AxeItem(SILVER_TIER, 3f, -3.2f, makeProperties("silver_battle_axe", 1)
+        AxeItem(SILVER_TIER, 4f, -3.2f, makeProperties("silver_battle_axe", 1)
             .durability(miteDurability(SILVER_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val SILVER_SCYTHE: Item = register("silver_scythe",
-        HoeItem(SILVER_TIER, 0f, -2.0f, makeProperties("silver_scythe", 1)
+        HoeItem(SILVER_TIER, 1f, -2.0f, makeProperties("silver_scythe", 1)
             .durability(miteDurability(SILVER_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val SILVER_MATTOCK: Item = register("silver_mattock",
-        ShovelItem(SILVER_TIER, 0f, -3.0f, makeProperties("silver_mattock", 1)
+        ShovelItem(SILVER_TIER, 1f, -3.0f, makeProperties("silver_mattock", 1)
             .durability(miteDurability(SILVER_MAT_DUR, MATTOCK_COMPONENTS))))
     @JvmField val SILVER_SHEARS: Item = register("silver_shears",
         ShearsItem(makeProperties("silver_shears", 1)
@@ -428,39 +428,39 @@ object ICPMItems {
             .durability(miteArmorDurability(ANCIENT_METAL_MAT_DUR, BOOTS_COMPONENTS))))
 
     @JvmField val ANCIENT_METAL_SHOVEL: Item = register("ancient_metal_shovel",
-        ShovelItem(ANCIENT_METAL_TIER, 0f, -3.0f, makeProperties("ancient_metal_shovel", 1)
+        ShovelItem(ANCIENT_METAL_TIER, 1f, -3.0f, makeProperties("ancient_metal_shovel", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, SHOVEL_COMPONENTS))))
     @JvmField val ANCIENT_METAL_AXE: Item = register("ancient_metal_axe",
-        AxeItem(ANCIENT_METAL_TIER, 2f, -3.0f, makeProperties("ancient_metal_axe", 1)
+        AxeItem(ANCIENT_METAL_TIER, 3f, -3.0f, makeProperties("ancient_metal_axe", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, AXE_COMPONENTS))))
     @JvmField val ANCIENT_METAL_HOE: Item = register("ancient_metal_hoe",
-        HoeItem(ANCIENT_METAL_TIER, 0f, -2.0f, makeProperties("ancient_metal_hoe", 1)
+        HoeItem(ANCIENT_METAL_TIER, 1f, -2.0f, makeProperties("ancient_metal_hoe", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, HOE_COMPONENTS))))
     @JvmField val ANCIENT_METAL_PICKAXE: Item = register("ancient_metal_pickaxe",
-        Item(makeProperties("ancient_metal_pickaxe", 1).pickaxe(ANCIENT_METAL_TIER, 1f, -2.8f)
+        Item(makeProperties("ancient_metal_pickaxe", 1).pickaxe(ANCIENT_METAL_TIER, 2f, -2.8f)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, PICKAXE_COMPONENTS))))
     @JvmField val ANCIENT_METAL_SWORD: Item = register("ancient_metal_sword",
-        Item(makeProperties("ancient_metal_sword", 1).sword(ANCIENT_METAL_TIER, 3f, -2.4f)
+        Item(makeProperties("ancient_metal_sword", 1).sword(ANCIENT_METAL_TIER, 4f, -2.4f)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, SWORD_COMPONENTS))))
 
     // ========== 远古金属特殊工具 (R196 原版) ==========
     @JvmField val ANCIENT_METAL_HATCHET: Item = register("ancient_metal_hatchet",
-        AxeItem(ANCIENT_METAL_TIER, 1f, -3.0f, makeProperties("ancient_metal_hatchet", 1)
+        AxeItem(ANCIENT_METAL_TIER, 2f, -3.0f, makeProperties("ancient_metal_hatchet", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val ANCIENT_METAL_DAGGER: Item = register("ancient_metal_dagger",
-        Item(makeProperties("ancient_metal_dagger", 1).sword(ANCIENT_METAL_TIER, 1f, -1.8f)
+        Item(makeProperties("ancient_metal_dagger", 1).sword(ANCIENT_METAL_TIER, 2f, -1.8f)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val ANCIENT_METAL_WAR_HAMMER: Item = register("ancient_metal_war_hammer",
-        Item(makeProperties("ancient_metal_war_hammer", 1).pickaxe(ANCIENT_METAL_TIER, 1f, -3.5f)
+        Item(makeProperties("ancient_metal_war_hammer", 1).pickaxe(ANCIENT_METAL_TIER, 2f, -3.5f)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val ANCIENT_METAL_BATTLE_AXE: Item = register("ancient_metal_battle_axe",
-        AxeItem(ANCIENT_METAL_TIER, 3f, -3.2f, makeProperties("ancient_metal_battle_axe", 1)
+        AxeItem(ANCIENT_METAL_TIER, 4f, -3.2f, makeProperties("ancient_metal_battle_axe", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val ANCIENT_METAL_SCYTHE: Item = register("ancient_metal_scythe",
-        HoeItem(ANCIENT_METAL_TIER, 0f, -2.0f, makeProperties("ancient_metal_scythe", 1)
+        HoeItem(ANCIENT_METAL_TIER, 1f, -2.0f, makeProperties("ancient_metal_scythe", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val ANCIENT_METAL_MATTOCK: Item = register("ancient_metal_mattock",
-        ShovelItem(ANCIENT_METAL_TIER, 0f, -3.0f, makeProperties("ancient_metal_mattock", 1)
+        ShovelItem(ANCIENT_METAL_TIER, 1f, -3.0f, makeProperties("ancient_metal_mattock", 1)
             .durability(miteDurability(ANCIENT_METAL_MAT_DUR, MATTOCK_COMPONENTS))))
     @JvmField val ANCIENT_METAL_SHEARS: Item = register("ancient_metal_shears",
         ShearsItem(makeProperties("ancient_metal_shears", 1)
@@ -491,39 +491,39 @@ object ICPMItems {
             .durability(miteArmorDurability(MITHRIL_MAT_DUR, BOOTS_COMPONENTS))))
 
     @JvmField val MITHRIL_SHOVEL: Item = register("mithril_shovel",
-        ShovelItem(MITHRIL_TIER, 0f, -3.0f, makeProperties("mithril_shovel", 1)
+        ShovelItem(MITHRIL_TIER, 1f, -3.0f, makeProperties("mithril_shovel", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, SHOVEL_COMPONENTS))))
     @JvmField val MITHRIL_AXE: Item = register("mithril_axe",
-        AxeItem(MITHRIL_TIER, 2f, -3.0f, makeProperties("mithril_axe", 1)
+        AxeItem(MITHRIL_TIER, 3f, -3.0f, makeProperties("mithril_axe", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, AXE_COMPONENTS))))
     @JvmField val MITHRIL_HOE: Item = register("mithril_hoe",
-        HoeItem(MITHRIL_TIER, 0f, -2.0f, makeProperties("mithril_hoe", 1)
+        HoeItem(MITHRIL_TIER, 1f, -2.0f, makeProperties("mithril_hoe", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, HOE_COMPONENTS))))
     @JvmField val MITHRIL_PICKAXE: Item = register("mithril_pickaxe",
-        Item(makeProperties("mithril_pickaxe", 1).pickaxe(MITHRIL_TIER, 1f, -2.8f)
+        Item(makeProperties("mithril_pickaxe", 1).pickaxe(MITHRIL_TIER, 2f, -2.8f)
             .durability(miteDurability(MITHRIL_MAT_DUR, PICKAXE_COMPONENTS))))
     @JvmField val MITHRIL_SWORD: Item = register("mithril_sword",
-        Item(makeProperties("mithril_sword", 1).sword(MITHRIL_TIER, 3f, -2.4f)
+        Item(makeProperties("mithril_sword", 1).sword(MITHRIL_TIER, 4f, -2.4f)
             .durability(miteDurability(MITHRIL_MAT_DUR, SWORD_COMPONENTS))))
 
     // ========== 秘银特殊工具 (R196 原版) ==========
     @JvmField val MITHRIL_HATCHET: Item = register("mithril_hatchet",
-        AxeItem(MITHRIL_TIER, 1f, -3.0f, makeProperties("mithril_hatchet", 1)
+        AxeItem(MITHRIL_TIER, 2f, -3.0f, makeProperties("mithril_hatchet", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val MITHRIL_DAGGER: Item = register("mithril_dagger",
-        Item(makeProperties("mithril_dagger", 1).sword(MITHRIL_TIER, 1f, -1.8f)
+        Item(makeProperties("mithril_dagger", 1).sword(MITHRIL_TIER, 2f, -1.8f)
             .durability(miteDurability(MITHRIL_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val MITHRIL_WAR_HAMMER: Item = register("mithril_war_hammer",
-        Item(makeProperties("mithril_war_hammer", 1).pickaxe(MITHRIL_TIER, 1f, -3.5f)
+        Item(makeProperties("mithril_war_hammer", 1).pickaxe(MITHRIL_TIER, 2f, -3.5f)
             .durability(miteDurability(MITHRIL_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val MITHRIL_BATTLE_AXE: Item = register("mithril_battle_axe",
-        AxeItem(MITHRIL_TIER, 3f, -3.2f, makeProperties("mithril_battle_axe", 1)
+        AxeItem(MITHRIL_TIER, 4f, -3.2f, makeProperties("mithril_battle_axe", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val MITHRIL_SCYTHE: Item = register("mithril_scythe",
-        HoeItem(MITHRIL_TIER, 0f, -2.0f, makeProperties("mithril_scythe", 1)
+        HoeItem(MITHRIL_TIER, 1f, -2.0f, makeProperties("mithril_scythe", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val MITHRIL_MATTOCK: Item = register("mithril_mattock",
-        ShovelItem(MITHRIL_TIER, 0f, -3.0f, makeProperties("mithril_mattock", 1)
+        ShovelItem(MITHRIL_TIER, 1f, -3.0f, makeProperties("mithril_mattock", 1)
             .durability(miteDurability(MITHRIL_MAT_DUR, MATTOCK_COMPONENTS))))
     @JvmField val MITHRIL_SHEARS: Item = register("mithril_shears",
         ShearsItem(makeProperties("mithril_shears", 1)
@@ -554,39 +554,39 @@ object ICPMItems {
             .durability(miteArmorDurability(ADAMANTIUM_MAT_DUR, BOOTS_COMPONENTS))))
 
     @JvmField val ADAMANTIUM_SHOVEL: Item = register("adamantium_shovel",
-        ShovelItem(ADAMANTIUM_TIER, 0f, -3.0f, makeProperties("adamantium_shovel", 1)
+        ShovelItem(ADAMANTIUM_TIER, 1f, -3.0f, makeProperties("adamantium_shovel", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, SHOVEL_COMPONENTS))))
     @JvmField val ADAMANTIUM_AXE: Item = register("adamantium_axe",
-        AxeItem(ADAMANTIUM_TIER, 2f, -3.0f, makeProperties("adamantium_axe", 1)
+        AxeItem(ADAMANTIUM_TIER, 3f, -3.0f, makeProperties("adamantium_axe", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, AXE_COMPONENTS))))
     @JvmField val ADAMANTIUM_HOE: Item = register("adamantium_hoe",
-        HoeItem(ADAMANTIUM_TIER, 0f, -2.0f, makeProperties("adamantium_hoe", 1)
+        HoeItem(ADAMANTIUM_TIER, 1f, -2.0f, makeProperties("adamantium_hoe", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, HOE_COMPONENTS))))
     @JvmField val ADAMANTIUM_PICKAXE: Item = register("adamantium_pickaxe",
-        Item(makeProperties("adamantium_pickaxe", 1).pickaxe(ADAMANTIUM_TIER, 1f, -2.8f)
+        Item(makeProperties("adamantium_pickaxe", 1).pickaxe(ADAMANTIUM_TIER, 2f, -2.8f)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, PICKAXE_COMPONENTS))))
     @JvmField val ADAMANTIUM_SWORD: Item = register("adamantium_sword",
-        Item(makeProperties("adamantium_sword", 1).sword(ADAMANTIUM_TIER, 3f, -2.4f)
+        Item(makeProperties("adamantium_sword", 1).sword(ADAMANTIUM_TIER, 4f, -2.4f)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, SWORD_COMPONENTS))))
 
     // ========== 艾德曼特殊工具 (R196 原版) ==========
     @JvmField val ADAMANTIUM_HATCHET: Item = register("adamantium_hatchet",
-        AxeItem(ADAMANTIUM_TIER, 1f, -3.0f, makeProperties("adamantium_hatchet", 1)
+        AxeItem(ADAMANTIUM_TIER, 2f, -3.0f, makeProperties("adamantium_hatchet", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val ADAMANTIUM_DAGGER: Item = register("adamantium_dagger",
-        Item(makeProperties("adamantium_dagger", 1).sword(ADAMANTIUM_TIER, 1f, -1.8f)
+        Item(makeProperties("adamantium_dagger", 1).sword(ADAMANTIUM_TIER, 2f, -1.8f)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val ADAMANTIUM_WAR_HAMMER: Item = register("adamantium_war_hammer",
-        Item(makeProperties("adamantium_war_hammer", 1).pickaxe(ADAMANTIUM_TIER, 1f, -3.5f)
+        Item(makeProperties("adamantium_war_hammer", 1).pickaxe(ADAMANTIUM_TIER, 2f, -3.5f)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val ADAMANTIUM_BATTLE_AXE: Item = register("adamantium_battle_axe",
-        AxeItem(ADAMANTIUM_TIER, 3f, -3.2f, makeProperties("adamantium_battle_axe", 1)
+        AxeItem(ADAMANTIUM_TIER, 4f, -3.2f, makeProperties("adamantium_battle_axe", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val ADAMANTIUM_SCYTHE: Item = register("adamantium_scythe",
-        HoeItem(ADAMANTIUM_TIER, 0f, -2.0f, makeProperties("adamantium_scythe", 1)
+        HoeItem(ADAMANTIUM_TIER, 1f, -2.0f, makeProperties("adamantium_scythe", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val ADAMANTIUM_MATTOCK: Item = register("adamantium_mattock",
-        ShovelItem(ADAMANTIUM_TIER, 0f, -3.0f, makeProperties("adamantium_mattock", 1)
+        ShovelItem(ADAMANTIUM_TIER, 1f, -3.0f, makeProperties("adamantium_mattock", 1)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, MATTOCK_COMPONENTS))))
     @JvmField val ADAMANTIUM_SHEARS: Item = register("adamantium_shears",
         ShearsItem(makeProperties("adamantium_shears", 1)
@@ -733,22 +733,22 @@ object ICPMItems {
     // R196 iron: getDamageVsEntity() = 4.0f
     // 战锤伤害 = 稿子 + 1 = 5.0 + 1.0 = 6.0, 战斧伤害 = 剑 + 1 = 7.0 + 1.0 = 8.0
     @JvmField val IRON_HATCHET: Item = register("iron_hatchet",
-        AxeItem(IRON_TIER, 1f, -3.2f, makeProperties("iron_hatchet", 1)
+        AxeItem(IRON_TIER, 2f, -3.2f, makeProperties("iron_hatchet", 1)
             .durability(miteDurability(IRON_MAT_DUR, HATCHET_COMPONENTS))))
     @JvmField val IRON_DAGGER: Item = register("iron_dagger",
-        Item(makeProperties("iron_dagger", 1).sword(IRON_TIER, 1f, -1.8f)
+        Item(makeProperties("iron_dagger", 1).sword(IRON_TIER, 2f, -1.8f)
             .durability(miteDurability(IRON_MAT_DUR, DAGGER_COMPONENTS))))
     @JvmField val IRON_WAR_HAMMER: Item = register("iron_war_hammer",
-        Item(makeProperties("iron_war_hammer", 1).pickaxe(IRON_TIER, 1f, -3.5f)
+        Item(makeProperties("iron_war_hammer", 1).pickaxe(IRON_TIER, 2f, -3.5f)
             .durability(miteDurability(IRON_MAT_DUR, WAR_HAMMER_COMPONENTS))))
     @JvmField val IRON_BATTLE_AXE: Item = register("iron_battle_axe",
-        AxeItem(IRON_TIER, 3f, -3.2f, makeProperties("iron_battle_axe", 1)
+        AxeItem(IRON_TIER, 4f, -3.2f, makeProperties("iron_battle_axe", 1)
             .durability(miteDurability(IRON_MAT_DUR, BATTLE_AXE_COMPONENTS))))
     @JvmField val IRON_SCYTHE: Item = register("iron_scythe",
-        HoeItem(IRON_TIER, 0f, -2.0f, makeProperties("iron_scythe", 1)
+        HoeItem(IRON_TIER, 1f, -2.0f, makeProperties("iron_scythe", 1)
             .durability(miteDurability(IRON_MAT_DUR, SCYTHE_COMPONENTS))))
     @JvmField val IRON_MATTOCK: Item = register("iron_mattock",
-        ShovelItem(IRON_TIER, 0f, -3.0f, makeProperties("iron_mattock", 1)
+        ShovelItem(IRON_TIER, 1f, -3.0f, makeProperties("iron_mattock", 1)
             .durability(miteDurability(IRON_MAT_DUR, MATTOCK_COMPONENTS))))
 
     // ========== 下界合金特殊工具 (ICPM 扩展) ==========
@@ -757,32 +757,32 @@ object ICPMItems {
 
     // 匕首 (Dagger) - damage = 1.0 (sword 基础 1.0 + 材质 7.0 + P 1.0 = 9.0)
     @JvmField val NETHERITE_DAGGER: Item = register("netherite_dagger",
-        Item(makeProperties("netherite_dagger", 1).sword(NETHERITE_TIER, 1f, -1.8f)
+        Item(makeProperties("netherite_dagger", 1).sword(NETHERITE_TIER, 2f, -1.8f)
             .durability(miteDurability(NETHERITE_MAT_DUR, DAGGER_COMPONENTS))))
 
     // 短斧 (Hatchet) - damage = 材质 7.0 + P 1.0 = 8.0 (斧类 attackDamage = 1.0 附加)
     @JvmField val NETHERITE_HATCHET: Item = register("netherite_hatchet",
-        AxeItem(NETHERITE_TIER, 1f, -3.0f, makeProperties("netherite_hatchet", 1)
+        AxeItem(NETHERITE_TIER, 2f, -3.0f, makeProperties("netherite_hatchet", 1)
             .durability(miteDurability(NETHERITE_MAT_DUR, HATCHET_COMPONENTS))))
 
     // 战锤 (WarHammer) - damage = 材质 7.0 + P 2.0 = 10.0 (镐类, 可挖石头)
     @JvmField val NETHERITE_WAR_HAMMER: Item = register("netherite_war_hammer",
-        Item(makeProperties("netherite_war_hammer", 1).pickaxe(NETHERITE_TIER, 1f, -3.5f)
+        Item(makeProperties("netherite_war_hammer", 1).pickaxe(NETHERITE_TIER, 2f, -3.5f)
             .durability(miteDurability(NETHERITE_MAT_DUR, WAR_HAMMER_COMPONENTS))))
 
     // 战斧 (BattleAxe) - damage = 材质 7.0 + P 4.0 = 12.0
     @JvmField val NETHERITE_BATTLE_AXE: Item = register("netherite_battle_axe",
-        AxeItem(NETHERITE_TIER, 3f, -3.2f, makeProperties("netherite_battle_axe", 1)
+        AxeItem(NETHERITE_TIER, 4f, -3.2f, makeProperties("netherite_battle_axe", 1)
             .durability(miteDurability(NETHERITE_MAT_DUR, BATTLE_AXE_COMPONENTS))))
 
     // 镰刀 (Scythe) - damage = 材质 7.0 + P 0.0 = 8.0
     @JvmField val NETHERITE_SCYTHE: Item = register("netherite_scythe",
-        HoeItem(NETHERITE_TIER, 0f, -2.0f, makeProperties("netherite_scythe", 1)
+        HoeItem(NETHERITE_TIER, 1f, -2.0f, makeProperties("netherite_scythe", 1)
             .durability(miteDurability(NETHERITE_MAT_DUR, SCYTHE_COMPONENTS))))
 
     // 鸭嘴锄 (Mattock) - damage = 材质 7.0 + P 1.0 = 9.0
     @JvmField val NETHERITE_MATTOCK: Item = register("netherite_mattock",
-        ShovelItem(NETHERITE_TIER, 0f, -3.0f, makeProperties("netherite_mattock", 1)
+        ShovelItem(NETHERITE_TIER, 1f, -3.0f, makeProperties("netherite_mattock", 1)
             .durability(miteDurability(NETHERITE_MAT_DUR, MATTOCK_COMPONENTS))))
 
     // 下界合金长矛为原版 Minecraft 物品(minecraft:netherite_spear)，此处不重复注册。

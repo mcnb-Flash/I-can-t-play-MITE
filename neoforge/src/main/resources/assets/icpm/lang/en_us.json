@@ -457,5 +457,9 @@
   "bucket.icpm.melt_chance": "Chance of bucket melting: %s%%",
   "bucket.icpm.place_source_hint": "Ctrl + Right Click: place a liquid source (100 XP)",
   "bucket.icpm.cannot_place_source": "Cannot place a liquid source here",
-  "bucket.icpm.need_xp_source": "Not enough XP: placing a liquid source costs 100 XP"
+  "bucket.icpm.need_xp_source": "Not enough XP: placing a liquid source costs 100 XP",
+  "effect.icpm.witch_curse": "Witch Curse",
+  "effect.icpm.witch_whisper": "Witch's Whisper",
+  "curse.active.regular": "Current witch curse: [%s] - %s",
+  "curse.active.whisper": "Witch's Whisper (permanent): [%s] - %s"
 }

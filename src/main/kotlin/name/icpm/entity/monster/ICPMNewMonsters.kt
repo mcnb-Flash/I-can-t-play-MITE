@@ -4,12 +4,20 @@ import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.DifficultyInstance
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
+import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.SpawnGroupData
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.ai.goal.FloatGoal
@@ -22,9 +30,15 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal
 import net.minecraft.world.entity.animal.Animal
 import net.minecraft.world.entity.ambient.Bat
 import net.minecraft.world.entity.monster.Monster
+import net.minecraft.world.entity.monster.skeleton.Skeleton
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.ServerLevelAccessor
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.AABB
+import name.icpm.entity.ICPMEntities
 
 /**
  * ICPM R196 新增怪物实体集合
@@ -165,6 +179,8 @@ class ShadowEntity(type: EntityType<out ShadowEntity>, level: Level) : Monster(t
 
     override fun tick() {
         super.tick()
+        // R196 EntityShadow.onLivingUpdate：每 tick 尝试熄灭附近光源（服务端/未受击/4 格外无玩家）
+        tryDisableNearbyLightSource(this)
         if (!level().isClientSide) {
             // 阳光下秒杀
             if (level().canSeeSky(blockPosition()) && level().getMaxLocalRawBrightness(blockPosition()) > 12) {
@@ -194,7 +210,9 @@ class ShadowEntity(type: EntityType<out ShadowEntity>, level: Level) : Monster(t
     override fun doHurtTarget(serverLevel: ServerLevel, target: net.minecraft.world.entity.Entity): Boolean {
         val hit = super.doHurtTarget(serverLevel, target)
         if (hit && target is LivingEntity) {
-            target.addEffect(net.minecraft.world.effect.MobEffectInstance(MobEffects.WEAKNESS, 600, 0))
+            target.addEffect(MobEffectInstance(MobEffects.WEAKNESS, 600, 0))
+            // R196 EntityShadow.attackEntityAsMob：命中玩家叠加 vision_dimming（1.21 无对应→DARKNESS 近似）
+            applyVisionDimming(target, 2.0f)
         }
         return hit
     }
@@ -234,6 +252,12 @@ class InvisibleStalkerEntity(type: EntityType<out InvisibleStalkerEntity>, level
         targetSelector.addGoal(2, NearestAttackableTargetGoal(this, Player::class.java, true))
     }
 
+    override fun tick() {
+        super.tick()
+        // R196 EntityInvisibleStalker.onLivingUpdate：每 tick 尝试熄灭附近光源
+        tryDisableNearbyLightSource(this)
+    }
+
     override fun getAmbientSound(): SoundEvent = SoundEvents.ZOMBIE_AMBIENT
     override fun getHurtSound(source: DamageSource): SoundEvent = SoundEvents.ZOMBIE_HURT
     override fun getDeathSound(): SoundEvent = SoundEvents.ZOMBIE_DEATH
@@ -268,6 +292,31 @@ class RevenantEntity(type: EntityType<out RevenantEntity>, level: Level) : Monst
         goalSelector.addGoal(6, RandomLookAroundGoal(this))
         targetSelector.addGoal(1, HurtByTargetGoal(this))
         targetSelector.addGoal(2, NearestAttackableTargetGoal(this, Player::class.java, true))
+    }
+
+    /**
+     * R196 EntityRevenant.getMaxSpawnedInChunk() = 1：同一区块最多 1 个复仇僵尸。
+     * 1.21 无「每区块刷怪上限」原语，故在 finalizeSpawn 时统计本区块现存复仇僵尸（含自身），
+     * 超过 1 个则丢弃自身。
+     */
+    override fun finalizeSpawn(
+        level: ServerLevelAccessor,
+        difficulty: DifficultyInstance,
+        reason: EntitySpawnReason,
+        spawnData: SpawnGroupData?
+    ): SpawnGroupData? {
+        val data = super.finalizeSpawn(level, difficulty, reason, spawnData)
+        if (level is ServerLevel) {
+            val cp = ChunkPos(blockPosition())
+            val aabb = AABB(
+                cp.minBlockX.toDouble(), level.minY.toDouble(), cp.minBlockZ.toDouble(),
+                (cp.maxBlockX + 1).toDouble(), level.maxY.toDouble(), (cp.maxBlockZ + 1).toDouble()
+            )
+            if (level.getEntitiesOfClass(RevenantEntity::class.java, aabb).size > 1) {
+                discard()
+            }
+        }
+        return data
     }
 
     override fun getAmbientSound(): SoundEvent = SoundEvents.ZOMBIE_AMBIENT
@@ -334,6 +383,26 @@ class AncientBoneLordEntity(type: EntityType<out AncientBoneLordEntity>, level: 
         goalSelector.addGoal(6, RandomLookAroundGoal(this))
         targetSelector.addGoal(1, HurtByTargetGoal(this))
         targetSelector.addGoal(2, NearestAttackableTargetGoal(this, Player::class.java, true))
+    }
+
+    // R196 EntityBoneLord.num_troops_summoned（远古骨王承继骨领主召唤链，召唤古尸）
+    private var numTroopsSummoned = 0
+
+    override fun tick() {
+        super.tick()
+        if (!level().isClientSide) {
+            numTroopsSummoned = r196BoneLordTick(this, ICPMEntities.LONGDEAD, numTroopsSummoned)
+        }
+    }
+
+    override fun addAdditionalSaveData(output: net.minecraft.world.level.storage.ValueOutput) {
+        super.addAdditionalSaveData(output)
+        if (numTroopsSummoned > 0) output.putInt("num_troops_summoned", numTroopsSummoned)
+    }
+
+    override fun readAdditionalSaveData(input: net.minecraft.world.level.storage.ValueInput) {
+        super.readAdditionalSaveData(input)
+        numTroopsSummoned = input.getInt("num_troops_summoned").orElse(0)
     }
 
     override fun getAmbientSound(): SoundEvent = SoundEvents.SKELETON_AMBIENT
@@ -497,7 +566,130 @@ class NightwingEntity(type: EntityType<out NightwingEntity>, level: Level) : Bat
         return false
     }
 
+    override fun doHurtTarget(serverLevel: ServerLevel, target: net.minecraft.world.entity.Entity): Boolean {
+        val hit = super.doHurtTarget(serverLevel, target)
+        // R196 EntityNightwing.collideWithEntity：命中玩家叠加 vision_dimming（1.21 无对应→DARKNESS 近似）
+        if (hit && target is LivingEntity) {
+            applyVisionDimming(target, 1.25f)
+        }
+        return hit
+    }
+
     override fun getAmbientSound(): SoundEvent = SoundEvents.BAT_AMBIENT
     override fun getHurtSound(source: DamageSource): SoundEvent = SoundEvents.BAT_HURT
     override fun getDeathSound(): SoundEvent = SoundEvents.BAT_DEATH
+}
+
+// ==================== R196 通用行为助手 ====================
+
+/**
+ * R196 EntityLiving.tryDisableNearbyLightSource 移植：
+ * 服务端、未受击（hurtTime==0）、4 格内无玩家时，扫描自身 3×3×(1+身高) 范围：
+ *  - 火把/红石火把（含墙挂）→ 破坏并掉落、播放 pop 音效、返回 true
+ *  - 南瓜灯 → 还原为南瓜并掉落一个火把、播放 pop 音效、返回 true
+ */
+internal fun tryDisableNearbyLightSource(self: Mob): Boolean {
+    val level = self.level()
+    if (level.isClientSide) return false
+    if (self.hurtTime != 0) return false
+    if (level.getNearestPlayer(self, 4.0) != null) return false
+    val bx = self.blockPosition().x
+    val by = self.blockPosition().y
+    val bz = self.blockPosition().z
+    val top = 1 + self.bbHeight.toInt()
+    for (dx in -1..1) {
+        for (dy in -1..top) {
+            for (dz in -1..1) {
+                val p = BlockPos(bx + dx, by + dy, bz + dz)
+                val state = level.getBlockState(p)
+                if (state.`is`(Blocks.TORCH) || state.`is`(Blocks.REDSTONE_TORCH)
+                    || state.`is`(Blocks.WALL_TORCH) || state.`is`(Blocks.REDSTONE_WALL_TORCH)) {
+                    level.destroyBlock(p, true)
+                    playPopSound(self)
+                    return true
+                }
+                if (state.`is`(Blocks.JACK_O_LANTERN)) {
+                    level.setBlock(p, Blocks.PUMPKIN.defaultBlockState(), 3)
+                    val item = ItemEntity(level, p.x + 0.5, p.y + 0.5, p.z + 0.5, ItemStack(Items.TORCH))
+                    item.setPickUpDelay(10)
+                    level.addFreshEntity(item)
+                    playPopSound(self)
+                    return true
+                }
+            }
+        }
+    }
+    return false
+}
+
+private fun playPopSound(self: Mob) {
+    self.level().playSound(
+        null, self.x, self.y, self.z, SoundEvents.ITEM_PICKUP, SoundSource.HOSTILE,
+        0.05f, ((self.random.nextFloat() - self.random.nextFloat()) * 0.7f + 1.0f) * 2.0f
+    )
+}
+
+/**
+ * R196 vision_dimming（屏幕变暗）在 1.21 无对应渲染，用 DARKNESS（黑暗）效果近似。
+ * R196 为该 float 值随时间 0.01/tick 衰减、封顶 2.0；此处以固定时长近似叠加量。
+ */
+internal fun applyVisionDimming(target: LivingEntity, amount: Float) {
+    if (target !is Player) return
+    val duration = (amount * 100f).toInt().coerceIn(20, 600)
+    target.addEffect(MobEffectInstance(MobEffects.DARKNESS, duration, 0, false, false))
+}
+
+/**
+ * R196 EntityBoneLord.onLivingUpdate 召唤链移植（每 20 tick）：
+ *  - 目标有效（玩家、16 格内可见）且 num<6 时，以 rand.nextInt(8) < 7-num 的概率召唤 1 只随从，
+ *    随后 50% 概率再召唤 1 只（上限 6）。
+ *  - 16×8×16 内可见的骷髅：血量未满则治疗 1，并使其攻击同一目标（frenzied）。
+ * 返回更新后的 num_troops_summoned。
+ */
+internal fun r196BoneLordTick(self: Mob, troopType: EntityType<out Mob>, numSummoned: Int): Int {
+    val level = self.level() as? ServerLevel ?: return numSummoned
+    if (self.tickCount % 20 != 0) return numSummoned
+    var num = numSummoned
+    var target: LivingEntity? = self.target
+    if (target != null && (!target.isAlive || self.distanceTo(target) > 16.0 || !self.hasLineOfSight(target))) {
+        target = null
+    }
+    if (target is Player && num < 6 && self.random.nextInt(8) < 7 - num) {
+        if (trySummonTroop(self, level, troopType, target)) num++
+        if (num < 6 && self.random.nextBoolean()) {
+            if (trySummonTroop(self, level, troopType, target)) num++
+        }
+    }
+    val nearby = level.getEntitiesOfClass(Skeleton::class.java, self.boundingBox.inflate(16.0, 8.0, 16.0))
+    for (sk in nearby) {
+        if (sk === self) continue
+        if (!sk.hasLineOfSight(self)) continue
+        if (sk.health < sk.maxHealth) sk.heal(1.0f)
+        if (target != null) sk.target = target
+    }
+    return num
+}
+
+/** 在施法者周围寻找可站立位置并召唤一只随从；成功返回 true。 */
+private fun trySummonTroop(self: Mob, level: ServerLevel, troopType: EntityType<out Mob>, target: LivingEntity): Boolean {
+    val troop: Mob = (troopType.create(level, EntitySpawnReason.MOB_SUMMONED) as? Mob) ?: return false
+    for (attempt in 0 until 16) {
+        val dx = self.random.nextInt(9) - 4
+        val dz = self.random.nextInt(9) - 4
+        val dy = self.random.nextInt(3) - 1
+        val px = self.x + dx
+        val py = self.y + dy
+        val pz = self.z + dz
+        val bp = BlockPos.containing(px, py, pz)
+        if (!level.getBlockState(bp).isAir || !level.getBlockState(bp.above()).isAir) continue
+        if (!level.getBlockState(bp.below()).isSolid) continue
+        troop.setPos(px, py, pz)
+        troop.setYRot(self.random.nextFloat() * 360f)
+        troop.finalizeSpawn(level, level.getCurrentDifficultyAt(bp), EntitySpawnReason.MOB_SUMMONED, null)
+        level.addFreshEntity(troop)
+        troop.target = target
+        return true
+    }
+    troop.discard()
+    return false
 }

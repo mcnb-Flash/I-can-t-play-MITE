@@ -57,17 +57,21 @@ public abstract class ICPMWeatherMixin {
         if (self.dimension() != Level.OVERWORLD) {
             return;
         }
-        long t = self.getDayTime();
-        long phase = t % 24000L;
-        boolean force = (ICPMMoonPhase.isBloodMoonDay(self) && phase >= 6000L)
-                || ICPMMoonPhase.isBloodMoonNight(self);
-        if (!force) {
+        // R196：血月日（24 小时周期）才有特殊天气
+        if (!ICPMMoonPhase.isBloodMoonDay(self)) {
             return;
         }
+        long phase = self.getDayTime() % 24000L;
         ServerLevelData data = (ServerLevelData) self.getLevelData();
-        if (!self.isThundering() || data.getThunderTime() < 20) {
-            // (clearDuration, weatherDuration, raining, thundering)
-            self.setWeatherParameters(0, 13000, true, true);
+        if (phase < 13000L) {
+            // 血月日 0~13000 tick：强制雷雨（覆盖整个白天与入夜后 1000 tick）
+            // （续期条件：未雷暴或雷暴计时即将耗尽，避免每 tick 重置导致血月结束后仍久打雷）
+            if (!self.isThundering() || data.getThunderTime() < 20) {
+                self.setWeatherParameters(0, 13000, true, true);
+            }
+        } else if (self.isRaining() || self.isThundering()) {
+            // 深夜（13000~24000）：雨停，血月当空显形（R196 WeatherEvent 到期结束）
+            self.setWeatherParameters(1, 0, false, false);
         }
     }
 }

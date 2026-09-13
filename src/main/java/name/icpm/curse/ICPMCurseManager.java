@@ -70,8 +70,18 @@ public final class ICPMCurseManager {
     public static final int CURSE_DELAY_TICKS = 0;
 
     private static final Map<UUID, CurseEntry> ENTRIES = new HashMap<>();
-    /** 已"学会"效果的玩家（服务端会话内）；防重复发送 desc 提示。 */
-    private static final Set<UUID> LEARNED = new HashSet<>();
+    /** 已"学会"的诅咒（玩家 → 诅咒 id 集合）。
+     *  R196 的 {@code Curse.effect_known} 是【每条诅咒一个】标志，故这里按诅咒分别记录——
+     *  历史实现用"玩家级单标志"，导致玩家触发过任意一条诅咒后，换成别的诅咒也永远不再播报
+     *  （表现为"只在第一次进存档时提示过一次"）。 */
+    private static final Map<UUID, Set<Integer>> LEARNED = new HashMap<>();
+    /** 本次服务端会话内已播报过"当前诅咒"的玩家（重进服务器会自动重播一次）。 */
+    private static final Set<UUID> SESSION_CURSE_NOTIFIED = new HashSet<>();
+
+    /** 标记"已学会某条诅咒"，返回是否为【首次】学会（对应 R196 Curse.effect_known）。 */
+    private static boolean markLearned(UUID uuid, ICPMCurse curse) {
+        return LEARNED.computeIfAbsent(uuid, k -> new HashSet<>()).add(curse.id());
+    }
 
     private ICPMCurseManager() {
     }
@@ -126,7 +136,8 @@ public final class ICPMCurseManager {
             MobEffectInstance whisper = le.getEffect(ICPM.WITCH_WHISPER_HOLDER);
             hit = whisper != null && whisper.getAmplifier() + 1 == curse.id();
         }
-        if (hit && learnEffect && entity instanceof ServerPlayer player && LEARNED.add(player.getUUID())) {
+        if (hit && learnEffect && entity instanceof ServerPlayer player
+                && markLearned(player.getUUID(), curse)) {
             player.sendSystemMessage(Component.translatable(curse.descKey()));
         }
         return hit;
@@ -181,16 +192,20 @@ public final class ICPMCurseManager {
 
     /** realize 后施加效果本体 + realize 提示（R196 checkCurses realize + onCurseRealized）。 */
     private static void applyRealized(ServerPlayer player, CurseEntry e) {
-        // 施加无限时长诅咒效果（变体 = amplifier）
+        // 施加无限时长诅咒效果（变体 = amplifier）。
+        // showIcon=true：让诅咒在 HUD 效果栏可见（此前 false ⇒ 玩家界面上完全看不到自己中了诅咒，
+        // 只能靠聊天栏那一条消息，重进存档后更是毫无提示）。
         player.addEffect(new MobEffectInstance(ICPM.WITCH_CURSE_HOLDER, -1,
-                e.curse.id() - 1, false, false, false));
+                e.curse.id() - 1, false, false, true));
         player.sendSystemMessage(Component.translatable("curse.realized",
                 Component.translatable(e.curse.titleKey())));
+        // R196 effect_known：每条诅咒"学会"一次，播报其具体效果（per-curse，换诅咒会重新播报）
+        if (markLearned(player.getUUID(), e.curse)) {
+            player.sendSystemMessage(Component.translatable(e.curse.descKey()));
+        }
+        e.effectKnown = true;
         if (e.curse == ICPMCurse.CANNOT_WEAR_ARMOR) {
             dropAllArmor(player); // R196 onCurseRealized
-            e.effectKnown = true;
-            LEARNED.add(player.getUUID());
-            player.sendSystemMessage(Component.translatable(e.curse.descKey()));
         }
     }
 
@@ -206,6 +221,40 @@ public final class ICPMCurseManager {
                 }
             }
             syncWhisper(player);
+            announceActiveCurse(player);
+        }
+    }
+
+    /** 当前【普通】诅咒类型（读 witch_curse 效果 amplifier；无则 null）。 */
+    public static ICPMCurse getRegularCurse(Entity entity) {
+        if (!(entity instanceof LivingEntity le)) {
+            return null;
+        }
+        MobEffectInstance inst = le.getEffect(ICPM.WITCH_CURSE_HOLDER);
+        return inst == null ? null : ICPMCurse.fromId(inst.getAmplifier() + 1);
+    }
+
+    /** 本次会话首次 tick 到玩家时，播报一次其身上现有的全部诅咒（普通 + 女巫低吟）。
+     *  解决"重进存档后完全看不出自己中了什么诅咒"——效果图标只能显示"女巫诅咒"，
+     *  具体是哪一条必须靠文字说明。 */
+    private static void announceActiveCurse(ServerPlayer player) {
+        if (!SESSION_CURSE_NOTIFIED.add(player.getUUID())) {
+            return;
+        }
+        ICPMCurse regular = getRegularCurse(player);
+        ICPMCurse whisper = getWhisperCurse(player);
+        if (regular == null && whisper == null) {
+            return;
+        }
+        if (regular != null) {
+            player.sendSystemMessage(Component.translatable("curse.active.regular",
+                    Component.translatable(regular.titleKey()),
+                    Component.translatable(regular.descKey())));
+        }
+        if (whisper != null) {
+            player.sendSystemMessage(Component.translatable("curse.active.whisper",
+                    Component.translatable(whisper.titleKey()),
+                    Component.translatable(whisper.descKey())));
         }
     }
 
@@ -220,7 +269,7 @@ public final class ICPMCurseManager {
                 ICPMCurse curse = ICPMCurse.getRandom(player.getRandom());
                 player.addEffect(new MobEffectInstance(ICPM.WITCH_WHISPER_HOLDER, -1,
                         curse.id() - 1, false, false, true));
-                LEARNED.add(player.getUUID());
+                markLearned(player.getUUID(), curse);
                 player.sendSystemMessage(Component.translatable("curse.realized",
                         Component.translatable(curse.titleKey())));
                 player.sendSystemMessage(Component.translatable("message.icpm.whisper_curse",
@@ -323,7 +372,7 @@ public final class ICPMCurseManager {
                 e.realized = tag.getInt(TAG_REALIZED).orElse(0) != 0;
                 e.effectKnown = tag.getInt(TAG_KNOWN).orElse(0) != 0;
                 if (e.effectKnown) {
-                    LEARNED.add(uuid);
+                    markLearned(uuid, e.curse);
                 }
                 ENTRIES.put(uuid, e);
             }

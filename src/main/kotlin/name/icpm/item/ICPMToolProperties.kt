@@ -29,8 +29,93 @@ object ICPMToolProperties {
      * 材质枚举（对应 ICPMDurability.Material）
      */
     enum class ToolMaterial {
-        LEATHER, WOOD, FLINT, COPPER, SILVER, GOLD, IRON,
+        LEATHER, WOOD, FLINT, OBSIDIAN, RUSTED_IRON, COPPER, SILVER, GOLD, IRON,
         ANCIENT_METAL, MITHRIL, ADAMANTIUM, DIAMOND, NETHERITE
+    }
+
+    /**
+     * R196 工具基础攻击伤害表。
+     *
+     * 判决源：R196 各 ItemTool 子类 `getBaseDamageVsEntity()`：
+     * ItemSword 4.0 / ItemDagger(super-2) 2.0 / ItemKnife(super-1) 1.0 /
+     * ItemAxe 3.0 / ItemHatchet(super-1) 2.0 / ItemBattleAxe(super+1) 4.0 /
+     * ItemPickaxe 2.0 / ItemWarHammer(继承镐) 2.0 / ItemShovel 1.0 /
+     * ItemMattock(继承铲) 1.0 / ItemHoe 1.0 / ItemCudgel 1.0 /
+     * ItemClub(super+1) 2.0 / ItemScythe 1.0。
+     *
+     * 语义说明：R196 `ItemTool.getCombinedDamageVsEntity() = getBaseDamageVsEntity() + 材质伤害`，
+     * 再叠加玩家基础攻击 1.0（`EntityPlayer.java:210` setEntityAttribute(attackDamage, 1.0)）。
+     * 1.21.11 的 `.sword(tier, x, spd)` / `XxxItem(tier, x, spd)` 语义为「x + tier.attackDamageBonus」，
+     * 故这里的 x 必须直接取 R196 的 `getBaseDamageVsEntity()` 才能总量对齐。
+     */
+    @JvmStatic
+    fun getR196BaseDamage(category: ToolCategory): Float = when (category) {
+        ToolCategory.SWORD -> 4.0f
+        ToolCategory.DAGGER -> 2.0f
+        ToolCategory.KNIFE -> 1.0f
+        ToolCategory.AXE -> 3.0f
+        ToolCategory.HATCHET -> 2.0f
+        ToolCategory.BATTLE_AXE -> 4.0f
+        ToolCategory.PICKAXE -> 2.0f
+        ToolCategory.WAR_HAMMER -> 2.0f
+        ToolCategory.SHOVEL -> 1.0f
+        ToolCategory.MATTOCK -> 1.0f
+        ToolCategory.HOE -> 1.0f
+        ToolCategory.CUDGEL -> 1.0f
+        ToolCategory.CLUB -> 2.0f
+        ToolCategory.SCYTHE -> 1.0f
+        ToolCategory.SPEAR -> 0.85f
+    }
+
+    /**
+     * R196 材质攻击加值（`Material.getDamageVsEntity()`，Material.java:370-409）。
+     * wood0 / flint1 / obsidian2 / rusted_iron2 / copper3 / silver3 / gold2 /
+     * iron4 / ancient_metal4 / mithril5 / adamantium6 / diamond4。
+     */
+    @JvmStatic
+    fun getR196MaterialDamage(material: ToolMaterial): Float = when (material) {
+        ToolMaterial.LEATHER -> 0.0f
+        ToolMaterial.WOOD -> 0.0f
+        ToolMaterial.FLINT -> 1.0f
+        ToolMaterial.OBSIDIAN -> 2.0f
+        ToolMaterial.RUSTED_IRON -> 2.0f
+        ToolMaterial.COPPER -> 3.0f
+        ToolMaterial.SILVER -> 3.0f
+        ToolMaterial.GOLD -> 2.0f
+        ToolMaterial.IRON -> 4.0f
+        ToolMaterial.ANCIENT_METAL -> 4.0f
+        ToolMaterial.MITHRIL -> 5.0f
+        ToolMaterial.ADAMANTIUM -> 6.0f
+        ToolMaterial.DIAMOND -> 4.0f
+        ToolMaterial.NETHERITE -> 7.0f
+    }
+
+    /**
+     * 手持工具的 R196 攻击伤害修饰总量（不含玩家基础 1.0）。
+     * = getBaseDamageVsEntity() + 材质伤害。
+     */
+    @JvmStatic
+    fun getR196AttackDamageModifier(stack: ItemStack): Float {
+        val category = getToolCategory(stack) ?: return 0f
+        val material = getToolMaterial(stack) ?: return 0f
+        return getR196BaseDamage(category) + getR196MaterialDamage(material)
+    }
+
+    /**
+     * 读取 ItemStack 当前 ATTACK_DAMAGE 属性修饰之和。
+     */
+    @JvmStatic
+    fun getCurrentAttackDamageModifier(stack: ItemStack): Float {
+        val mods = stack.get(DataComponents.ATTRIBUTE_MODIFIERS) ?: return 0f
+        var total = 0f
+        for (entry in mods.modifiers()) {
+            if (entry.attribute() != net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) continue
+            val mod = entry.modifier()
+            if (mod.operation() == net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE) {
+                total += mod.amount().toFloat()
+            }
+        }
+        return total
     }
 
     private val TOOL_TYPE_MAP: Map<ToolCategory, ICPMDurability.ToolType> = mapOf(
@@ -238,8 +323,9 @@ object ICPMToolProperties {
             if (type == ICPMDurability.ToolType.SCYTHE &&
                 (state.`is`(BlockTags.CROPS) || state.`is`(Blocks.TALL_GRASS) || state.`is`(Blocks.FERN))
             ) return 0.5f
-            // R196 ItemKnife.getBaseDecayRateForBreakingBlock：作物 ÷4（继承剑 2.0 → 0.5）
-            if (type == ICPMDurability.ToolType.KNIFE && state.`is`(BlockTags.CROPS)) return 0.5f
+            // R196 ItemKnife.getBaseDecayRateForBreakingBlock：cloth/plants/vine ÷4（继承剑 2.0 → 0.5）
+            // 其余方块 ÷2 → 1.0（即 ToolType.KNIFE.blockDecayRate 默认值）
+            if (type == ICPMDurability.ToolType.KNIFE && isR196KnifeSoftBlock(state)) return 0.5f
             // R196 ItemAxe.getBaseDecayRateForBreakingBlock：砂岩 1.875
             if (type == ICPMDurability.ToolType.AXE &&
                 (state.`is`(Blocks.SANDSTONE) || state.`is`(Blocks.RED_SANDSTONE))
@@ -258,6 +344,28 @@ object ICPMToolProperties {
             if (enchantLevel(stack, "minecraft:sharpness") > 0) return 2.0f
         }
         return type.attackDecayRate
+    }
+
+    /**
+     * R196 `ItemKnife.getBaseDecayRateForBreakingBlock` 的 ÷4 集合：
+     * `Material.cloth`（布/羊毛）、`Material.plants`（作物/草/花/树苗）、`Material.vine`（藤蔓）。
+     * 不含 `Material.tree_leaves`（树叶走 ÷2）。
+     */
+    @JvmStatic
+    private fun isR196KnifeSoftBlock(state: BlockState): Boolean {
+        return state.`is`(BlockTags.WOOL)
+                || state.`is`(BlockTags.CROPS)
+                || state.`is`(BlockTags.FLOWERS)
+                || state.`is`(BlockTags.SAPLINGS)
+                || state.`is`(Blocks.VINE)
+                || state.`is`(Blocks.SHORT_GRASS)
+                || state.`is`(Blocks.TALL_GRASS)
+                || state.`is`(Blocks.FERN)
+                || state.`is`(Blocks.LARGE_FERN)
+                || state.`is`(Blocks.SWEET_BERRY_BUSH)
+                || state.`is`(Blocks.NETHER_SPROUTS)
+                || state.`is`(Blocks.CRIMSON_ROOTS)
+                || state.`is`(Blocks.WARPED_ROOTS)
     }
 
     /** 读取物品附魔等级（按注册 id 全名匹配，如 "icpm:vampiric"） */
@@ -315,6 +423,8 @@ object ICPMToolProperties {
             ToolMaterial.LEATHER -> ICPMDurability.Material.LEATHER
             ToolMaterial.WOOD -> ICPMDurability.Material.WOOD
             ToolMaterial.FLINT -> ICPMDurability.Material.FLINT
+            ToolMaterial.OBSIDIAN -> ICPMDurability.Material.OBSIDIAN
+            ToolMaterial.RUSTED_IRON -> ICPMDurability.Material.RUSTED_IRON
             ToolMaterial.COPPER -> ICPMDurability.Material.COPPER
             ToolMaterial.SILVER -> ICPMDurability.Material.SILVER
             ToolMaterial.GOLD -> ICPMDurability.Material.GOLD

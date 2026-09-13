@@ -131,7 +131,10 @@
         "ICPMCreativeModeGateMixin",
         "ICPMTechMiningMixin",
         "ICPMTechAttackMixin",
-        "ICPMR196TargetingMixin"
+        "ICPMR196TargetingMixin",
+        "ICPMVillagerReputationMixin",
+        "ICPMVillagerTradeMixin",
+        "ICPMIronGolemReputationMixin"
     ],
     "injectors": {
         "defaultRequire": 1

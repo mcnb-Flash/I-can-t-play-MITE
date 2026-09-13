@@ -30,7 +30,8 @@ public abstract class ICPMTechMiningMixin {
         }
         float factor = ICPMWorldEvil.penaltyFactor();
         float v = cir.getReturnValueF();
-        if (factor < 1.0f && v > 0.0f) {
+        // 零硬度方块原版返回 Infinity，乘惩罚前必须排除（Infinity×factor 仍 Infinite 无碍，但 ×0 会 NaN）
+        if (factor < 1.0f && v > 0.0f && !Float.isInfinite(v) && !Float.isNaN(v)) {
             cir.setReturnValue(v * factor);
         }
     }
