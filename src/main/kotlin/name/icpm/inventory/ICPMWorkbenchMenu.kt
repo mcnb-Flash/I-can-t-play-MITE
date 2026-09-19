@@ -130,10 +130,13 @@ class ICPMWorkbenchMenu(
          */
         fun getRequiredWorkbenchTier(item: ItemStack): Int {
             val holder = item.item.builtInRegistryHolder()
-            val id = holder.key().identifier().path
+            val key = holder.key().identifier()
+            val id = key.path
             return when {
                 // === 金属工作台自身：需要「材料弱一级」的工作台 ===
                 // 艾德曼工作台（tier 6 台）→ 秘银台(tier 5)可合成
+                // 下界合金工作台（tier 7 台）→ 艾德曼台(tier 6)可合成（R196 next_strongest_material 类推）
+                id == "netherite_workbench" -> 6
                 id == "adamantium_workbench" -> 5
                 // 秘银工作台（tier 5 台）→ 远古金属台(tier 4)可合成
                 id == "mithril_workbench" -> 4
@@ -146,7 +149,10 @@ class ICPMWorkbenchMenu(
                 // === 金属锭/粒：R196 ItemIngot 不设等级 → 任何工作台可合成（含熔炉冶炼所得）===
                 id.endsWith("_ingot") || id.endsWith("_nugget") -> 0
                 // === 金属制品：需要自身材料对应等级的工作台 ===
-                id.contains("adamantium") || id.contains("netherite") -> 6
+                id.contains("adamantium") -> 6
+                // 下界合金矿物块/砧/装备（R196 RecipeHelper:83 类推：门槛=该物品最硬金属材质，tier 7）
+                // 含原版 minecraft:netherite_block / netherite_* 装备；升级模板不算制品，排除。
+                id.contains("netherite") && !id.contains("smithing_template") -> 7
                 id.contains("mithril") || id.contains("diamond") -> 5
                 id.contains("ancient_metal") -> 4
                 id.contains("iron") -> 3
@@ -775,6 +781,7 @@ class ICPMWorkbenchMenu(
         4 -> 125f
         5 -> 155f
         6 -> 190f
+        7 -> 220f
         else -> 40f
     }
 
@@ -790,6 +797,7 @@ class ICPMWorkbenchMenu(
         4 -> 0.5f
         5 -> 0.6f
         6 -> 0.7f
+        7 -> 0.8f
         else -> 0.2f
     }
 

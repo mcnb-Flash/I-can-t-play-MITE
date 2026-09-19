@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -44,11 +46,38 @@ public abstract class CropBlockMixin {
         return s.is(Blocks.FARMLAND) && s.getValue(FarmBlock.MOISTURE) > 0;
     }
 
+    /**
+     * 取作物当前生长阶段。
+     *
+     * 0 修正：1.21.11 的 CropBlock.AGE 常量恒为 AGE_7（0-7），但部分子类使用**自己的** age 属性：
+     * BeetrootBlock → AGE_3(0-3)、TorchflowerCropBlock → AGE_2(0-2)、PitcherCropBlock → AGE_4(0-4)。
+     * 直接 state.getValue(CropBlock.AGE) 在这些方块上会抛
+     * IllegalArgumentException: Cannot get property ... as it does not exist（血月 25% 强制染病时必崩）。
+     * 它们的 age 属性名统一为 "age"，故按属性遍历取值。
+     */
+    private static int cropAge(BlockState state) {
+        for (Property<?> p : state.getProperties()) {
+            if (p instanceof IntegerProperty ip && "age".equals(p.getName())) {
+                return state.getValue(ip);
+            }
+        }
+        return 0;
+    }
+
+    /** 是否已成熟：走 CropBlock.isMaxAge（Beetroot 3、Torchflower 2、Pitcher 需 AGE_4+HALF 等特例均正确） */
+    private static boolean isMature(BlockState state) {
+        return state.getBlock() instanceof CropBlock crop && crop.isMaxAge(state);
+    }
+
     /** 作物随机刻：干湿 + 病害检查 */
     @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
     private void icpm$diseaseOnRandomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo ci) {
+        // 枯死作物不参与随机刻（R196 BlockCropsDead.setTickRandomly(false)）
+        if (state.getBlock() instanceof name.icpm.block.ICPMDeadCropBlock) {
+            return;
+        }
         ResourceKey<Level> dim = level.dimension();
-        boolean mature = state.getValue(CropBlock.AGE) >= CropBlock.MAX_AGE;
+        boolean mature = isMature(state);
         BlockState below = level.getBlockState(pos.below());
         boolean onFarmland = below.is(Blocks.FARMLAND);
         boolean wet = isWetFarmland(level, pos.below());
@@ -64,7 +93,7 @@ public abstract class CropBlockMixin {
                     Block.dropResources(state, level, pos);
                     level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                 } else {
-                    level.setBlock(pos, name.icpm.block.ICPMDeadCropBlock.placeState(state.getValue(CropBlock.AGE)), 3);
+                    level.setBlock(pos, name.icpm.block.ICPMDeadCropBlock.placeState(cropAge(state)), 3);
                 }
                 ci.cancel();
                 return;
@@ -79,34 +108,44 @@ public abstract class CropBlockMixin {
             // B1 疫病致死（R196 BlockCrops:93-97）：每随机刻 1/64 转枯死作物方块
             //（成熟的进度 -1，未成熟保持进度）；R196 无掉落。
             if (random.nextInt(64) == 0) {
-                int age = state.getValue(CropBlock.AGE);
+                int age = cropAge(state);
                 int deadAge = mature ? Math.max(0, age - 1) : age;
                 level.setBlock(pos, name.icpm.block.ICPMDeadCropBlock.placeState(deadAge), 3);
                 ICPMPlantDisease.cure(dim, pos);
                 return;
             }
-            // B2 邻近传染：水平 4 邻居中健康且未成熟者，每随机刻 1/32 概率被感染
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
-                BlockPos neighbor = pos.relative(dir);
-                BlockState nState = level.getBlockState(neighbor);
-                if (nState.getBlock() instanceof CropBlock
-                        && !(nState.getBlock() instanceof name.icpm.block.ICPMDeadCropBlock)
-                        && !ICPMPlantDisease.isDiseased(dim, neighbor)
-                        && nState.getValue(CropBlock.AGE) < CropBlock.MAX_AGE
-                        && random.nextInt(32) == 0) {
-                    ICPMPlantDisease.infect(dim, neighbor);
-                }
+            // B2 邻近传染（R196 BlockCrops.java:99-108）：先 50% 门控（nextBoolean），
+            // 通过后于 3×3×3（去掉自身，共 26 格）中**随机取一格**尝试感染；
+            // 目标须为作物、非枯死、且尚未患病。R196 **不限制成熟度**（成熟作物同样会被传染）。
+            if (random.nextBoolean()) {
+                return;
+            }
+            int dx = random.nextInt(3) - 1;
+            int dy = random.nextInt(3) - 1;
+            int dz = random.nextInt(3) - 1;
+            if (dx == 0 && dy == 0 && dz == 0) {
+                return;
+            }
+            BlockPos neighbor = pos.offset(dx, dy, dz);
+            if (!level.isLoaded(neighbor)) {
+                return;
+            }
+            BlockState nState = level.getBlockState(neighbor);
+            if (nState.getBlock() instanceof CropBlock
+                    && !(nState.getBlock() instanceof name.icpm.block.ICPMDeadCropBlock)
+                    && !ICPMPlantDisease.isDiseased(dim, neighbor)) {
+                ICPMPlantDisease.infect(dim, neighbor);
             }
             return;
         }
         // 血月之夜：作物大量患病（R196 BlockCrops: 25% 概率患病）
-        if (state.getValue(CropBlock.AGE) < CropBlock.MAX_AGE && ICPMMoonPhase.isBloodMoonNight(level) && random.nextFloat() < 0.25f) {
+        if (!mature && ICPMMoonPhase.isBloodMoonNight(level) && random.nextFloat() < 0.25f) {
             ICPMPlantDisease.infect(dim, pos);
             ci.cancel();
             return;
         }
         // 健康作物患病（R196：0.0005/t × 温度疾病因子 × (湿度>0.85?1.5) × (1-亮度/16)）
-        if (state.getValue(CropBlock.AGE) < CropBlock.MAX_AGE) {
+        if (!mature) {
             boolean potato = state.is(Blocks.POTATOES);
             float chance = (potato ? 0.001f : 0.0005f)
                     * ICPMClimate.diseaseFactor(level, pos)
@@ -129,8 +168,15 @@ public abstract class CropBlockMixin {
         if (level.isClientSide()) {
             return;
         }
-        int before = state.getValue(CropBlock.AGE);
-        int after = level.getBlockState(pos).getValue(CropBlock.AGE);
+        if (state.getBlock() instanceof name.icpm.block.ICPMDeadCropBlock) {
+            return;
+        }
+        BlockState now = level.getBlockState(pos);
+        if (!(now.getBlock() instanceof CropBlock) || now.getBlock() instanceof name.icpm.block.ICPMDeadCropBlock) {
+            return;
+        }
+        int before = cropAge(state);
+        int after = cropAge(now);
         if (after > before && ICPMFarmlandFertility.get(level.dimension(), pos.below()) > 0) {
             ICPMFarmlandFertility.consume(level.dimension(), pos.below());
         }
@@ -146,16 +192,10 @@ public abstract class CropBlockMixin {
         Block block = state.getBlock();
         float speed = cir.getReturnValue();
         BlockPos below = pos.below();
-        if (l.getBlockState(below).is(Blocks.FARMLAND)) {
-            int fertility = ICPMFarmlandFertility.get(l.dimension(), below);
-            if (fertility > 0) {
-                float boost = switch (fertility) {
-                    case 1 -> 1.0f;
-                    case 2 -> 2.5f;
-                    default -> 4.5f; // 3 级
-                };
-                speed += boost;
-            }
+        // R196 BlockCrops.java:185-187：下方耕地 isFertilized → growth_rate *= 1.5f（乘算）
+        if (l.getBlockState(below).is(Blocks.FARMLAND)
+                && ICPMFarmlandFertility.isFertilized(l.dimension(), below)) {
+            speed *= 1.5f;
         }
         // 丰收之月：作物生长速度 +2.0（R196 丰收月作物加速）
         if (l instanceof net.minecraft.server.level.ServerLevel sl && ICPMMoonPhase.isHarvestMoonDay(sl)) {

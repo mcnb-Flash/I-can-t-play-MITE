@@ -29,22 +29,24 @@ object ICPMBlocks {
         "adamantium_ore", "deepslate_adamantium_ore",
         "silver_block", "ancient_metal_block", "mithril_block", "adamantium_block",
         "copper_anvil", "silver_anvil", "gold_anvil",
-        "ancient_metal_anvil", "mithril_anvil", "adamantium_anvil",
+        "ancient_metal_anvil", "mithril_anvil", "adamantium_anvil", "netherite_anvil",
         "chipped_copper_anvil", "damaged_copper_anvil",
         "chipped_silver_anvil", "damaged_silver_anvil",
         "chipped_gold_anvil", "damaged_gold_anvil",
         "chipped_ancient_metal_anvil", "damaged_ancient_metal_anvil",
         "chipped_mithril_anvil", "damaged_mithril_anvil",
         "chipped_adamantium_anvil", "damaged_adamantium_anvil",
+        "chipped_netherite_anvil", "damaged_netherite_anvil",
         "flint_workbench",
         "copper_workbench", "silver_workbench", "gold_workbench",
         "iron_workbench", "ancient_metal_workbench", "mithril_workbench", "adamantium_workbench",
+        "netherite_workbench",
         "clay_furnace", "hardened_clay_furnace", "sandstone_furnace", "obsidian_furnace", "netherrack_furnace",
-        "silver_door", "gold_door", "ancient_metal_door", "mithril_door", "adamantium_door",
+        "silver_door", "gold_door", "ancient_metal_door", "mithril_door", "adamantium_door", "netherite_door",
         "emerald_enchanting_table",
         "silver_strongbox", "gold_strongbox", "iron_strongbox",
-        "ancient_metal_strongbox", "mithril_strongbox", "adamantium_strongbox",
-        "mithril_runestone", "adamantium_runestone", "core"
+        "ancient_metal_strongbox", "mithril_strongbox", "adamantium_strongbox", "netherite_strongbox",
+        "mithril_runestone", "adamantium_runestone", "netherite_runestone", "core"
     )
 
     /**
@@ -147,7 +149,8 @@ object ICPMBlocks {
         BlockMetalAnvil.MetalType.GOLD to listOf("gold_anvil", "chipped_gold_anvil", "damaged_gold_anvil"),
         BlockMetalAnvil.MetalType.ANCIENT_METAL to listOf("ancient_metal_anvil", "chipped_ancient_metal_anvil", "damaged_ancient_metal_anvil"),
         BlockMetalAnvil.MetalType.MITHRIL to listOf("mithril_anvil", "chipped_mithril_anvil", "damaged_mithril_anvil"),
-        BlockMetalAnvil.MetalType.ADAMANTIUM to listOf("adamantium_anvil", "chipped_adamantium_anvil", "damaged_adamantium_anvil")
+        BlockMetalAnvil.MetalType.ADAMANTIUM to listOf("adamantium_anvil", "chipped_adamantium_anvil", "damaged_adamantium_anvil"),
+        BlockMetalAnvil.MetalType.NETHERITE to listOf("netherite_anvil", "chipped_netherite_anvil", "damaged_netherite_anvil")
     )
 
     /**
@@ -216,6 +219,14 @@ object ICPMBlocks {
     @JvmField
     var ADAMANTIUM_ANVIL: BlockMetalAnvil? = null
 
+    /**
+     * 下界合金砧
+     * 砧等级: 7（R196 语义：可修等级 ≤7 的物品；高于艾德曼的 6）
+     * 可修复: 全部金属工具（含下界合金）
+     */
+    @JvmField
+    var NETHERITE_ANVIL: BlockMetalAnvil? = null
+
     // ===== 工作台方块 =====
 
     /** 燧石工作台（多原木衍生变体，见 BlockICPMFlintWorkbench.WoodType） */
@@ -227,6 +238,7 @@ object ICPMBlocks {
     @JvmField var ANCIENT_METAL_WORKBENCH: BlockICPMWorkbench? = null
     @JvmField var MITHRIL_WORKBENCH: BlockICPMWorkbench? = null
     @JvmField var ADAMANTIUM_WORKBENCH: BlockICPMWorkbench? = null
+    @JvmField var NETHERITE_WORKBENCH: BlockICPMWorkbench? = null
 
     /** 原石熔炉=原版熔炉（mixin 注入，maxHeatLevel=2），此处不再单独注册 */
     /** 粘土熔炉（maxHeatLevel=1，不能烧大物品） */
@@ -250,6 +262,7 @@ object ICPMBlocks {
     @JvmField var ANCIENT_METAL_DOOR: net.minecraft.world.level.block.DoorBlock? = null
     @JvmField var MITHRIL_DOOR: net.minecraft.world.level.block.DoorBlock? = null
     @JvmField var ADAMANTIUM_DOOR: net.minecraft.world.level.block.DoorBlock? = null
+    @JvmField var NETHERITE_DOOR: net.minecraft.world.level.block.DoorBlock? = null
 
     /** 绿宝石附魔台（ICPM R196 BlockEnchantmentTable, Material.emerald） */
     @JvmField var EMERALD_ENCHANTING_TABLE: EmeraldEnchantingTableBlock? = null
@@ -261,12 +274,14 @@ object ICPMBlocks {
     @JvmField var ANCIENT_METAL_STRONGBOX: ICPMStrongboxBlock? = null
     @JvmField var MITHRIL_STRONGBOX: ICPMStrongboxBlock? = null
     @JvmField var ADAMANTIUM_STRONGBOX: ICPMStrongboxBlock? = null
+    @JvmField var NETHERITE_STRONGBOX: ICPMStrongboxBlock? = null
 
     /** 秘银符文石（1.6.4 BlockRunestone） */
     @JvmField var MITHRIL_RUNESTONE: BlockRunestone? = null
 
     /** 艾德曼符文石（1.6.4 BlockRunestone） */
     @JvmField var ADAMANTIUM_RUNESTONE: BlockRunestone? = null
+    @JvmField var NETHERITE_RUNESTONE: BlockRunestone? = null
 
     /** 地核（1.6.4 BlockMantleOrCore metadata=1，地下世界最底层，不可破坏） */
     @JvmField var CORE: Block? = null
@@ -465,13 +480,22 @@ object ICPMBlocks {
                     .setId(blockKey)
                 BlockMetalAnvil(BlockMetalAnvil.MetalType.ADAMANTIUM, 0, properties)
             }
+            "netherite_anvil" -> {
+                val properties = BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(10.0f, 1200.0f)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .setId(blockKey)
+                BlockMetalAnvil(BlockMetalAnvil.MetalType.NETHERITE, 0, properties)
+            }
             // ===== 金属砧变体（chipped/damaged）=====
             "chipped_copper_anvil", "damaged_copper_anvil",
             "chipped_silver_anvil", "damaged_silver_anvil",
             "chipped_gold_anvil", "damaged_gold_anvil",
             "chipped_ancient_metal_anvil", "damaged_ancient_metal_anvil",
             "chipped_mithril_anvil", "damaged_mithril_anvil",
-            "chipped_adamantium_anvil", "damaged_adamantium_anvil" -> {
+            "chipped_adamantium_anvil", "damaged_adamantium_anvil",
+            "chipped_netherite_anvil", "damaged_netherite_anvil" -> {
                 val metalName = name.removePrefix("chipped_").removePrefix("damaged_").removeSuffix("_anvil")
                 val stage = if (name.startsWith("chipped_")) 1 else 2
                 val metalType = when (metalName) {
@@ -482,12 +506,13 @@ object ICPMBlocks {
                     "ancient_metal" -> BlockMetalAnvil.MetalType.ANCIENT_METAL
                     "mithril" -> BlockMetalAnvil.MetalType.MITHRIL
                     "adamantium" -> BlockMetalAnvil.MetalType.ADAMANTIUM
+                    "netherite" -> BlockMetalAnvil.MetalType.NETHERITE
                     else -> throw IllegalArgumentException("Unknown anvil variant: $name")
                 }
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(if (metalName == "gold") MapColor.GOLD else MapColor.METAL)
                     .strength(3.0f, 6.0f)
-                    .sound(if (metalName == "adamantium") SoundType.NETHERITE_BLOCK else SoundType.METAL)
+                    .sound(if (metalName == "adamantium" || metalName == "netherite") SoundType.NETHERITE_BLOCK else SoundType.METAL)
                     .setId(blockKey)
                 BlockMetalAnvil(metalType, stage, properties)
             }
@@ -556,6 +581,14 @@ object ICPMBlocks {
                     .setId(blockKey)
                 BlockICPMWorkbench(6, "艾德曼工作台", properties)
             }
+            "netherite_workbench" -> {
+                val properties = BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(5.0f, 1200.0f)
+                    .sound(SoundType.WOOD)
+                    .setId(blockKey)
+                BlockICPMWorkbench(7, "下界合金工作台", properties)
+            }
             "clay_furnace" -> {
                 // 粘土熔炉：ICPM R196 BlockFurnaceClay，maxHeatLevel=1，不能烧大物品
                 val properties = BlockBehaviour.Properties.of()
@@ -612,7 +645,8 @@ object ICPMBlocks {
                     .setId(blockKey)
                 ICPMFurnaceBlock(4, properties)
             }
-            "silver_door", "gold_door", "ancient_metal_door", "mithril_door", "adamantium_door" -> {
+            "silver_door", "gold_door", "ancient_metal_door", "mithril_door", "adamantium_door",
+            "netherite_door" -> {
                 // 金属门：ICPM R196 BlockDoor（Material 金属），红石开门（canOpenByHand=false）
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
@@ -634,7 +668,8 @@ object ICPMBlocks {
                 EmeraldEnchantingTableBlock(properties)
             }
             "silver_strongbox", "gold_strongbox", "iron_strongbox",
-            "ancient_metal_strongbox", "mithril_strongbox", "adamantium_strongbox" -> {
+            "ancient_metal_strongbox", "mithril_strongbox", "adamantium_strongbox",
+            "netherite_strongbox" -> {
                 // 金属箱（强箱）：1.6.4 BlockStrongbox，仅所有者可开，金属块贴图
                 val metalName = name.removeSuffix("_strongbox")
                 val properties = BlockBehaviour.Properties.of()
@@ -645,10 +680,14 @@ object ICPMBlocks {
                     .setId(blockKey)
                 ICPMStrongboxBlock(metalName, properties)
             }
-            "mithril_runestone", "adamantium_runestone" -> {
+            "mithril_runestone", "adamantium_runestone", "netherite_runestone" -> {
                 // 符文石：1.6.4 BlockRunestone（黑曜石强度，16 变体符文，符文门框架 4 角）
                 val metalName = name.removeSuffix("_runestone")
-                val metal = if (metalName == "mithril") BlockRunestone.MetalType.MITHRIL else BlockRunestone.MetalType.ADAMANTIUM
+                val metal = when (metalName) {
+                    "mithril" -> BlockRunestone.MetalType.MITHRIL
+                    "netherite" -> BlockRunestone.MetalType.NETHERITE
+                    else -> BlockRunestone.MetalType.ADAMANTIUM
+                }
                 val properties = BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BLACK)
                     .strength(2.4f, 20.0f)
@@ -699,6 +738,7 @@ object ICPMBlocks {
             "ancient_metal_anvil" -> ANCIENT_METAL_ANVIL = block as BlockMetalAnvil
             "mithril_anvil" -> MITHRIL_ANVIL = block as BlockMetalAnvil
             "adamantium_anvil" -> ADAMANTIUM_ANVIL = block as BlockMetalAnvil
+            "netherite_anvil" -> NETHERITE_ANVIL = block as BlockMetalAnvil
             "flint_workbench" -> FLINT_WORKBENCH = block as BlockICPMFlintWorkbench
             "copper_workbench" -> COPPER_WORKBENCH = block as BlockICPMWorkbench
             "silver_workbench" -> SILVER_WORKBENCH = block as BlockICPMWorkbench
@@ -707,6 +747,7 @@ object ICPMBlocks {
             "ancient_metal_workbench" -> ANCIENT_METAL_WORKBENCH = block as BlockICPMWorkbench
             "mithril_workbench" -> MITHRIL_WORKBENCH = block as BlockICPMWorkbench
             "adamantium_workbench" -> ADAMANTIUM_WORKBENCH = block as BlockICPMWorkbench
+            "netherite_workbench" -> NETHERITE_WORKBENCH = block as BlockICPMWorkbench
             "clay_furnace" -> CLAY_FURNACE = block as ICPMFurnaceBlock
             "hardened_clay_furnace" -> HARDENED_CLAY_FURNACE = block as ICPMFurnaceBlock
             "sandstone_furnace" -> SANDSTONE_FURNACE = block as ICPMFurnaceBlock
@@ -717,6 +758,7 @@ object ICPMBlocks {
             "ancient_metal_door" -> ANCIENT_METAL_DOOR = block as DoorBlock
             "mithril_door" -> MITHRIL_DOOR = block as DoorBlock
             "adamantium_door" -> ADAMANTIUM_DOOR = block as DoorBlock
+            "netherite_door" -> NETHERITE_DOOR = block as DoorBlock
             "emerald_enchanting_table" -> EMERALD_ENCHANTING_TABLE = block as EmeraldEnchantingTableBlock
             "silver_strongbox" -> SILVER_STRONGBOX = block as ICPMStrongboxBlock
             "gold_strongbox" -> GOLD_STRONGBOX = block as ICPMStrongboxBlock
@@ -724,8 +766,10 @@ object ICPMBlocks {
             "ancient_metal_strongbox" -> ANCIENT_METAL_STRONGBOX = block as ICPMStrongboxBlock
             "mithril_strongbox" -> MITHRIL_STRONGBOX = block as ICPMStrongboxBlock
             "adamantium_strongbox" -> ADAMANTIUM_STRONGBOX = block as ICPMStrongboxBlock
+            "netherite_strongbox" -> NETHERITE_STRONGBOX = block as ICPMStrongboxBlock
             "mithril_runestone" -> MITHRIL_RUNESTONE = block as BlockRunestone
             "adamantium_runestone" -> ADAMANTIUM_RUNESTONE = block as BlockRunestone
+            "netherite_runestone" -> NETHERITE_RUNESTONE = block as BlockRunestone
             "core" -> CORE = block
         }
 

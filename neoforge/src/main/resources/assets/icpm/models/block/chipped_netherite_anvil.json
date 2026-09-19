@@ -1,0 +1,8 @@
+{
+    "textures":  {
+                     "body":  "icpm:block/anvil/netherite/base",
+                     "top":  "icpm:block/anvil/netherite/top_damaged_1",
+                     "particle":  "icpm:block/anvil/netherite/base"
+                 },
+    "parent":  "minecraft:block/anvil"
+}

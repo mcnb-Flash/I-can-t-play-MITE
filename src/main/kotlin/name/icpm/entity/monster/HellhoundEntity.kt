@@ -26,16 +26,22 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 
 /**
- * 地狱犬（R196 Hellhound）：燃烧的猎犬形怪物。
- * 火焰免疫、跳跃扑击、命中点燃目标。
+ * 地狱犬（R196 `EntityHellhound`）：燃烧的猎犬形怪物。
+ * 火焰免疫、跳跃扑击、命中按 40% 概率点燃目标 1–8 秒。
+ *
+ * 数值取自 R196 `EntityHellhound.java:51-56`（`applyEntityAttributes`）：
+ * maxHealth **20** / attackDamage **4** / movementSpeed **0.4**（与 `EntityWolf` 同速）。
+ * 点燃取自 `EntityHellhound.java:83-93`（`attackEntityAsMob`）：
+ * `nextFloat() < 0.4f` 时 `setFire(1 + rand.nextInt(8))`；
+ * R196 的 `setFire(秒)` 内部为 `秒 × 20 + 10` tick（`Entity.java:557-565`），此处等价换算。
  */
 class HellhoundEntity(type: EntityType<out HellhoundEntity>, level: Level) : Monster(type, level) {
 
     companion object {
         fun createAttributes(): AttributeSupplier.Builder = Monster.createMonsterAttributes()
-            .add(Attributes.MAX_HEALTH, 30.0)
-            .add(Attributes.ATTACK_DAMAGE, 6.0)
-            .add(Attributes.MOVEMENT_SPEED, 0.32)
+            .add(Attributes.MAX_HEALTH, 20.0)
+            .add(Attributes.ATTACK_DAMAGE, 4.0)
+            .add(Attributes.MOVEMENT_SPEED, 0.4)
             .add(Attributes.FOLLOW_RANGE, 24.0)
     }
 
@@ -59,8 +65,10 @@ class HellhoundEntity(type: EntityType<out HellhoundEntity>, level: Level) : Mon
 
     override fun doHurtTarget(serverLevel: ServerLevel, target: net.minecraft.world.entity.Entity): Boolean {
         val hit = super.doHurtTarget(serverLevel, target)
-        if (hit) {
-            target.setRemainingFireTicks(100)
+        if (hit && this.random.nextFloat() < 0.4f) {
+            // R196：setFire(1 + rand.nextInt(8)) 秒 ⇒ 秒 × 20 + 10 tick
+            this.playSound(SoundEvents.BLAZE_SHOOT, 4.0f, 1.0f)
+            target.setRemainingFireTicks((1 + this.random.nextInt(8)) * 20 + 10)
         }
         return hit
     }

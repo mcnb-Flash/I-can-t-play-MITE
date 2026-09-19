@@ -67,7 +67,7 @@ public final class ICPMCommands {
                                     return 1;
                                 }))));
 
-        // ICPM 创造模式限制：/icpmconfig creative on|off|status（写 config/icpm.json，即时生效）
+        // ICPM 配置开关：/icpmconfig <creative|attackcooldown> on|off|status（写 config/icpm.json，即时生效）
         dispatcher.register(Commands.literal("icpmconfig")
                 .then(Commands.literal("creative")
                         .then(Commands.literal("on").executes(ctx -> {
@@ -86,6 +86,25 @@ public final class ICPMCommands {
                             boolean v = ICPMConfig.isCreativeEnabled();
                             ctx.getSource().sendSuccess(() -> Component.literal(
                                     "[ICPM] enableCreativeMode=" + v), false);
+                            return 1;
+                        })))
+                .then(Commands.literal("attackcooldown")
+                        .then(Commands.literal("on").executes(ctx -> {
+                            ICPMConfig.setNoAttackCooldown(true);
+                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                    "[ICPM] 已启用无攻击速度：近战无视攻击冷却、每击满伤害（noAttackCooldown=true）"), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("off").executes(ctx -> {
+                            ICPMConfig.setNoAttackCooldown(false);
+                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                    "[ICPM] 已恢复现代版攻击冷却（noAttackCooldown=false）"), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("status").executes(ctx -> {
+                            boolean v = ICPMConfig.isNoAttackCooldownEnabled();
+                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                    "[ICPM] noAttackCooldown=" + v), false);
                             return 1;
                         }))));
     }

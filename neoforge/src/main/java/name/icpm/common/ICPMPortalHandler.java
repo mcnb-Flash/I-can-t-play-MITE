@@ -70,14 +70,17 @@ public class ICPMPortalHandler {
     }
 
     // ===================== 符文门（R196 BlockPortal 第 8 位 runegate） =====================
-    // 4 角同金属符文石的变体组合成 seed，决定同维度内传送坐标（mithril 半径 5000 / adamantium 半径 40000）。
+    // 4 角同金属符文石的变体组合成 seed，决定同维度内传送坐标（mithril 5000 / adamantium 40000 / netherite 80000）。
     public enum RunegateMetal {
         MITHRIL,
-        ADAMANTIUM
+        ADAMANTIUM,
+        NETHERITE
     }
 
     private static final int RUNEGATE_MITHRIL_RADIUS = 5000;
     private static final int RUNEGATE_ADAMANTIUM_RADIUS = 40000;
+    // ICPM 扩展（R196 无下界合金）：下界合金符文门 = 艾德曼的两倍
+    private static final int RUNEGATE_NETHERITE_RADIUS = 80000;
 
     /**
      * 读取传送门 4 角符文石：若 4 角均为同金属符文石，返回该金属；否则 null（R196 getRunegateType）。
@@ -108,7 +111,11 @@ public class ICPMPortalHandler {
         BlockRunestone rTL = (BlockRunestone) sTL.getBlock();
         BlockRunestone rTR = (BlockRunestone) sTR.getBlock();
         if (rBL.getMetal() == rBR.getMetal() && rBL.getMetal() == rTL.getMetal() && rBL.getMetal() == rTR.getMetal()) {
-            return rBL.getMetal() == BlockRunestone.MetalType.MITHRIL ? RunegateMetal.MITHRIL : RunegateMetal.ADAMANTIUM;
+            return switch (rBL.getMetal()) {
+                case MITHRIL -> RunegateMetal.MITHRIL;
+                case ADAMANTIUM -> RunegateMetal.ADAMANTIUM;
+                case NETHERITE -> RunegateMetal.NETHERITE;
+            };
         }
         return null;
     }
@@ -135,7 +142,7 @@ public class ICPMPortalHandler {
 
     /**
      * 计算符文门同维度内传送坐标（R196 getRunegateDestinationCoords）：
-     * seed==0 → 原点 (0,0)；否则以 seed 为随机种子在金属半径内取坐标（adamantium 远离原点、避开海洋）。
+     * seed==0 → 原点 (0,0)；否则以 seed 为随机种子在金属半径内取坐标（adamantium/netherite 远离原点、避开海洋）。
      */
     private static int[] getRunegateDestinationCoords(ServerLevel world, BlockPos portalPos, Direction.Axis axis, RunegateMetal metal) {
         int seed = getRunegateSeed(world, portalPos, axis);
@@ -145,14 +152,18 @@ public class ICPMPortalHandler {
             x = 0;
             z = 0;
         } else {
-            int radius = metal == RunegateMetal.ADAMANTIUM ? RUNEGATE_ADAMANTIUM_RADIUS : RUNEGATE_MITHRIL_RADIUS;
+            int radius = switch (metal) {
+                case MITHRIL -> RUNEGATE_MITHRIL_RADIUS;
+                case ADAMANTIUM -> RUNEGATE_ADAMANTIUM_RADIUS;
+                case NETHERITE -> RUNEGATE_NETHERITE_RADIUS;
+            };
             Random random = new Random(seed);
-            // R196 getRunegateDestinationCoords：4 次尝试（mithril/adamantium 半径内），
-            // adamantium 时远离原点半径一半以内则重投，遇到海洋则换一个尝试。
+            // R196 getRunegateDestinationCoords：4 次尝试（各金属半径内），
+            // adamantium/netherite 时远离原点半径一半以内则重投，遇到海洋则换一个尝试。
             for (int attempts = 0; attempts < 4; ++attempts) {
                 x = random.nextInt(radius * 2) - radius;
                 z = random.nextInt(radius * 2) - radius;
-                while (metal == RunegateMetal.ADAMANTIUM) {
+                while (metal != RunegateMetal.MITHRIL) {   // adamantium / netherite：远离原点半径一半以内则重投
                     if (!((double) x * x + (double) z * z < (double) (radius / 2) * (radius / 2))) {
                         break;
                     }

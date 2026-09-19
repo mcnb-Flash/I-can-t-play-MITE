@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["N N", " N "],
+  "key": {"N": "minecraft:netherite_ingot"},
+  "result": {"id": "icpm:netherite_bucket", "count": 1}
+}

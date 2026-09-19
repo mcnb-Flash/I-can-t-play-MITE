@@ -109,6 +109,31 @@ object ICPMItems {
         ), 40, SoundEvents.ARMOR_EQUIP_CHAIN, 0.0f, 0.0f,
         TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_adamantium"))
     )
+    // 下界合金锁链甲：防御沿用艾德曼锁链甲；附魔值取 R196 EnumEquipmentMaterial netherite=15
+    private val NETHERITE_CHAINMAIL_MAT = createArmorMaterial(
+        "netherite_chainmail", mapOf(
+            ArmorType.HELMET to 3, ArmorType.CHESTPLATE to 5, ArmorType.LEGGINGS to 4, ArmorType.BOOTS to 3
+        ), 15, SoundEvents.ARMOR_EQUIP_CHAIN, 0.0f, 0.0f,
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_netherite"))
+    )
+
+    // 锈铁护甲材质（R196 ItemArmor.getMaterialProtection: rusted_iron = 6；锁甲 −2 = 4）
+    private val RUSTED_IRON_ARMOR_MAT = createArmorMaterial(
+        "rusted_iron", mapOf(
+            ArmorType.HELMET to 1,
+            ArmorType.CHESTPLATE to 3,
+            ArmorType.LEGGINGS to 2,
+            ArmorType.BOOTS to 1
+        ), 1, SoundEvents.ARMOR_EQUIP_IRON, 0.0f, 0.0f,   // R196 rusted_iron 附魔能力=0；1.21.11 Enchantable 要求 >0，取 1
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_iron"))
+    )
+    // 锁链锈铁：防御值与板甲相同（同 R196：仅 −2 protection），assetName 指向锁甲穿戴贴图
+    private val RUSTED_IRON_CHAINMAIL_MAT = createArmorMaterial(
+        "rusted_iron_chainmail", mapOf(
+            ArmorType.HELMET to 1, ArmorType.CHESTPLATE to 3, ArmorType.LEGGINGS to 2, ArmorType.BOOTS to 1
+        ), 1, SoundEvents.ARMOR_EQUIP_CHAIN, 0.0f, 0.0f,   // R196 rusted_iron 附魔能力=0；1.21.11 Enchantable 要求 >0，取 1
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_iron"))
+    )
 
     // ==================== R196 源文件数值表 ====================
     // 来自 EnumEquipmentMaterial.durability (R196 源)
@@ -120,7 +145,8 @@ object ICPMItems {
     private const val ANCIENT_METAL_MAT_DUR = 16.0f
     private const val MITHRIL_MAT_DUR = 64.0f
     private const val ADAMANTIUM_MAT_DUR = 256.0f
-    private const val NETHERITE_MAT_DUR = 256.0f
+    private const val NETHERITE_MAT_DUR = 512.0f
+    private const val RUSTED_IRON_MAT_DUR = 4.0f
 
     // 来自 yj.getNumComponentsForDurability() 等 (R196 源)
     private const val PICKAXE_COMPONENTS = 3
@@ -188,6 +214,7 @@ object ICPMItems {
         name.startsWith("ancient_metal_") -> TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_ancient_metal"))
         name.startsWith("mithril_") -> TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_mithril"))
         name.startsWith("adamantium_") -> TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_adamantium"))
+        name.startsWith("netherite_") -> TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(ICPM.MOD_ID, "repair_netherite"))
         else -> null
     }
 
@@ -596,6 +623,81 @@ object ICPMItems {
         Item(makeProperties("adamantium_spear", 1).spear(ADAMANTIUM_TIER, 1.15f, 1.20f, 0.40f, 2.5f, 7.0f, 5.5f, 5.1f, 8.75f, 4.6f)
             .durability(miteDurability(ADAMANTIUM_MAT_DUR, SPEAR_COMPONENTS))))
 
+    // ==================== 锈铁系物品（R196 Item.java:291-503，23 件） ====================
+    // 伤害参数 x = R196 getBaseDamageVsEntity()；tier 补 Material.rusted_iron 的 +2.0
+    @JvmField val RUSTED_IRON_PICKAXE: Item = register("rusted_iron_pickaxe",
+        Item(makeProperties("rusted_iron_pickaxe", 1).pickaxe(RUSTED_IRON_TIER, 2f, -2.8f)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, PICKAXE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_SHOVEL: Item = register("rusted_iron_shovel",
+        ShovelItem(RUSTED_IRON_TIER, 1f, -3.0f, makeProperties("rusted_iron_shovel", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, SHOVEL_COMPONENTS))))
+    @JvmField val RUSTED_IRON_AXE: Item = register("rusted_iron_axe",
+        AxeItem(RUSTED_IRON_TIER, 3f, -3.0f, makeProperties("rusted_iron_axe", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, AXE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_HOE: Item = register("rusted_iron_hoe",
+        HoeItem(RUSTED_IRON_TIER, 1f, -2.0f, makeProperties("rusted_iron_hoe", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, HOE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_SWORD: Item = register("rusted_iron_sword",
+        Item(makeProperties("rusted_iron_sword", 1).sword(RUSTED_IRON_TIER, 4f, -2.4f)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, SWORD_COMPONENTS))))
+    @JvmField val RUSTED_IRON_HATCHET: Item = register("rusted_iron_hatchet",
+        AxeItem(RUSTED_IRON_TIER, 2f, -3.0f, makeProperties("rusted_iron_hatchet", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, HATCHET_COMPONENTS))))
+    @JvmField val RUSTED_IRON_DAGGER: Item = register("rusted_iron_dagger",
+        Item(makeProperties("rusted_iron_dagger", 1).sword(RUSTED_IRON_TIER, 2f, -1.8f)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, DAGGER_COMPONENTS))))
+    @JvmField val RUSTED_IRON_KNIFE: Item = register("rusted_iron_knife",
+        Item(makeProperties("rusted_iron_knife", 1).sword(RUSTED_IRON_TIER, 1f, 0.0f)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, KNIFE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_WAR_HAMMER: Item = register("rusted_iron_war_hammer",
+        Item(makeProperties("rusted_iron_war_hammer", 1).pickaxe(RUSTED_IRON_TIER, 2f, -3.5f)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, WAR_HAMMER_COMPONENTS))))
+    @JvmField val RUSTED_IRON_BATTLE_AXE: Item = register("rusted_iron_battle_axe",
+        AxeItem(RUSTED_IRON_TIER, 4f, -3.2f, makeProperties("rusted_iron_battle_axe", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, BATTLE_AXE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_SCYTHE: Item = register("rusted_iron_scythe",
+        HoeItem(RUSTED_IRON_TIER, 1f, -2.0f, makeProperties("rusted_iron_scythe", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, SCYTHE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_MATTOCK: Item = register("rusted_iron_mattock",
+        ShovelItem(RUSTED_IRON_TIER, 1f, -3.0f, makeProperties("rusted_iron_mattock", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, MATTOCK_COMPONENTS))))
+    @JvmField val RUSTED_IRON_SHEARS: Item = register("rusted_iron_shears",
+        ShearsItem(makeProperties("rusted_iron_shears", 1)
+            .durability(miteDurability(RUSTED_IRON_MAT_DUR, SHEARS_COMPONENTS))))
+
+    @JvmField val RUSTED_IRON_HELMET: Item = register("rusted_iron_helmet",
+        Item(makeProperties("rusted_iron_helmet", 1).humanoidArmor(RUSTED_IRON_ARMOR_MAT, ArmorType.HELMET)
+            .durability(miteArmorDurability(RUSTED_IRON_MAT_DUR, HELMET_COMPONENTS))))
+    @JvmField val RUSTED_IRON_CHESTPLATE: Item = register("rusted_iron_chestplate",
+        Item(makeProperties("rusted_iron_chestplate", 1).humanoidArmor(RUSTED_IRON_ARMOR_MAT, ArmorType.CHESTPLATE)
+            .durability(miteArmorDurability(RUSTED_IRON_MAT_DUR, CHESTPLATE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_LEGGINGS: Item = register("rusted_iron_leggings",
+        Item(makeProperties("rusted_iron_leggings", 1).humanoidArmor(RUSTED_IRON_ARMOR_MAT, ArmorType.LEGGINGS)
+            .durability(miteArmorDurability(RUSTED_IRON_MAT_DUR, LEGGINGS_COMPONENTS))))
+    @JvmField val RUSTED_IRON_BOOTS: Item = register("rusted_iron_boots",
+        Item(makeProperties("rusted_iron_boots", 1).humanoidArmor(RUSTED_IRON_ARMOR_MAT, ArmorType.BOOTS)
+            .durability(miteArmorDurability(RUSTED_IRON_MAT_DUR, BOOTS_COMPONENTS))))
+
+    @JvmField val RUSTED_IRON_CHAINMAIL_HELMET: Item = register("rusted_iron_chainmail_helmet",
+        Item(makeProperties("rusted_iron_chainmail_helmet", 1).humanoidArmor(RUSTED_IRON_CHAINMAIL_MAT, ArmorType.HELMET)
+            .durability(chainmailDurability(RUSTED_IRON_MAT_DUR, HELMET_COMPONENTS))))
+    @JvmField val RUSTED_IRON_CHAINMAIL_CHESTPLATE: Item = register("rusted_iron_chainmail_chestplate",
+        Item(makeProperties("rusted_iron_chainmail_chestplate", 1).humanoidArmor(RUSTED_IRON_CHAINMAIL_MAT, ArmorType.CHESTPLATE)
+            .durability(chainmailDurability(RUSTED_IRON_MAT_DUR, CHESTPLATE_COMPONENTS))))
+    @JvmField val RUSTED_IRON_CHAINMAIL_LEGGINGS: Item = register("rusted_iron_chainmail_leggings",
+        Item(makeProperties("rusted_iron_chainmail_leggings", 1).humanoidArmor(RUSTED_IRON_CHAINMAIL_MAT, ArmorType.LEGGINGS)
+            .durability(chainmailDurability(RUSTED_IRON_MAT_DUR, LEGGINGS_COMPONENTS))))
+    @JvmField val RUSTED_IRON_CHAINMAIL_BOOTS: Item = register("rusted_iron_chainmail_boots",
+        Item(makeProperties("rusted_iron_chainmail_boots", 1).humanoidArmor(RUSTED_IRON_CHAINMAIL_MAT, ArmorType.BOOTS)
+            .durability(chainmailDurability(RUSTED_IRON_MAT_DUR, BOOTS_COMPONENTS))))
+
+    // R196 ItemArrow.getMaterialDamageVsEntity() = 材质伤害 = 2；回收率沿用同档金(0.5)
+    @JvmField val RUSTED_IRON_ARROW: Item = register("rusted_iron_arrow",
+        ICPMArrowItem(2, 0.5f, makeProperties("rusted_iron_arrow", 64)))
+    // R196 ItemChain
+    @JvmField val RUSTED_IRON_CHAIN: Item = register("rusted_iron_chain", Item(makeProperties("rusted_iron_chain", 64)))
+
+
     // ========== 锁链甲 (R196 锁甲耐久 = 部件数 × 材质系数 × 1，不乘2) ==========
     // 7 种材质 × 头盔/胸甲/护腿/靴子 = 28 件
     // 防御值基于 R196 源码，与对应金属板甲一致（锁甲防御不衰减）
@@ -788,6 +890,45 @@ object ICPMItems {
     // 下界合金长矛为原版 Minecraft 物品(minecraft:netherite_spear)，此处不重复注册。
     // 延续"艾德曼长矛 → 下界合金长矛"：通过锻造台升级配方(见 netherite_spear_from_adamantium.json)，
     // 将 ICPM 的 adamantium_spear 升级为原版 netherite_spear。
+
+    // ========== 下界合金衍生制品 (ICPM 扩展，高版本新衍生物) ==========
+    // 材料：粒 / 链条 / 币 / 箭 ；工具杂项：剪刀 / 钓鱼竿 / 弓 ；桶族：空/水/岩浆/牛奶/石头 ；护甲：锁链甲四件
+    // 注：锭 / 块 / 镐锹斧锄剑 / 板甲 / 马铠 由原版 minecraft:netherite_* 提供，此处不重复注册。
+    // 贴图由 adamantium 同件按「模板材质→下界合金」真实映射表换色生成。
+
+    @JvmField val NETHERITE_NUGGET: Item = register("netherite_nugget", Item(makeProperties("netherite_nugget", 64)))
+    @JvmField val NETHERITE_CHAIN: Item = register("netherite_chain", Item(makeProperties("netherite_chain", 64)))
+    @JvmField val NETHERITE_COIN: Item = register("netherite_coin", Item(makeProperties("netherite_coin", 64)))
+    @JvmField val NETHERITE_ARROW: Item = register("netherite_arrow",
+        ICPMArrowItem(7, 0.9f, makeProperties("netherite_arrow", 64)))
+
+    @JvmField val NETHERITE_SHEARS: Item = register("netherite_shears",
+        ShearsItem(makeProperties("netherite_shears", 1)
+            .enchantable(100)
+            .durability(miteDurability(NETHERITE_MAT_DUR, SHEARS_COMPONENTS))))
+    @JvmField val NETHERITE_FISHING_ROD: Item = register("netherite_fishing_rod",
+        ICPMFishingRodItem(makeProperties("netherite_fishing_rod", 1).durability(1600).enchantable(1)))
+    @JvmField val NETHERITE_BOW: Item = register("netherite_bow",
+        ICPMBowItem(1.4f, makeProperties("netherite_bow", 1).enchantable(15).durability(256)))
+
+    @JvmField val NETHERITE_BUCKET: Item = registerBucket("netherite_bucket", ICPMBucketItem(Fluids.EMPTY, "netherite", makeProperties("netherite_bucket", 1)))
+    @JvmField val NETHERITE_WATER_BUCKET: Item = registerBucket("netherite_water_bucket", ICPMBucketItem(Fluids.WATER, "netherite", makeProperties("netherite_water_bucket", 1).craftRemainder(NETHERITE_BUCKET)))
+    @JvmField val NETHERITE_LAVA_BUCKET: Item = registerBucket("netherite_lava_bucket", ICPMBucketItem(Fluids.LAVA, "netherite", makeProperties("netherite_lava_bucket", 1).craftRemainder(NETHERITE_BUCKET)))
+    @JvmField val NETHERITE_MILK_BUCKET: Item = registerBucket("netherite_milk_bucket", ICPMMilkBucketItem("netherite", makeProperties("netherite_milk_bucket", 1).craftRemainder(NETHERITE_BUCKET)))
+    @JvmField val NETHERITE_STONE_BUCKET: Item = registerBucket("netherite_stone_bucket", ICPMStoneBucketItem("netherite", makeProperties("netherite_stone_bucket", 1).craftRemainder(NETHERITE_BUCKET)))
+
+    @JvmField val NETHERITE_CHAINMAIL_HELMET: Item = register("netherite_chainmail_helmet",
+        Item(makeProperties("netherite_chainmail_helmet", 1).humanoidArmor(NETHERITE_CHAINMAIL_MAT, ArmorType.HELMET)
+            .durability(chainmailDurability(NETHERITE_MAT_DUR, HELMET_COMPONENTS))))
+    @JvmField val NETHERITE_CHAINMAIL_CHESTPLATE: Item = register("netherite_chainmail_chestplate",
+        Item(makeProperties("netherite_chainmail_chestplate", 1).humanoidArmor(NETHERITE_CHAINMAIL_MAT, ArmorType.CHESTPLATE)
+            .durability(chainmailDurability(NETHERITE_MAT_DUR, CHESTPLATE_COMPONENTS))))
+    @JvmField val NETHERITE_CHAINMAIL_LEGGINGS: Item = register("netherite_chainmail_leggings",
+        Item(makeProperties("netherite_chainmail_leggings", 1).humanoidArmor(NETHERITE_CHAINMAIL_MAT, ArmorType.LEGGINGS)
+            .durability(chainmailDurability(NETHERITE_MAT_DUR, LEGGINGS_COMPONENTS))))
+    @JvmField val NETHERITE_CHAINMAIL_BOOTS: Item = register("netherite_chainmail_boots",
+        Item(makeProperties("netherite_chainmail_boots", 1).humanoidArmor(NETHERITE_CHAINMAIL_MAT, ArmorType.BOOTS)
+            .durability(chainmailDurability(NETHERITE_MAT_DUR, BOOTS_COMPONENTS))))
 
     // ========== ICPM 特有食物 ==========
     // 数值基于 1.18.2-ICPM 移植(IFW)与 ICPM 1.6.4 合成表。

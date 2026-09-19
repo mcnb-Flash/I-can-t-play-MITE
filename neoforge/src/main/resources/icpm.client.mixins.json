@@ -18,7 +18,8 @@
         "IntegratedServerOwnerFixMixin",
         "BucketCtrlClientMixin",
         "BucketTooltipMixin",
-        "EnchantmentMenuClientMixin"
+        "EnchantmentMenuClientMixin",
+        "ICPMUnderworldFogMixin"
     ],
     "injectors": {
         "defaultRequire": 1

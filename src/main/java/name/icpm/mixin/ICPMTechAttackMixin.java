@@ -1,5 +1,6 @@
 package name.icpm.mixin;
 
+import name.icpm.common.ICPMConfig;
 import name.icpm.common.ICPMFoodStats;
 import name.icpm.common.ICPMWorldEvil;
 import name.icpm.item.ICPMToolProperties;
@@ -94,6 +95,10 @@ public abstract class ICPMTechAttackMixin {
      */
     @Unique
     private boolean icpm$canOnlyPerformWeakStrike(Player self) {
+        // 配置项 weakStrike=false 时关闭弱击：空手/未持工具也能正常造成伤害
+        if (!ICPMConfig.isWeakStrikeEnabled()) {
+            return false;
+        }
         ItemStack held = self.getMainHandItem();
         if (!held.isEmpty() && icpm$preventsHandDamage(held)) {
             return false;

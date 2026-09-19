@@ -9,21 +9,29 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ICPM 耕地肥力管理器（1.6.4 BlockFarmland.fertility 移植）
+ * ICPM 耕地肥力管理器（R196 {@code BlockFarmland} 的 **bit 8 fertilized** 移植）。
  *
- * 粪便（ItemManure）右键耕地增加肥力（0-3 级），肥力越高作物生长越快：
- * - CropBlockMixin 注入 getGrowthSpeed：下方耕地肥力 1 级 +1.0，2 级 +2.5，3 级 +4.5
- * - 耕地被破坏/替换时肥力丢失（内存态，与 1.6.4 语义一致：耕地变成泥土肥力消失）
+ * <p>R196 判决源：
+ * <ul>
+ *   <li>{@code BlockFarmland.java:46} —— "Bits 1, 2, and 4 used for wetness, <b>bit 8 set if fertilized</b>"
+ *       ⇒ 肥力是**单比特**（已施肥 / 未施肥），不是多级；</li>
+ *   <li>{@code BlockCrops.java:185-187} —— 已施肥时 {@code var5 *= 1.5f}（生长速率 **×1.5**，乘算）；</li>
+ *   <li>{@code BlockCrops.java:124-125} —— 生长成功时 {@code rand.nextInt(256) == 0}（**1/256**）取消施肥；</li>
+ *   <li>{@code BlockFarmland.java:239-252} —— 只有**未施肥**的耕地才能被粪便施肥（已施肥则不消耗物品）。</li>
+ * </ul>
  *
- * 肥力状态仅存于服务端内存，按维度分桶，维度卸载时清理。
+ * <p>1.21 的耕地没有空闲 bit，故用内存态集合保存"已施肥"的耕地位置（按维度分桶，维度卸载清理）。
+ * 语义与 R196 一致：施肥后**长期有效**，仅在作物生长时以 1/256 概率被消耗；
+ * 耕地被破坏 / 替换即失效（与 1.6.4 中耕地变泥土后 metadata 丢失一致）。
  */
 public final class ICPMFarmlandFertility {
 
     private ICPMFarmlandFertility() {}
 
-    public static final int MAX_FERTILITY = 3;
+    /** R196 是单比特：只有"已施肥 / 未施肥"两种状态。 */
+    public static final int MAX_FERTILITY = 1;
 
-    /** 维度 -> 耕地位置 -> 肥力等级(0-3) */
+    /** 维度 -> 已施肥的耕地位置 -> 1 */
     private static final Map<ResourceKey<Level>, Map<BlockPos, Integer>> FERTILITY = new ConcurrentHashMap<>();
 
     public static int get(ResourceKey<Level> dim, BlockPos pos) {
@@ -34,19 +42,29 @@ public final class ICPMFarmlandFertility {
         return map.getOrDefault(pos, 0);
     }
 
-    /** 增加肥力，返回新等级（不超过 MAX_FERTILITY） */
-    public static int add(ResourceKey<Level> dim, BlockPos pos, int amount) {
-        Map<BlockPos, Integer> map = FERTILITY.computeIfAbsent(dim, k -> new HashMap<>());
-        int current = map.getOrDefault(pos, 0);
-        int next = Math.min(MAX_FERTILITY, current + amount);
-        map.put(pos.immutable(), next);
-        return next;
+    /** 是否已施肥（R196 {@code BlockFarmland.isFertilized}）。 */
+    public static boolean isFertilized(ResourceKey<Level> dim, BlockPos pos) {
+        return get(dim, pos) > 0;
     }
 
     /**
-     * 作物吸收肥力：每次生长阶段推进或收获时调用，扣除 1 级肥力（不低于 0）。
-     * MITE 中肥力会被作物持续吸收而递减，玩家需不断施肥维持产量（还原核心循环）。
-     * @return 扣除前的肥力等级（供调用方决定本次生长是否仍享受加速）
+     * 施肥（R196 {@code BlockFarmland.setFertilized(world,x,y,z,true)}）。
+     * 返回施肥后的状态值（0 或 1）。
+     */
+    public static int add(ResourceKey<Level> dim, BlockPos pos, int amount) {
+        if (amount <= 0) {
+            return get(dim, pos);
+        }
+        Map<BlockPos, Integer> map = FERTILITY.computeIfAbsent(dim, k -> new HashMap<>());
+        map.put(pos.immutable(), MAX_FERTILITY);
+        return MAX_FERTILITY;
+    }
+
+    /**
+     * 取消施肥（R196 {@code setFertilized(..., false)}）。
+     * 触发点：R196 {@code BlockCrops.java:124-125} —— 作物生长成功时 1/256 概率；以及耕地失效。
+     *
+     * @return 取消前的状态（1 = 本次确实取消了施肥）
      */
     public static int consume(ResourceKey<Level> dim, BlockPos pos) {
         Map<BlockPos, Integer> map = FERTILITY.get(dim);
@@ -57,7 +75,7 @@ public final class ICPMFarmlandFertility {
         if (current <= 0) {
             return 0;
         }
-        map.put(pos.immutable(), current - 1);
+        map.remove(pos);
         return current;
     }
 

@@ -28,6 +28,7 @@ object ICPMBlockEntities {
             ICPMBlocks.ANCIENT_METAL_ANVIL!!,
             ICPMBlocks.MITHRIL_ANVIL!!,
             ICPMBlocks.ADAMANTIUM_ANVIL!!,
+            ICPMBlocks.NETHERITE_ANVIL!!,
             ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.COPPER, 1)!!,
             ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.COPPER, 2)!!,
             ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.SILVER, 1)!!,
@@ -39,7 +40,9 @@ object ICPMBlockEntities {
             ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.MITHRIL, 1)!!,
             ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.MITHRIL, 2)!!,
             ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.ADAMANTIUM, 1)!!,
-            ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.ADAMANTIUM, 2)!!
+            ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.ADAMANTIUM, 2)!!,
+            ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.NETHERITE, 1)!!,
+            ICPMBlocks.getAnvilVariant(BlockMetalAnvil.MetalType.NETHERITE, 2)!!
         )
 
         // 原版砧方块（旧存档把砧方块实体挂在这些方块上，而非 ICPM 金属砧方块）
@@ -99,7 +102,8 @@ object ICPMBlockEntities {
                 ICPMBlocks.IRON_STRONGBOX!!,
                 ICPMBlocks.ANCIENT_METAL_STRONGBOX!!,
                 ICPMBlocks.MITHRIL_STRONGBOX!!,
-                ICPMBlocks.ADAMANTIUM_STRONGBOX!!
+                ICPMBlocks.ADAMANTIUM_STRONGBOX!!,
+                ICPMBlocks.NETHERITE_STRONGBOX!!
             )
         )
     }

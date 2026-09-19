@@ -110,26 +110,26 @@ public abstract class ZombieMiteSpawnMixin {
         long day = (self.level().getGameTime() + 6000L) / 24000L + 1L;
         List<Item> items = new ArrayList<>();
         List<Integer> weights = new ArrayList<>();
-        addWeighted(items, weights, Items.WOODEN_SHOVEL, 1);          // shovelWood
-        addWeighted(items, weights, Items.COPPER_SHOVEL, 2);          // shovelRustedIron(w2)
+        addWeighted(items, weights, Items.WOODEN_SHOVEL, 1);                        // shovelWood
+        addWeighted(items, weights, ICPMItems.RUSTED_IRON_SHOVEL, 2);               // shovelRustedIron (w2)
         if (day >= 10L) {
-            addWeighted(items, weights, ICPMItems.COPPER_HATCHET, 1); // hatchetRustedIron
+            addWeighted(items, weights, ICPMItems.RUSTED_IRON_HATCHET, 1);          // hatchetRustedIron
         }
         if (villager) {
-            addWeighted(items, weights, ICPMItems.COPPER_SHEARS, 1);  // shearsRustedIron
-            addWeighted(items, weights, ICPMItems.COPPER_SCYTHE, 1);  // scytheRustedIron
+            addWeighted(items, weights, ICPMItems.RUSTED_IRON_SHEARS, 1);           // shearsRustedIron
+            addWeighted(items, weights, ICPMItems.RUSTED_IRON_SCYTHE, 1);           // scytheRustedIron
             if (day >= 10L) {
-                addWeighted(items, weights, Items.COPPER_HOE, 1);       // hoeRustedIron
-                addWeighted(items, weights, ICPMItems.COPPER_MATTOCK, 1);// mattockRustedIron
+                addWeighted(items, weights, ICPMItems.RUSTED_IRON_HOE, 1);          // hoeRustedIron
+                addWeighted(items, weights, ICPMItems.RUSTED_IRON_MATTOCK, 1);      // mattockRustedIron
             }
             if (day >= 20L) {
-                addWeighted(items, weights, Items.COPPER_PICKAXE, 1);   // pickaxeRustedIron
+                addWeighted(items, weights, ICPMItems.RUSTED_IRON_PICKAXE, 1);      // pickaxeRustedIron
             }
         } else {
-            addWeighted(items, weights, ICPMItems.WOOD_CUDGEL, 1);    // cudgelWood
-            addWeighted(items, weights, Items.WOODEN_SWORD, 1);       // clubWood
-            addWeighted(items, weights, Items.COPPER_SWORD, 1);       // swordRustedIron
-            addWeighted(items, weights, ICPMItems.COPPER_DAGGER, 1);  // daggerRustedIron
+            addWeighted(items, weights, ICPMItems.WOOD_CUDGEL, 1);                  // cudgelWood
+            addWeighted(items, weights, Items.WOODEN_SWORD, 1);                     // clubWood
+            addWeighted(items, weights, ICPMItems.RUSTED_IRON_SWORD, 1);            // swordRustedIron
+            addWeighted(items, weights, ICPMItems.RUSTED_IRON_DAGGER, 1);           // daggerRustedIron
         }
         int total = 0;
         for (int w : weights) {

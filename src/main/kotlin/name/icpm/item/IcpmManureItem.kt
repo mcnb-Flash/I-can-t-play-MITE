@@ -3,7 +3,6 @@ package name.icpm.item
 import name.icpm.common.ICPMFarmlandFertility
 import net.minecraft.core.BlockPos
 import net.minecraft.resources.ResourceKey
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.context.UseOnContext
@@ -30,22 +29,17 @@ class IcpmManureItem(
 
         // 只对耕地生效
         if (state.`is`(Blocks.FARMLAND)) {
+            val dim: ResourceKey<Level> = level.dimension()
+            // R196 BlockFarmland.java:239-252：只有**未施肥**的耕地才能施肥；
+            // 已施肥时直接失败（不消耗物品、不触发任何效果）。
+            if (ICPMFarmlandFertility.isFertilized(dim, pos)) {
+                return InteractionResult.PASS
+            }
             if (!level.isClientSide) {
-                val dim: ResourceKey<Level> = level.dimension()
-                val newLevel = ICPMFarmlandFertility.add(dim, pos, 1)
+                ICPMFarmlandFertility.add(dim, pos, 1)
                 context.itemInHand.shrink(1)
                 // 施肥粒子（绿色十字）
                 level.levelEvent(2005, pos, 0)
-                if (newLevel >= ICPMFarmlandFertility.MAX_FERTILITY && level is ServerLevel) {
-                    // 已满级，提示
-                    val player = context.player
-                    if (player != null) {
-                        player.displayClientMessage(
-                            net.minecraft.network.chat.Component.literal("土壤肥力已达上限！"),
-                            true
-                        )
-                    }
-                }
             }
             return InteractionResult.SUCCESS
         }

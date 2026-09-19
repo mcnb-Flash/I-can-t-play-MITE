@@ -16,7 +16,7 @@
     "mainhand"
   ],
   "supported_items": "#icpm:enchantable/fishing",
-  "weight": 10,
+  "weight": 100,
   "effects": {
     "minecraft:fishing_luck_bonus": [
       {

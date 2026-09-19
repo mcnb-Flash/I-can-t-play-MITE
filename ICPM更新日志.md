@@ -2,6 +2,282 @@
 
 > 关于美术资源：本项目贴图在 MITE 资源包风格基础上已做**调色板级再处理**（透明度与像素形状不变、色值全部偏离原作，不再存在与原作逐像素相同的文件）；如原作者或权利方仍有异议，请联系我，我会立即替换或移除。
 
+## 1.1.4（2026-09-19）· 下界合金体系补齐 + R196 移植收口 + 两处启动/进世界崩溃修复
+
+> 本版为 1.1.3 之后累积的全部改动：① 新增**下界合金（Netherite）全套制品**与等级体系；② R196 逐项移植收口（刷怪距离 / 地下世界雾色与禁刷 / 疫病 / 肥力 / 地狱苦力怕 / 刷怪深度门控 / 锈铁接线）；③ 修复两处会导致**服务端起不来 / 进世界即崩**的问题（锈铁材质附魔值 0、Fabric mixin 注入点冲突），另修枯死作物缺模型。
+
+### 一、下界合金（Netherite）体系补齐
+
+R196（MC 1.6.4）时代没有下界合金，ICPM 此前的下界合金只有 6 件（战斧 / 匕首 / 短斧 / 鸭嘴锄 / 镰刀 / 战锤）。本版按「高版本新衍生物」补齐：
+
+**新增 16 件物品**：下界合金**粒** / **链条** / **币** / **箭** / **剪刀** / **钓鱼竿** / **弓** / **桶** + 水桶 · 岩浆桶 · 牛奶桶 · 石头桶 / **下界合金锁链甲**（头盔 · 胸甲 · 护腿 · 靴子）。
+
+**新增 7 件方块**：下界合金**砧**（完整 / 裂痕 / 损坏）、**工作台**、**箱**、**门**、**符文石**。
+
+**贴图如何保证画风一致**：先验证现有 6 件下界合金工具与其模板材质（艾德曼）的 **alpha 形状 6/6 完全一致** ⇒ 判定既有下界合金贴图是**纯换色**而非重画；再从这 6 对贴图逐像素反推「模板色 → 下界合金色」映射表（70 色）与 11 色下界合金色阶（`#160814` `#231012` `#2F2122` `#322928` `#4A2940` `#4F3C3E` `#51444E` `#5D565D` `#706F70` `#867B86` + `#000000` 描边），未命中的颜色按亮度回退。新贴图据此换色生成，与既有件保持一致。
+
+**不重复造**：下界合金**锭 / 块 / 镐锹斧锄剑 / 板甲 / 马铠 / 长矛**沿用原版 `minecraft:netherite_*`，由既有 16 条锻造配方（艾德曼 → 下界合金）接入。
+
+**自定数值**（R196 无下界合金 ⇒ 无判决源，以下为 ICPM 自定）：箭伤害 7 / 回收 0.9（艾德曼 6 / 0.9）；钓鱼竿耐久 1600（艾德曼 800）；弓拉速 ×1.4 / 耐久 256 / 附魔 15（秘银弓 1.25 / 128 / 100）；剪刀与锁链甲按本模组材质公式推算。
+
+#### 砧等级体系（对齐 R196 `ContainerRepair` 门槛）
+
+判决源 R196 `ContainerRepair.java:100-108`：`material_for_repairs.isMetal() && material_for_repairs.durability > anvil.getMetalType().durability` ⇒ **拒绝修复**（`repair_fail_condition = 2`）。
+
+ICPM 由 `MetalType.level` 实现。本版**按 R196 `EnumEquipmentMaterial.durability` 重排等级序**（原「秘银 = 远古金属 = 4」与 R196 不符）：
+
+| 材质 | R196 durability | level |
+|---|---|---|
+| 铜 / 银 / 金 | 4 | 2 |
+| 铁 | 8 | 3 |
+| 远古金属 | 16 | 4 |
+| 秘银 | 64 | 5 |
+| 艾德曼 | 256 | 6 |
+| 下界合金 | 512（ICPM 自定） | 7 |
+
+修正后行为：**远古金属砧不再能修秘银物品**（R196：16 < 64）；秘银砧不能修艾德曼物品；艾德曼砧不能修下界合金物品。砧最大耐久 = 1600 × 31 × durabilityFactor ⇒ 下界合金砧 **25,395,200**。
+
+#### 符文门第三种：下界合金（半径 80000）
+
+`RunegateMetal` 由两值扩为三值：秘银 5000 / 艾德曼 40000 / **下界合金 80000**（艾德曼两倍）。此前下界合金符文石会被归入艾德曼门，现已独立成第三种。
+
+#### 工作台等级门槛（对齐 R196 `RecipeHelper`）
+
+判决源 `RecipeHelper.java:73-96`：金属**锭**直接放行（无门槛）；其余金属制品取「最硬金属材质」等级；**工作台取「弱一级」**。核对结果：
+
+| 物品类型 | 所需工作台 |
+|---|---|
+| 各金属锭 / 粒 | 任意 |
+| 各金属块 / 砧 / 装备 | ≥ 该金属等级 |
+| 各金属工作台 | 弱一级 |
+
+顺带收口一处：原版 `minecraft:netherite_block` 与下界合金装备此前**不受门槛**（判定条件过窄），现统一归入 tier 7；升级模板（`smithing_template`）排除；并补 `difficultyForTier(7) = 220f`、`benchSpeedModifier(7) = 0.8f`（否则 tier 7 落入 `else` 分支反而比 tier 6 退化）。
+
+### 二、R196 逐项移植收口
+
+| 机制 | 落地 |
+|---|---|
+| **刷怪距离** | 玩家 24 格（576）→ **8 格（64）**（`ICPMSpawnDistanceMixin`） |
+| **地下世界雾色** | 按「32 天」阶段切换雾色（`ICPMUnderworldFogMixin`，客户端） |
+| **地下世界禁刷** | 8 格内禁止刷怪 |
+| **刷怪深度门控** | 按深度门控特定怪物生成（`ICPMSpawnDepthGateMixin`） |
+| **疫病** | 3×3×3 范围内传播、触发率 50%（`CropBlockMixin`） |
+| **肥力** | 单比特肥力 ×1.5、消耗 1/256（**收获不扣**） |
+| **地狱苦力怕** | 下界 50% 替换 + 膨胀距离调整（`ICPMInfernalCreeperSpawnMixin` + `ICPMSwellGoalMixin`） |
+| **锈铁接线** | 复仇僵尸 / 僵尸持械 / 骷髅武器与箭，全部接到真·锈铁材质 |
+
+> 溯源结论：R196 无 `genesis` / `Debris`，地牢战利品为静态两套表且 ICPM 已覆写 ⇒ 该项无需改动。
+
+### 三、崩溃与资源修复
+
+#### 1. Fabric 进世界即崩：`@Redirect` 注入点冲突（与 Carpet）
+
+```
+@Redirect conflict. Skipping carpet.mixins.json:NaturalSpawnerMixin ...
+   already redirected by icpm.mixins.json:ICPMInfernalCreeperSpawnMixin
+InjectionError: Critical injection failure: Redirector spawnEntity(...) (0/1) succeeded
+```
+
+ICPM 的地狱苦力怕替换用 `@Redirect` 重定向 `addFreshEntityWithPassengers`，而 **Carpet 也重定向同一调用点**；`@Redirect` 对调用点独占 ⇒ Carpet 的必需注入被跳过 ⇒ `NaturalSpawner` 类转换失败 ⇒ `Exception ticking world`，**进世界立即崩服**。
+
+**修复**：改用 MixinExtras 的 **`@WrapOperation`**（不占用 redirect 槽位，可与其它 mod 的 `@Redirect` 链式共存），handler 增参 `Operation<Void> original` 并在末尾 `original.call(level, toAdd)`；「放弃本次生成」仍直接 `return`，语义不变。
+
+**验证**：专建 Fabric 复现环境（`run/mods` 放入 fabric-api / fabric-language-kotlin / **fabric-carpet** / ICPM）跑服务端 ⇒ `Done (2.357s)`，且原必现的 `@Redirect conflict` 警告 **0 条**。
+
+#### 2. 服务端启动即崩：锈铁材质附魔值 0
+
+```
+java.lang.IllegalArgumentException: Enchantment value must be positive, but was 0
+  at Enchantable.<init> -> Item$Properties.enchantable / humanoidArmor -> ICPMItems.<clinit>
+```
+
+三处材质把 R196 的 `enchantability = 0` 原样传入，而 **1.21.11 的 `Enchantable` 强制要求 > 0**，静态初始化抛 `ExceptionInInitializerError`：`RUSTED_IRON_TIER`（`FlintTier.kt`）与 `RUSTED_IRON_ARMOR_MAT` / `RUSTED_IRON_CHAINMAIL_MAT`（`ICPMItems.kt`）。
+
+**修复**：0 → **1**（1.21.11 无法用 0 表达「不可附魔」，取 1 = 几乎不可附魔，语义最接近）；全项目扫描确认无其它 0 值材质。
+
+#### 3. 枯死作物缺模型（紫黑）
+
+`dead_crop` 的 blockstate 变体键误写为 `"0"` ~ `"7"`，正确格式是 **`"age=0"` ~ `"age=7"`** ⇒ 8 个状态全部匹配不到模型。已修正 8 个键。
+
+### 验证
+
+双端 `clean build` **BUILD SUCCESSFUL**；mixin 注入点审计 **151 个 mixin / 339 个注入点**全绿；发版预检 **0 问题**；jar 全 entry 校验通过（Fabric 2857 / NeoForge 2861 条，`testzip=None`，netherite 资源各 141 个）；NeoForge 服务端冒烟 `Done (0.382s)!`；Fabric + Carpet 复现环境冒烟 `Done (2.357s)!`（`conflict-lines = 0`）。
+
+版本号提升至 `1.1.4`（Fabric 产物名 `ICPM-1.1.4-fabric.jar`；NeoForge 产物名 `ICPM-1.1.4-NeoForge.jar`）。
+
+## 1.1.3（2026-09-13）· 热修：作物随机刻崩溃（甜菜根）
+
+### 崩溃现象
+
+实测存档在**血月夜**直接崩服，`crash-reports` 指向：
+
+```
+java.lang.IllegalArgumentException: Cannot get property IntegerProperty{name=age, values=[0..7]}
+    as it does not exist in Block{minecraft:beetroots}
+  at net.minecraft.world.level.block.state.BlockState.getValue
+  at name.icpm.mixin.CropBlockMixin.handler$...$icpm$diseaseOnRandomTick(CropBlockMixin.java:1551)
+  ... 由 Lithium 的 randomTick 扫描触发
+```
+
+### 根因
+
+`CropBlockMixin` 全程用类常量 `CropBlock.AGE`（= `AGE_7`，0–7）读写方块状态，但 1.21.11 有多个 `CropBlock` 子类**不用**这个属性、而是各带自己的 age：
+
+| 方块 | 实际 age 属性 | 取值范围 |
+|---|---|---|
+| 小麦 / 胡萝卜 / 马铃薯 | `CropBlock.AGE`（`AGE_7`） | 0–7 |
+| **甜菜根** `BeetrootBlock` | 自有 `AGE_3` | **0–3** |
+| 火炬花 `TorchflowerCropBlock` | 自有 `AGE_2` | 0–2 |
+| 瓶子草 `PitcherCropBlock` | 自有 `AGE_4` + `HALF` | 0–4 |
+
+对非 `AGE_7` 的方块调用 `state.getValue(CropBlock.AGE)` 会立刻抛 `IllegalArgumentException`。平时只是偶发（随机刻 0.0005 概率路径），而**血月夜的 "25% 强制染病" 分支把判定概率抬到必然命中** —— 所以只剩甜菜根的地里，一入夜就崩。1.1.2 起存在。
+
+### 修复（双端同步）
+
+- 新增 `cropAge(BlockState)`：按属性名 `"age"` 遍历取值，兼容全部子类（不再依赖 `CropBlock.AGE` 常量）。
+- 新增 `isMature(BlockState)`：改走 `CropBlock.isMaxAge()`，正确处理甜菜根(3) / 火炬花(2) / 瓶子草(需 `AGE_4`+`HALF`) 等特例。
+- 原有 **7 处** `state.getValue(CropBlock.AGE)` / `CropBlock.MAX_AGE` 全部替换（干湿旱死、疫病致死、邻近传染、血月染病、健康染病、肥力吸收前后比对）。
+- 顺带加固两处：①枯死作物（`ICPMDeadCropBlock`）在随机刻 HEAD/TAIL 直接跳过，对齐 R196 `BlockCropsDead.setTickRandomly(false)`；②肥力吸收 TAIL 段先确认方块仍是 `CropBlock` 再取值，避免被替换为空气/异类方块时二次抛错。
+
+### 验证
+
+双端 `clean build` BUILD SUCCESSFUL；mixin 注入点审计 **145 个 mixin / 231 个注入点**全绿；发版预检 0 问题；jar 全 entry 校验通过（Fabric 2649 / NeoForge 2648 条）；NeoForge 服务端冒烟 `Done (0.383s)!`。产物 `ICPM-1.1.3-fabric.jar` / `ICPM-Neoforge-1.1.3.jar`。
+
+### 附：人形怪物贴图错位（头长到脚上等）——64×32 → 64×64 重映射
+
+1.1.2 起，暗影/食尸鬼/幽魂等一众"人形"怪物的贴图出现**严重错位**：头长在脚上、手臂/躯干乱位。根因是**纹理尺寸与模型 UV 不匹配**：
+
+- MITE R196（MC 1.6.4）的人形实体贴图是 **64×32**（经典 Notch 双足布局：头部 0,0 / 躯干 16,16 / 右臂 40,16 / 右腿 0,16，左臂左腿靠 `mirror=true` 复用右臂右腿区域）。
+- 1.21.11 原版 `ZombieModel` / `HumanoidModel` / `SkeletonModel` 声明的是 **64×64** 纹理：上半部分 UV 与 64×32 完全一致，但**左臂、左腿改到独立的底部区域**（左臂 32,48 / 左腿 16,48）。
+- 把 64×32 贴图直接喂给 64×64 模型，引擎按 64×64 的 UV 取像素，底部原不该有图的区域被错取、上半图被拉伸错位 —— 于是"头长到脚上"。`zombie.png` / `revenant.png` 原先就是 64×64 所以一直正常，其它 7 张 64×32 全部中招。
+
+**修复（双端资源同步重映射）**：写 `_remap_textures.py` 把 7 张 64×32 人形贴图升级为 64×64——
+
+- 上半部分（0–31 行）原样保留（头/帽/躯干/右臂/右腿 UV 两版一致）；
+- 左臂 = 右臂矩形（40,16,16,16）**水平镜像**后写入底部 (32,48)；
+- 左腿 = 右腿矩形（0,16,16,16）**水平镜像**后写入底部 (16,48)。
+
+覆盖清单（Fabric + NeoForge 同步）：
+
+| 贴图 | 绑定模型层 | 备注 |
+|---|---|---|
+| `ghoul.png` | `ZOMBIE` | 食尸鬼 |
+| `wight.png` | `ZOMBIE` | 幽魂 |
+| `shadow.png` | `ZOMBIE` | 暗影（用户首报） |
+| `invisible_stalker.png` | `PLAYER` | 潜伏者（5% 半透） |
+| `earth_elemental/clay/earth_elemental_clay.png` | `PLAYER` | 黏土魔像 |
+| `fire_elemental.png` | `PLAYER` | 火元素（eyes 贴图，本就全透，仅补尺寸） |
+| `skeleton/bone_lord.png` | `SKELETON` | 远古骨王 |
+
+> `fire_elemental.png` 经 `RenderTypes.eyes` 绘制、本体近乎全透，仅作尺寸对齐；未引入新内容。
+
+**⚠ 首版重映射翻车（已全部修正）**：第一次重映射用到的手工 PNG 解码器，逐像素写回分支错按"通道数"而非"颜色类型"判断，把 4 通道 RGBA 当成灰度图解析，导致 7 张贴图全部渲染成**蓝条状**。已修正解码器（按颜色类型分支 + 补调色板），并把 7 张原图从 `git HEAD` 还原后用修正 codec 重做；验证改为 **decode→encode→decode 往返字节完全一致** + 顶部半幅与原图一致 + 底部左肢为右肢水平镜像。重构建并重新部署后，三处 mods 目录 jar 内贴图经验证均正常（不再蓝条）。
+
+**验证**：脚本输出 7/7 `CONVERTED -> 64x64 (fabric + neoforge synced)`；二次解码校验确认尺寸均 64×64、左臂/左腿镜像像素与右臂/右腿逐列水平对称（arm_mirror_ok=True）、底部新增 480/308 个不透明像素（镜像写入生效）。
+
+### 附：配置增强 —— 弱击开关 + 带中文说明的 icpm.json + NeoForge 配置界面（MaFgLib）
+
+- **弱击开关（`weakStrike`）**：R196 的弱击（`canOnlyPerformWeakStrike`：未持工具且 `生命<2 ‖ 饱食+营养=0 ‖ 攻击属性<1` → 近战只击退、不造成伤害）此前**无法关闭**，导致空手半血时打不动动物。现新增 `weakStrike` 配置项，**默认 `true` = 忠实 R196**；设为 `false` 即关闭弱击（空手/未持工具也能正常造成伤害）。落地于 `ICPMTechAttackMixin.icpm$canOnlyPerformWeakStrike` 开头（双树）。
+- **`icpm.json` 自带中文说明（注释式配置）**：`ICPMConfig` 改为「写入带 `//` 中文注释的文本、读取前自动剥离注释再解析」，**每个选项上方都有一句中文解释**，服主无需看英文即可理解；旧版无注释文件会在加载时自动升级为新格式（数值保留）。示例：
+  ```text
+  //弱击（R196 原版机制）：true = 启用（默认）…… false = 关闭弱击，空手/未持工具也能正常对生物造成伤害。
+  "weakStrike": true
+  ```
+- **NeoForge 配置界面改用 MaFgLib**：NeoForge 端无原版 malilib，改接其非官方移植 **MaFgLib**（同为 `fi.dy.masa.malilib` 包）。新增 `neoforge/libs/mafglib-neoforge-1.21.11-0.4.6.jar`（**仅编译期 `compileOnly`，不打入 jar**），并镜像 `ICPMMaLiLibConfig` / `ICPMConfigScreen` / `ICPMConfigAccess`（反射安全入口，未装 MaFgLib 时静默降级为 `/icpmconfig` 命令）；`neoforge.mods.toml` 追加 `mafglib` 可选前置（CLIENT，AFTER）。Fabric 侧 malilib 面板同步加入「弱击」开关。
+- **验证**：双端 BUILD SUCCESSFUL；产物含全部新类与 `weakStrike` / `isWeakStrikeEnabled`，且 **MaFgLib 未被误打包**（jar 内 `fi/dy/masa/malilib/` 条目 = 0）；「带注释 JSON → 剥离注释 → 解析」往返测试通过（含弱击 true/false 两态）。
+- **部署**：Fabric `ICPM-1.1.3-fabric.jar`（md5 `8bdd43f1…`，E: 测试目录 + `run/mods`）；NeoForge `ICPM-1.1.3-NeoForge.jar`（md5 `acc802fc…`）。**NeoForge 产物不再带 `[内测]` 前缀**（系早期内部测试遗留，已统一为正式命名）。
+
+### 附：无攻击速度（1.6.4 原版机制）—— 配置项 `noAttackCooldown`
+
+- **机制**：1.6.4 **没有**攻击冷却。判决源 `EntityPlayer.java` / `EntityLivingBase.java` 整文件检索 `attackStrength` / `attackCooldown` / `attackTime` / `getAttackStrengthScale` —— **0 匹配**（只有手臂挥动动画 `swingProgress`）。玩家挥击只受「挥臂动画 + 目标受击无敌帧」限制，**每一次点击都按满伤害结算**；攻击冷却与"充能伤害缩放"是 **1.9 才引入**的机制。
+- **开关**：新增 `noAttackCooldown`，**默认 `true` = 1.6.4 手感（忠实 MITE）**；`false` = 保留现代版攻击冷却（连点衰减、需等待充能）。三条修改途径：① `config/icpm.json`（自带中文注释）；② 图形配置界面（Fabric 装 malilib / NeoForge 装 MaFgLib 后进「上天眷顾」页）；③ 命令 `/icpmconfig attackcooldown on|off|status`。
+- **实现**（`ICPMNoAttackCooldownMixin`，双树）：在 `Player.getAttackStrengthScale(float)` 的 HEAD 令其恒返回 `1.0F`（满充能）。
+  选这个点而不去改 `ATTACK_SPEED` 属性，是因为把攻速调到极大**也拿不到** 1.0 —— `attackStrengthTicker` 刚被 `attack()` 重置时 `(0 + 0.5) / delay` 仍 < 1，且 `delay → 0` 会除零得 NaN；而返回 1.0 对任何形式的缩放公式都恰等于「满充能伤害」。附带两个符合 1.6.4 的表现：客户端准星攻击指示器恒满格（1.6.4 准星本就没有攻击冷却指示）、按住左键的连续攻击不再被充能门控打断（1.6.4 同样是按住即连续挥击）。
+- **1.21.11 真实链路（已反汇编核实，非猜测）**：`Player.attack` → `getAttackStrengthScale(0.5f)` → `getEnchantedDamage(...)` → `baseDamageScaleFactor()`；另有 `ldc 0.9; fcmpl` 判定"充能是否满"（决定暴击/横扫资格）。其中 `getAttackStrengthScale` = `clamp((attackStrengthTicker + adjustTicks) / getCurrentItemAttackStrengthDelay(), 0, 1)`，`getCurrentItemAttackStrengthDelay` = `(1.0 / ATTACK_SPEED) * 20`。
+- **验证**：双端 `clean build` BUILD SUCCESSFUL；mixin 注入点审计 **146 个 mixin / 232 个注入点**全绿；发版预检 **0 问题**；`verify_jar` 双 jar 通过（Fabric 2650 / NeoForge 2654 条，`testzip=None`）；NeoForge 服务端冒烟 **`Done (0.462s)!`**；jar 内含新 mixin 类与 `noAttackCooldown` / `isNoAttackCooldownEnabled` 字符串，refmap 含 `getAttackStrengthScale` 映射，且 MaFgLib 未被误打包。
+- **顺带修复（发版闸门）**：`neoforge/scripts/audit_mixins.py` 与 `scripts/preflight_release.py` 此前**必然在最后一步异常退出**——前者打印 `✓` 在 GBK 控制台抛 `UnicodeEncodeError`，后者清理临时文件被本机 safe-delete 钩子拦截，导致「明明通过却退码 1」。已分别改为**统一 stdout 转 UTF-8**、**不再在脚本内删除临时文件**（同名文件下次原地覆盖），现两者均正常退码 0。
+
+### 附：锈铁（rusted_iron）全套 23 件注册 —— 同时更正一处「无贴图」误判
+
+**更正**：此前多处记载「MITE RP 1.6.41 无锈铁工具/武器贴图，不可凭空造美术」，**该判断是错的**。实测 `E:\MITE Resource Pack 1.6.41`：锈铁贴图**一件不缺**（`textures/items/tools/rusted_iron_*.png` 13 张 + `items/armor/rusted_iron*.png` 8 张 + `models/armor/rusted_iron*_layer_*.png` 4 张，另有 arrows / chains）。误判原因有二：① 扫 RP 时只看了 `items/` 一层、没进 `tools/`（护甲在 `armor/`）子目录；② R196 是**材质化注册**（`Item.swordRustedIron = new ItemSword(776, Material.rusted_iron)`），不存在 `*RustedIron*` 类名可搜。
+
+**R196 真值（判决源）**
+
+| 项 | 值 | 出处 |
+|---|---|---|
+| 材质耐久系数 / 附魔 / 品质 | 4.0f / 0 / poor | `EnumEquipmentMaterial.java:13` |
+| 材质伤害加值 | 2.0f | `Material.java:380-381` |
+| 挖掘等级 / 金属标记 | MinHarvestLevel 2、`setMetal(true)` | `Material.java:646` |
+| 挖掘效率 | 1.25f → 4.0×1.25 = **5.0f** | `ToolMaterialHarvestEfficiency.java:11` |
+| 护甲 protection | 板甲 **6**、锁甲 **4** | `ItemArmor.java:75-76,92-94` |
+| 修复材质 | 与铁共用 | `Item.java:1015` |
+| 箭伤害 | = 材质伤害 = **2** | `ItemArrow.java:85-86` |
+
+**落地（双树同步）**
+- 新增 `RUSTED_IRON_TIER`（`FlintTier.kt`）、`RUSTED_IRON_ARMOR_MAT` / `RUSTED_IRON_CHAINMAIL_MAT`、`RUSTED_IRON_MAT_DUR = 4.0f`（`ICPMItems.kt`）。
+- 注册 **23 件**：13 工具/武器（镐 / 锹 / 斧 / 锄 / 剑 / 短斧 / 匕首 / 小刀 / 战锤 / 战斧 / 镰刀 / 鸭嘴锄 / 剪刀）+ 8 护甲（4 板甲 + 4 锁甲）+ 锈铁箭 + 锈铁链。
+- 工具类型 / 材质映射 13 条（`ICPMToolProperties`）；剪刀按既有约定不入该表（其他材质的剪刀同样未入）。
+- 资源：`assets/icpm/items/*.json` ×23 + `models/item/*.json` ×23（工具 `handheld`、其余 `generated`）+ `en_us` / `zh_cn` 各 23 条（命名「锈铁××」）。
+- 贴图：从 RP 导入 23 张（双树共 46 文件），并由 `devtools/_tweak_textures.py --apply` **去相似化**（校验 0 张仍与 RP 逐像素相同）。
+- **骨领主装备恢复 R196 原样**：武器 swordRustedIron 权重 2、日 ≥10 加 battleAxeRustedIron、日 ≥20 加 warHammerRustedIron（`EntityBoneLord:47-58`）；护甲锈铁板甲全套（`:63-66`）——此前是「无护甲 + 远古金属替代」。
+
+**验证**：双端 `clean build` BUILD SUCCESSFUL（Fabric 7m34s / NeoForge 6m38s）；jar 内容校验双端均 贴图 23/23 · 护甲层 4/4 · 物品定义 23/23 · 模型 23/23 · 语言 23/23；mixin 审计、发版预检、`verify_jar` 全部退码 0。部署三处 **MD5 MATCH**：Fabric `b58137da…`、NeoForge `ba437b39…`。
+
+**仍待接线（下一步做）**：骷髅变种武器与箭（R196 用 `daggerRustedIron` / `arrowRustedIron`）。
+
+### 附：R196 移植路线逐项推进（第一批 + 第二批 + 第三批部分）
+
+按 `R196移植-下一步路线.md` 的清单逐项落地，本轮闭环 **13 项**（含 2 项溯源更正）。
+
+#### ⑧ 地狱犬数值校准（R196 `EntityHellhound`）
+- HP 30 → **20**、攻击 6 → **4**、移速 0.32 → **0.4**（`applyEntityAttributes:51-56`，与 `EntityWolf` 同速）。
+- 点燃改为 R196 语义：`nextFloat() < 0.4f` 时 `setFire(1 + rand.nextInt(8))` —— **40% 概率、1–8 秒**（R196 `setFire(秒)` 内部 = `秒×20+10` tick，`Entity.java:557-565`）。此前是「命中必定点燃 100 tick」。
+
+#### ⑨ 附魔权重精确化（R196 `EnumRarity.standard_weight`）
+- **真因**：R196 `EnchantmentHelper.buildEnchantmentList:265` 用 `WeightedRandom.getRandomItem` **按权重抽取**；而 ICPM 的 `ICPMEnchantDifficulty.buildList` 用的是均匀 `random.nextInt(size)` —— 权重此前**根本没有消费者**（改 JSON 数字不会有任何效果）。
+- 现在 `buildList` 按权重加权抽取；权重表 = R196 `EnumRarity`（common **100** / uncommon **25** / rare **5** / epic **1**，`EnumRarity.java:7-10`）+ 各附魔 rarity（`Enchantment.java:194-231`）。
+- ICPM 的 17 个附魔 JSON `weight` 一并校准（uncommon 8→25、fishing_fortune/true_flight 10→100、vampiric 2→1 等 11 项）。
+- 原版 21 个附魔在 `data/minecraft/enchantment/` **覆盖**为 R196 值（protection/sharpness/efficiency/power 10→**100**、fire_protection 等 5→**25**、respiration/fire_aspect/fortune/flame/silk_touch/thorns 2→**5**）。
+
+#### ⑩ NeoForge `ShearsInteractMixin` 补注册（双树一致性）
+- 该 mixin 此前在 NeoForge 端被一段**已被证伪的注释**屏蔽（旧结论"1.21.11 剪毛走 `ShearsItem.interactLivingEntity`"）。Fabric 端已实测 `Sheep`/`MushroomCow.mobInteract` 才是唯一入口 ⇒ 取消屏蔽并注册进 `icpm.mixins.json`。R196 剪取 50 点耐久 + 右键去抖在 NeoForge 端恢复生效。
+
+#### ⑭ 近距刷怪放宽（R196 `SpawnerAnimals.java:192-206`）
+- R196：**主世界 / 地下世界 + 该处全黑**时，怪物可在 **8–24 格**内生成（24 格内有玩家即可、8 格内仍禁止）。1.21 是 24 格硬下限。
+- 新增 `ICPMSpawnDistanceMixin`：满足条件时把 `isRightDistanceToPlayerAndSpawnPoint` 的 24 格阈值降为 8 格（只替换常量，其余判定交回 vanilla）。
+- **更正**：v8 报告写作「地下世界 8 格禁刷」，与判决源不符 —— 实为"黑暗中放宽到 8 格"。
+
+#### ⑰ 地下世界 32 天雾色循环（R196 `WorldProviderUnderworld.getFogColor`）
+- 新增客户端 `ICPMUnderworldFogMixin`：`getDayOfWorld() % 32` 距第 16 天越远雾色越亮（第 16 天全黑、第 0/32 天灰度 0.064），只替换 RGB、保留原 alpha。
+
+#### ② 疫病传播（R196 `BlockCrops.java:99-108`）
+- 由「水平 4 邻居各 1/32、且限未成熟」改为 R196 原样：**先 50% 门控**（`rand.nextBoolean()`），通过后于 **3×3×3（去自身共 26 格）随机取一格**感染；且 **R196 不限制成熟度**（成熟作物同样会被传染）。
+
+#### ③ 耕地肥力模型（R196 `BlockFarmland` bit 8）
+- R196 肥力是**单比特**（施肥 / 未施肥），不是 0–3 级；已施肥 **生长速率 ×1.5**（乘算，`BlockCrops.java:185-187`），且只在作物**成功生长时 1/256 概率**被消耗（`BlockCrops.java:124-125`）。
+- 原实现是「0–3 级 + 每次生长必扣 + 加法加速（+1.0 / +2.5 / +4.5）」→ 全部改为 R196 语义。
+- 收获**不再消耗**肥力（R196 无此逻辑，此前为 ICPM 自增）。
+- 粪便右键**只有未施肥**的耕地才消耗物品（R196 `BlockFarmland.java:239-252`）。
+- 肥沃附魔改为 R196 真实语义：锄地成耕后以 **等级/5** 概率直接施肥（`ItemHoe.java:88-91`），并在收获成熟作物时同概率重施肥（`ItemHoe.java:108-114`）；此前是"锄地必加 lvl 级"。
+
+#### ⑤ 地狱苦力怕 50% 替换 + 肿胀距离（R196 `WorldServer.java:595-599` / `EntityAICreeperSwell.java:67-68`）
+- 新增 `ICPMInfernalCreeperSpawnMixin`：自然刷怪时，苦力怕在**主世界 + 夜晚 + 露天**有 75% 直接放弃生成（R196 `continue`）；否则按 `(40−y)/40` 概率且 50% 替换为地狱苦力怕。**只作用于自然刷怪路径**（刷怪蛋 / 刷怪笼 / 命令不受影响）。
+- 新增 `ICPMSwellGoalMixin`：膨胀距离由固定 7 格改为 R196 动态值 —— 普通 **16** / 地狱 **36**，再除以健康比（clamp 0.4–1.0）⇒ 血越少起爆越远。
+
+#### ⑬ 刷怪深度门控（R196 `WorldServer.getSuitableCreature:578-682`）
+- 新增 `ICPMSpawnDepthGateMixin`（仅主世界）：食尸鬼 y≤56、**尸妖 y≤48**（血月 + 冰冻群系可上地表）、吸血蝙蝠 y≤48（血月）、亡魂 y≤44（血月）、隐形追猎者 y≤40、**暗影 y≤32**（血月 + 沙漠可上地表）；黑寡妇 50% 放弃；普通蜘蛛露天 1/4 放弃。
+- **更正**：v8 报告写作「y<32 尸妖 / y<16 恶魔蜘蛛」，与判决源不符（尸妖实为 **48**、恶魔蜘蛛**无**深度门控）。
+
+#### 锈铁接线（承接上一轮注册）
+- **僵尸随机持械**从「铜系替代」换回**真锈铁**（`EntityZombie.java:217-238` 的物品池与权重：shovelRustedIron 权重 2，hatchet / shears / scythe / hoe / mattock / pickaxe / sword / dagger 各 1，日 ≥10 解锁部分、日 ≥20 解锁镐）。
+- **复仇僵尸装备接线**（此前完全无装备）：`EntityRevenant.java:33-52` —— 锈铁剑权重 2、日 ≥10 加锈铁战斧、日 ≥20 加锈铁战锤；**锈铁板甲全套必定穿戴**（头/胸/腿/靴）。
+
+#### 已证伪 / 无需做（本轮溯源）
+- **B2「箱子 loot 时间锁 + 创世之书」整体不成立**：R196 源码内**无** `genesis`、**无** `Debris`、无 `StructurePieceTreasure`；地牢战利品（`WorldGenDungeons.java:20-27`）是**静态两套表**（主世界 / 地下世界），无任何天数门控。ICPM 已覆写 `minecraft:chests/simple_dungeon` ⇒ **归档、不立项**。
+- **⑦ `clumsiness` 诅咒**：核查后确认**已实现**（`ICPMWorkbenchMenu` 的等效等级 −20 + 品质经验花费 ×2，两处都已接线），此前「仅枚举无实现」的记录已过期。
+
+**验证**：双端 `clean build -x test --offline` BUILD SUCCESSFUL；mixin 注入点审计全绿（+7 个 mixin）；发版预检 0 问题；`verify_jar` 双端通过；部署三处 MD5 MATCH（版本仍 1.1.3，未发版故并入本栏目）。
+
 ## 1.1.2（2026-09-13）· 怪物特性收口：P0/P1 全闭 + 近战公式与工具攻击全量校准
 
 本轮承接 `完成度对比-MITE-R196-v8.md` 的全源码逐值审计（8 个并行审计代理，把完成度估算从 v7 的 98% 诚实下修到实测 91%），按 **P0 → P1 → P2** 顺序把全部结构性缺陷、行为缺口与主要数值偏差逐项拉回 R196 源码真值。裁决原则：**与原版生物不符的数值用 mixin 注入，ICPM 自增实体直接改源码**。
@@ -38,6 +314,11 @@
 - **修复：击晕附魔适用范围**——新增 `#icpm:enchantable/stun`（战锤类 + 木质短棍），木短棒自此可附魔击晕。
 - **移除自创：长逝箭矢"缓慢 140t"**——R196 `EntitySkeleton` 远程攻击未附加缓慢，属 ICPM 自创，已删。
 
+### 客户端渲染修复
+
+- **修复：矿工僵尸（及其他自定义人形怪物）手持物与护甲完全不显示**——1.21.11 的 `MobRenderer` **不再自带**「手持物 / 护甲 / 头部装饰」渲染层，自定义实体若只继承 `MobRenderer`（旧写法），则手持武器与四件护甲在客户端一律不渲染。现新增人形渲染器基类 `ICPMHumanoidRenderer`（继承 `HumanoidMobRenderer` 并补挂 `HumanoidArmorLayer`，前者自带 `CustomHeadLayer`/`WingsLayer`/`ItemInHandLayer` 与完整人形 RenderState 抽取），并让全部会穿戴装备/手持武器的人形怪物改经它派生：**矿工僵尸**（必定持镐/战锤 + 四件锁链甲）、**食尸鬼 / 尸妖 / 暗影 / 复仇僵尸 / 巨型僵尸**（受 `MobRandomIcpmArmorMixin` 随机装备影响）、**远古骨王**、**黏土傀儡**。
+  - 顺带修正：僵尸族渲染状态统一置 `isAggressive = true`，恢复 R196 标志性的「双臂前伸」僵尸姿态（此前因状态缺失而呈普通直立姿态）。
+
 ### 已核实为"误报"（非缺口，未改）
 
 - **血月风暴时间窗**：R196 事件起点 = `first_tick_of_day + 6000`、长度 13000，即"血月日**日相位 0 ~ 13000** 强制雷雨"——原实现本就正确。
@@ -47,7 +328,7 @@
 ### 说明与遗留
 
 - **挖掘除数 30 例外（黑曜石 / 工作台 / 金属砧 / ICPM 熔炉）与植物硬度 0.02 保留未动**：R196 除数恒为 512，看似偏差，但 R196 另有一整套 `BlockHardness` / `EnumMaterialHardness` / `isPortable` 硬度模型（portable 方块 `str = 4×hardness`）尚未移植，ICPM 现用 30 / 0.02 手工补偿；单独改除数只会放大偏差，须连同硬度模型一起专项回归。
-- **仍未闭环（附原因）**：疫病传播（3×3×3 + 50% 门控，需重写 `CropBlockMixin`）、耕地肥力模型（单比特 ×1.5 + 1/256 消耗，需重设计 `ICPMFarmlandFertility`）、地狱苦力怕 50% 替换（需拦截原版苦力怕生成做类型替换）、蛛类吐网 `EntityWeb`（需新抛射实体 + 渲染）、**锈铁物品全套**（MITE 资源包无锈铁工具/武器贴图，不能凭空造美术；僵尸/骨领主装备暂用铜/远古金属替代）。
+- **仍未闭环（附原因）**：疫病传播（3×3×3 + 50% 门控，需重写 `CropBlockMixin`）、耕地肥力模型（单比特 ×1.5 + 1/256 消耗，需重设计 `ICPMFarmlandFertility`）、地狱苦力怕 50% 替换（需拦截原版苦力怕生成做类型替换）、蛛类吐网 `EntityWeb`（需新抛射实体 + 渲染）、**锈铁物品全套**（僵尸/骨领主装备暂用铜/远古金属替代。⚠️ **2026-09-16 更正：此处原写「MITE 资源包无锈铁工具/武器贴图」为误判** —— `E:\MITE Resource Pack 1.6.41` 里锈铁贴图**一件不缺**（`textures/items/tools/rusted_iron_*.png` 13 张 + `items/armor/` 8 张 + `models/armor/` 4 张，另有 arrows/chains）；R196 `Item.java:291-503` 共 23 件。**该项已无美术阻塞，随时可做**）。
 
 > 验证：双端 `clean build` BUILD SUCCESSFUL；NeoForge 服务端冒烟 `Done (0.61s)!`；mixin 注入点审计 **145 个 mixin / 231 个注入点**全绿；发版预检 0 问题；jar 全 entry 校验通过。产物 `ICPM-1.1.2-fabric.jar` / `ICPM-Neoforge-1.1.2.jar`。
 

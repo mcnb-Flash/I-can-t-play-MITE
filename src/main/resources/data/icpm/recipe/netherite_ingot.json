@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["NNN", "NNN", "NNN"],
+  "key": {"N": "icpm:netherite_nugget"},
+  "result": {"id": "minecraft:netherite_ingot", "count": 1}
+}

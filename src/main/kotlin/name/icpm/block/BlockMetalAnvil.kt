@@ -283,6 +283,7 @@ class BlockMetalAnvil(
             ICPMItems.ANCIENT_METAL_NUGGET -> 16.0f
             ICPMItems.MITHRIL_NUGGET -> 64.0f
             ICPMItems.ADAMANTIUM_NUGGET -> 256.0f
+            ICPMItems.NETHERITE_NUGGET -> 512.0f
             else -> 1.0f
         }
     }
@@ -336,6 +337,7 @@ class BlockMetalAnvil(
             p.startsWith("ancient_metal_") -> MetalType.ANCIENT_METAL
             p.startsWith("mithril_") -> MetalType.MITHRIL
             p.startsWith("adamantium_") -> MetalType.ADAMANTIUM
+            p.startsWith("netherite_") -> MetalType.NETHERITE
             // 燧石工具（无法修复，无对应金属粒）
             else -> null
         }
@@ -354,6 +356,7 @@ class BlockMetalAnvil(
             item == ICPMItems.ANCIENT_METAL_NUGGET -> MetalType.ANCIENT_METAL
             item == ICPMItems.MITHRIL_NUGGET -> MetalType.MITHRIL
             item == ICPMItems.ADAMANTIUM_NUGGET -> MetalType.ADAMANTIUM
+            item == ICPMItems.NETHERITE_NUGGET -> MetalType.NETHERITE
             else -> null
         }
     }
@@ -444,11 +447,14 @@ class BlockMetalAnvil(
 
     /**
      * 金属类型枚举
+     * level：砧等级序，大小关系对齐 R196 EnumEquipmentMaterial.durability
+     *   4.0=铜/银/金 < 8.0=铁 < 16.0=远古金属 < 64.0=秘银 < 256.0=艾德曼 < 512.0=下界合金
+     *   （R196 ContainerRepair:100-108 判定「物品材质耐久 > 砧材质耐久」则拒绝修复）
      * durabilityFactor 与 ICPMDurabilityManager.MaterialDurability 一致
      */
     enum class MetalType(
         val id: String,
-        val level: Int,           // 挖掘等级
+        val level: Int,           // 砧等级序（非挖掘等级；仅用于 ContainerRepair 门槛判定）
         val durabilityFactor: Float // 耐久系数（与工具/护甲材质系数一致）
     ) {
         COPPER("copper", 2, 1.0f),
@@ -456,7 +462,9 @@ class BlockMetalAnvil(
         IRON("iron", 3, 8.0f),
         GOLD("gold", 2, 2.0f),
         ANCIENT_METAL("ancient_metal", 4, 16.0f),
-        MITHRIL("mithril", 4, 64.0f),
-        ADAMANTIUM("adamantium", 5, 256.0f)
+        MITHRIL("mithril", 5, 64.0f),
+        ADAMANTIUM("adamantium", 6, 256.0f),
+        // 下界合金（ICPM 高版本衍生物；R196 无此材质，等级按「高于艾德曼一级」定 7）
+        NETHERITE("netherite", 7, 512.0f)
     }
 }

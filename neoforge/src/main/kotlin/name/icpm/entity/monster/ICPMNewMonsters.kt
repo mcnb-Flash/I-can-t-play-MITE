@@ -10,8 +10,10 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityType
+import name.icpm.item.ICPMItems
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.SpawnGroupData
@@ -306,6 +308,8 @@ class RevenantEntity(type: EntityType<out RevenantEntity>, level: Level) : Monst
         spawnData: SpawnGroupData?
     ): SpawnGroupData? {
         val data = super.finalizeSpawn(level, difficulty, reason, spawnData)
+        // R196 EntityRevenant.addRandomEquipment:47-52：锈铁系武器 + 锈铁板甲全套（必定穿戴）
+        equipR196()
         if (level is ServerLevel) {
             val cp = ChunkPos(blockPosition())
             val aabb = AABB(
@@ -317,6 +321,27 @@ class RevenantEntity(type: EntityType<out RevenantEntity>, level: Level) : Monst
             }
         }
         return data
+    }
+
+    /**
+     * R196 `EntityRevenant.addRandomEquipment:47-52`：
+     * - `addRandomWeapon:33-44`：swordRustedIron 权重 2；日 ≥ 10 加 battleAxeRustedIron、日 ≥ 20 加 warHammerRustedIron；
+     * - 护甲：锈铁**板甲**全套（靴 / 腿 / 胸 / 头）**必定**穿戴。
+     * （此前该实体完全没有装备接线。）
+     */
+    private fun equipR196() {
+        val day = ((level().gameTime + 6000L) / 24000L).toInt() + 1   // R196 getDayOfWorld
+        val total = if (day >= 20) 4 else if (day >= 10) 3 else 2
+        val weapon = when (random.nextInt(total)) {
+            0, 1 -> ItemStack(ICPMItems.RUSTED_IRON_SWORD)
+            2 -> ItemStack(ICPMItems.RUSTED_IRON_BATTLE_AXE)
+            else -> ItemStack(ICPMItems.RUSTED_IRON_WAR_HAMMER)
+        }
+        this.setItemSlot(EquipmentSlot.MAINHAND, weapon)
+        this.setItemSlot(EquipmentSlot.HEAD, ItemStack(ICPMItems.RUSTED_IRON_HELMET))
+        this.setItemSlot(EquipmentSlot.CHEST, ItemStack(ICPMItems.RUSTED_IRON_CHESTPLATE))
+        this.setItemSlot(EquipmentSlot.LEGS, ItemStack(ICPMItems.RUSTED_IRON_LEGGINGS))
+        this.setItemSlot(EquipmentSlot.FEET, ItemStack(ICPMItems.RUSTED_IRON_BOOTS))
     }
 
     override fun getAmbientSound(): SoundEvent = SoundEvents.ZOMBIE_AMBIENT

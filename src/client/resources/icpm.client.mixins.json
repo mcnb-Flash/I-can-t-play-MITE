@@ -17,7 +17,8 @@
         "FixedLocalPlayerUuidMixin",
         "IntegratedServerOwnerFixMixin",
         "BucketCtrlClientMixin",
-        "BucketTooltipMixin"
+        "BucketTooltipMixin",
+        "ICPMUnderworldFogMixin"
     ],
     "injectors": {
         "defaultRequire": 1

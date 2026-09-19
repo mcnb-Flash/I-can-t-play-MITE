@@ -207,6 +207,34 @@ object ICPMToolProperties {
         ITEM_MATERIAL["copper_dagger"] = ToolMaterial.COPPER
         ITEM_MATERIAL["copper_scythe"] = ToolMaterial.COPPER
 
+        // ========== 锈铁工具 (R196 rusted_iron，材质伤害 +2) ==========
+        ITEM_TOOL_TYPE["rusted_iron_pickaxe"] = ToolCategory.PICKAXE
+        ITEM_TOOL_TYPE["rusted_iron_shovel"] = ToolCategory.SHOVEL
+        ITEM_TOOL_TYPE["rusted_iron_axe"] = ToolCategory.AXE
+        ITEM_TOOL_TYPE["rusted_iron_hoe"] = ToolCategory.HOE
+        ITEM_TOOL_TYPE["rusted_iron_sword"] = ToolCategory.SWORD
+        ITEM_TOOL_TYPE["rusted_iron_hatchet"] = ToolCategory.HATCHET
+        ITEM_TOOL_TYPE["rusted_iron_dagger"] = ToolCategory.DAGGER
+        ITEM_TOOL_TYPE["rusted_iron_knife"] = ToolCategory.KNIFE
+        ITEM_TOOL_TYPE["rusted_iron_war_hammer"] = ToolCategory.WAR_HAMMER
+        ITEM_TOOL_TYPE["rusted_iron_battle_axe"] = ToolCategory.BATTLE_AXE
+        ITEM_TOOL_TYPE["rusted_iron_scythe"] = ToolCategory.SCYTHE
+        ITEM_TOOL_TYPE["rusted_iron_mattock"] = ToolCategory.MATTOCK
+
+        ITEM_MATERIAL["rusted_iron_pickaxe"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_shovel"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_axe"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_hoe"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_sword"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_hatchet"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_dagger"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_knife"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_war_hammer"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_battle_axe"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_scythe"] = ToolMaterial.RUSTED_IRON
+        ITEM_MATERIAL["rusted_iron_mattock"] = ToolMaterial.RUSTED_IRON
+
+
         // ========== 原版铁工具 (Minecraft原版) ==========
         ITEM_TOOL_TYPE["iron_pickaxe"] = ToolCategory.PICKAXE
         ITEM_TOOL_TYPE["iron_axe"] = ToolCategory.AXE

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "icpm:netherite_chain"
+  ],
+  "result": {
+    "id": "icpm:netherite_nugget",
+    "count": 4
+  }
+}

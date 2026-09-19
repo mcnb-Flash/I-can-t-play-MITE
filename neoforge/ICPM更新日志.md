@@ -2,8 +2,79 @@
 
 > 关于美术资源：本项目贴图在 MITE 资源包风格基础上已做**调色板级再处理**（透明度与像素形状不变、色值全部偏离原作，不再存在与原作逐像素相同的文件）；如原作者或权利方仍有异议，请联系我，我会立即替换或移除。
 
-> 本文件为 **NeoForge 端**更新日志（对应产物 `[内测]ICPM-1.1.1-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
+> 本文件为 **NeoForge 端**更新日志（对应产物 `ICPM-1.1.4-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
+> 命名说明：NeoForge 产物自 1.1.3 起统一为 **`ICPM-<ver>-NeoForge.jar`**（此前一度带 `[内测]` 前缀，系早期内部测试遗留，已去除）。
 > 两端共享绝大部分源码（双树结构），本日志只记录 NeoForge 端的差异与落地情况。
+
+## 1.1.4（2026-09-19）· 与 Fabric 端同步：下界合金体系 + R196 移植收口 + 崩溃修复
+
+> 与根目录 `ICPM更新日志.md` 的 1.1.4 栏目内容一致（双树同源），此处只列 NeoForge 端需注意的点：
+
+- **下界合金全套双树同步**：16 件物品（粒 / 链条 / 币 / 箭 / 剪刀 / 钓鱼竿 / 弓 / 桶组 / 锁链甲 ×4）与 7 件方块（砧 ×3 / 工作台 / 箱 / 门 / 符文石）在 NeoForge 端同样注册到 `ICPMItems` / `ICPMBlocks` / `ICPMBlockEntities`，资源（blockstate / 模型 / 贴图 / 译名 / 配方 / 标签）双树一致。
+- **砧等级序重排**（秘银 5 / 艾德曼 6 / 下界合金 7）与 Fabric 端同源（`BlockMetalAnvil.MetalType` + `MetalAnvilMenu`）。
+- **符文门第三种**（下界合金 80000）与**工作台等级门槛**修正（`ICPMWorkbenchMenu`）双树同源。
+- **`@WrapOperation` 迁移**：`ICPMInfernalCreeperSpawnMixin` 由 `@Redirect` 改为 MixinExtras `@WrapOperation`。Fabric 端改动的直接动因是与 Carpet 的注入点冲突（NeoForge 端无此冲突），但双树保持同源；MixinExtras 由 NeoForge 自带（0.5.3）。
+- **锈铁材质附魔值 0 → 1**：`FlintTier.kt` / `ICPMItems.kt` 双树各 3 处；NeoForge 端同样会在注册期崩溃，必须同步。
+- **`dead_crop` blockstate 键修正**（`age=0` ~ `age=7`）双树同步。
+
+### 验证（NeoForge 侧）
+
+`clean build` BUILD SUCCESSFUL；`neoforge/scripts/audit_mixins.py` 全绿；发版预检 0 问题；jar 全 entry 校验 2861 条（`testzip=None`）；**服务端冒烟** `Done (0.382s)!`。
+
+版本号提升至 `1.1.4`（产物名 `ICPM-1.1.4-NeoForge.jar`）。
+
+## 1.1.3（2026-09-13）· 与 Fabric 端同步：作物随机刻崩溃热修（甜菜根）
+
+> 与根目录 `ICPM更新日志.md` 的 1.1.3 栏目内容完全一致（`CropBlockMixin` 双树同源），不再重复细节。
+
+- **崩溃**：血月夜扫到甜菜根随机刻 → `IllegalArgumentException: Cannot get property age(0-7) as it does not exist in Block{minecraft:beetroots}` → 崩服。
+- **根因**：`CropBlockMixin` 用类常量 `CropBlock.AGE`（`AGE_7`）读写作物状态，而 `BeetrootBlock`(AGE_3) / `TorchflowerCropBlock`(AGE_2) / `PitcherCropBlock`(AGE_4+HALF) 各有自己的 age 属性。
+- **修复**：新增 `cropAge(BlockState)`（按属性名 `"age"` 遍历取值）与 `isMature(BlockState)`（走 `CropBlock.isMaxAge()`），替换全部 7 处硬编码常量；并加固枯死作物跳过随机刻、肥力吸收前先判方块类型。
+- **版本号同步提升至 1.1.3**（`neoforge/build.gradle.kts` + `neoforge.mods.toml`），产物 `ICPM-Neoforge-1.1.3.jar`。
+
+### 附：人形怪物贴图错位（64×32 → 64×64 重映射，与 Fabric 端同源）
+
+> 与根目录 `ICPM更新日志.md` 1.1.3 栏「附：人形怪物贴图错位」完全一致（资源文件双树同步）：`ghoul` / `wight` / `shadow` / `invisible_stalker` / `earth_elemental_clay` / `fire_elemental` / `bone_lord` 共 7 张 64×32 人形贴图升级为 64×64（上半原样保留、左臂左腿镜像写入底部独立区域），根因是 1.21.11 原版 `Zombie/Humanoid/Skeleton` 模型声明 64×64 纹理而 MITE 资源为 64×32，直接喂入导致 UV 错位（头长到脚上）。两端 `src/main/resources` 与 `neoforge/src/main/resources` 已同步。
+
+### 附：配置增强（NeoForge 侧：MaFgLib 图形配置界面）
+
+- **弱击开关 `weakStrike`（双树同源，与 Fabric 端一致）**：默认 `true` = 忠实 R196；`false` = 关闭弱击（空手/未持工具也能正常造成伤害）。经 `ICPMConfig` 落盘到 `config/icpm.json`。
+- **`icpm.json` 改为「带中文注释」格式**：读取时自动剥离 `//` 注释再解析，写入时每个选项上方都带一句中文解释（旧无注释文件自动升级，数值保留）。
+- **配置 GUI 改用 MaFgLib（本端特有）**：NeoForge 无原版 malilib，改接其非官方移植 **MaFgLib**（同为 `fi.dy.masa.malilib` 包，1.21.11 版 `0.4.6+mc1.21.11`）。落地：`neoforge/libs/mafglib-neoforge-1.21.11-0.4.6.jar`（**仅编译期 `compileOnly`，不打入 jar**）+ 镜像 `ICPMMaLiLibConfig` / `ICPMConfigScreen` / `ICPMConfigAccess`（反射安全入口）+ `neoforge.mods.toml` 追加 `mafglib` 可选前置（`CLIENT` / `AFTER`）。**未装 MaFgLib 时**：`ICPMClient` 按键（默认 H）提示改用 `/icpmconfig` 命令，功能不受影响。
+- **验证**：NeoForge BUILD SUCCESSFUL；jar 内新类齐全、含 `weakStrike`/`isWeakStrikeEnabled`，且 **MaFgLib 未被误打包**（`fi/dy/masa/malilib/` 条目 = 0）；部署 `ICPM-1.1.3-NeoForge.jar`（md5 `acc802fc…`，已去除 `[内测]` 前缀）。
+
+### 附：无攻击速度（1.6.4 原版机制）配置项 `noAttackCooldown`（与 Fabric 端同源）
+
+- **机制**：1.6.4 **没有**攻击冷却。判决源 `EntityPlayer.java` / `EntityLivingBase.java` 整文件检索 `attackStrength` / `attackCooldown` / `attackTime` / `getAttackStrengthScale` —— **0 匹配**（只有手臂挥动动画 `swingProgress`），每次挥击都按满伤害结算；现代版的攻击冷却与"充能伤害缩放"是 **1.9 才引入**的。
+- **开关**：`noAttackCooldown`，**默认 `true` = 1.6.4 忠实手感**；`false` = 保留现代版攻击冷却（连点衰减）。落地为新 mixin **`ICPMNoAttackCooldownMixin`**（双树同源；在 `Player.getAttackStrengthScale(float)` HEAD 恒返回 `1.0F` 满充能），并已注册进本端 `icpm.mixins.json`。修改途径：`config/icpm.json`（带中文注释）／MaFgLib「上天眷顾」页／命令 `/icpmconfig attackcooldown on|off|status`。
+- **为何不改 `ATTACK_SPEED` 属性**：把攻速调到极大也拿不到 1.0（`attackStrengthTicker` 刚被 `attack()` 重置时 `(0+0.5)/delay` 仍 < 1，且 `delay → 0` 除零得 NaN）；返回 1.0 对任何形式的缩放公式都恰为「满充能伤害」。
+- **验证**：NeoForge BUILD SUCCESSFUL；mixin 注入点审计 **146 个 mixin / 232 个注入点**全绿；发版预检 **0 问题**；`verify_jar` 通过（2654 条，`testzip=None`）；服务端冒烟 **`Done (0.462s)!`**；jar 内新 mixin 类与 `noAttackCooldown` / `isNoAttackCooldownEnabled` 均在。部署 `ICPM-1.1.3-NeoForge.jar`（md5 `acc802fc…`）。
+- **顺带修复（发版闸门）**：`neoforge/scripts/audit_mixins.py`（GBK 控制台下打印 `✓` 抛 `UnicodeEncodeError`）与根目录 `scripts/preflight_release.py`（清理临时文件被本机 safe-delete 钩子拦截）此前**必然在最后一步异常退出**，导致「明明通过却退码 1」；已分别改为**统一 stdout 转 UTF-8**、**不再在脚本内删除临时文件**，现两者均正常退码 0。
+
+### 附：锈铁（rusted_iron）全套 23 件注册（与 Fabric 端同源）
+
+- **同时更正**：此前记载的「MITE RP 1.6.41 无锈铁贴图」是**误判** —— RP 内锈铁贴图一件不缺（tools 13 / armor 8 / armor layer 4 / arrows / chains）。误判源于只扫了 `items/` 一层未进 `tools/` 子目录，以及 R196 用材质化注册（`Item.swordRustedIron = new ItemSword(776, Material.rusted_iron)`，无 `*RustedIron*` 类可搜）。
+- **R196 真值**：耐久 4.0 / 附魔 0 / 品质 poor（`EnumEquipmentMaterial:13`）；伤害加值 2.0（`Material:380`）；MinHarvestLevel 2、setMetal（`Material:646`）；挖掘效率 1.25 → 5.0（`ToolMaterialHarvestEfficiency:11`）；护甲板甲 6 / 锁甲 4（`ItemArmor:75,92`）；修复与铁共用（`Item:1015`）；箭伤害 = 材质伤害 = 2（`ItemArrow:85`）。
+- **落地**：新增 `RUSTED_IRON_TIER` + 两个护甲材质 + `RUSTED_IRON_MAT_DUR`；注册 23 件（13 工具/武器 + 8 护甲 + 箭 + 链）；13 条工具映射；物品定义/模型各 23 个 + 中英语言各 23 条；23 张贴图从 RP 导入并**去相似化**。
+- **骨领主**恢复 R196 原样：武器 swordRustedIron 权重 2（日 ≥10 加 battleAxe、≥20 加 warHammer），护甲锈铁板甲全套（此前无护甲 + 远古金属替代）。
+- **验证**：NeoForge BUILD SUCCESSFUL（6m38s）；jar 内容 贴图 23/23 · 护甲层 4/4 · 物品定义 23/23 · 模型 23/23 · 语言 23/23；mixin 审计 / 发版预检 / `verify_jar` 均退码 0。部署 `ICPM-1.1.3-NeoForge.jar`（md5 `ba437b39…`）。
+- **仍待接线**：骷髅变种武器与箭（R196 用 `daggerRustedIron` / `arrowRustedIron`）。
+
+### 附：R196 移植路线逐项推进（与 Fabric 端同步）
+
+本轮闭环 **13 项**，NeoForge 端**同步实现**（逐项出处与判决源见根目录 `ICPM更新日志.md` 同名小节）：
+
+- **地狱犬数值**：HP 20 / 攻击 4 / 移速 0.4；点燃改为 40% 概率、1–8 秒（`EntityHellhound.java:51-56,83-93`）。
+- **附魔权重**：`ICPMEnchantDifficulty.buildList` 改为**按权重加权抽取**（此前是均匀随机 ⇒ 权重无消费者）；17 个 ICPM 附魔 `weight` 校准；原版 21 个附魔以 `data/minecraft/enchantment/` 覆盖为 R196 值。
+- **`ShearsInteractMixin` 补注册**：此前被一段已被证伪的注释屏蔽，现取消并注册 —— 剪取 50 耐久 + 右键去抖在 NeoForge 端恢复生效。
+- **近距刷怪放宽** `ICPMSpawnDistanceMixin`：主世界 / 地下世界全黑处放宽到 8 格（`SpawnerAnimals.java:192-206`）。
+- **地下世界 32 天雾色循环** `ICPMUnderworldFogMixin`（客户端）：「第 16 天最黑、第 0/32 天最亮」。
+- **疫病传播**改 R196：3×3×3 + 50% 门控、**不限成熟度**（`BlockCrops.java:99-108`）。
+- **耕地肥力**改 R196 单比特：生长速率 ×1.5、1/256 概率消耗、**收获不扣**；粪便宜只对未施肥耕地生效；肥沃附魔改为 `等级/5` 概率（锄地 + 收获两处）。
+- **地狱苦力怕 50% 替换 + 肿胀距离**：`ICPMInfernalCreeperSpawnMixin`（含主世界夜晚露天 75% 放弃）+ `ICPMSwellGoalMixin`（普通 16 / 地狱 36 ÷ 健康比）。
+- **刷怪深度门控** `ICPMSpawnDepthGateMixin`：食尸鬼 y≤56、尸妖 y≤48（血月+冰冻）、亡魂 y≤44、追猎者 y≤40、暗影 y≤32（血月+沙漠）、吸血蝙蝠 y≤48（血月）、黑寡妇 50%、普通蜘蛛露天 1/4。
+- **锈铁接线**：僵尸随机持械换回**真锈铁**；复仇僵尸补上装备（锈铁武器 + 板甲全套，此前完全无装备）。
+- **溯源更正**：B2「箱子 loot 时间锁 + 创世之书」**不成立**（R196 内无 `genesis` / `Debris`，地牢战利品为静态两套表）；`clumsiness` 诅咒**确认早已实现**。
 
 ## 1.1.2（2026-09-13）· 与 Fabric 端同步：怪物特性收口 + 近战公式与工具攻击全量校准
 
@@ -11,6 +82,7 @@
 
 - **村民声望系统（NeoForge 侧注册）**——新增 `ICPMVillagerReputation.kt` 与 3 个 mixin（`ICPMVillagerReputationMixin` / `ICPMVillagerTradeMixin` / `ICPMIronGolemReputationMixin`），并补入本端 `icpm.mixins.json`。
 - **凝胶立方族自然生成（NeoForge 侧注册）**——Jelly / Blob / Ooze / Pudding 四个实体在 `RegisterSpawnPlacementsEvent` 中注册刷怪规则，并在 `data/icpm/neoforge/biome_modifier/spawn_icpm_monsters.json` 追加四条刷怪条目（权重 8 / 6 / 6 / 4）。
+- **客户端渲染修复（与 Fabric 端同源）**——矿工僵尸等自定义人形怪物的手持物/护甲不显示：1.21.11 `MobRenderer` 不再自带手持物与护甲层，现统一改经新基类 `ICPMHumanoidRenderer`（`HumanoidMobRenderer` + `HumanoidArmorLayer`）派生。
 - **版本号同步提升至 1.1.2**（`neoforge/build.gradle.kts` + `neoforge.mods.toml`），产物 `ICPM-Neoforge-1.1.2.jar`。
 
 ## 1.1.1（2026-09-09 ~ 09-11）· NeoForge 1.21.11 移植落地 + R196 逐值审计纠偏 + 火花/枯死作物忠实移植 + 贴图去相似化

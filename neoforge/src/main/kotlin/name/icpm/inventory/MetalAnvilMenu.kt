@@ -463,6 +463,7 @@ class MetalAnvilMenu(
             p.startsWith("ancient_metal_") -> BlockMetalAnvil.MetalType.ANCIENT_METAL
             p.startsWith("mithril_") -> BlockMetalAnvil.MetalType.MITHRIL
             p.startsWith("adamantium_") -> BlockMetalAnvil.MetalType.ADAMANTIUM
+            p.startsWith("netherite_") -> BlockMetalAnvil.MetalType.NETHERITE
             // 燧石工具（无法修复，无对应金属粒）
             else -> null
         }
@@ -481,6 +482,7 @@ class MetalAnvilMenu(
             item == ICPMItems.ANCIENT_METAL_NUGGET -> BlockMetalAnvil.MetalType.ANCIENT_METAL
             item == ICPMItems.MITHRIL_NUGGET -> BlockMetalAnvil.MetalType.MITHRIL
             item == ICPMItems.ADAMANTIUM_NUGGET -> BlockMetalAnvil.MetalType.ADAMANTIUM
+            item == ICPMItems.NETHERITE_NUGGET -> BlockMetalAnvil.MetalType.NETHERITE
             else -> null
         }
     }

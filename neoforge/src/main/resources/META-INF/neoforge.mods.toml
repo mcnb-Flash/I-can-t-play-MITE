@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/mcnb-Flash/I-can-t-play-MITE/issues"
 
 [[mods]]
 modId="icpm"
-version="1.1.2"
+version="1.1.4"
 displayName="I can't play mite (ICPM)"
 description='''A hardcore survival mod for Minecraft 1.21.11 NeoForge. Port of the Fabric build.'''
 authors="78"
@@ -31,6 +31,15 @@ authors="78"
     versionRange="[6.1.0,)"
     ordering="AFTER"
     side="BOTH"
+
+# 可选前置：MaFgLib（malilib 的 (Neo)Forge 非官方移植）。装了才提供图形配置界面；
+# 未装时 ICPM 用 /icpmconfig 命令兜底，不影响其它任何功能（唯一入口类经反射安全层加载）。
+[[mods.dependencies]]
+    modId="mafglib"
+    type="optional"
+    versionRange="[0.4.0,)"
+    ordering="AFTER"
+    side="CLIENT"
 
 # Mixin 配置（jar 根 *.mixins.json）
 [[mixins]]

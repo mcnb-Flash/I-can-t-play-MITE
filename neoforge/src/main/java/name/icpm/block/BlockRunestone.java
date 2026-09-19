@@ -29,7 +29,8 @@ public class BlockRunestone extends Block {
 
     public enum MetalType {
         MITHRIL,
-        ADAMANTIUM
+        ADAMANTIUM,
+        NETHERITE
     }
 
     public BlockRunestone(MetalType metal, BlockBehaviour.Properties properties) {

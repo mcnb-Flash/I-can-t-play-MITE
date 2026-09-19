@@ -8,6 +8,14 @@
 """
 import json, os, re, subprocess, sys, zipfile
 
+# 控制台编码兜底：Windows GBK 控制台下打印非 GBK 字符（如 "✓"）会抛
+# UnicodeEncodeError 让脚本在最后一步异常退出（明明 0 问题却退码 1），此处统一转 UTF-8。
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "src", "main", "resources")
 DISASM = os.path.join(ROOT, "tmp_disasm")
@@ -58,8 +66,9 @@ for path in mixin_files():
             n_checked += 1
             if m not in declared:
                 issues.append(f"MIXIN {os.path.basename(path)}: @Mixin({fq}) 注入 {m} 但目标类未声明")
-        try: os.remove(tmp)
-        except OSError: pass
+        # 本机 safe-delete 钩子会拦截脚本内删除操作（累积约 50 次后抛
+        # SAFE_DELETE_BULK_CONFIRM_REQUIRED 直接中断脚本）。发版闸门绝不能因"清理临时文件"
+        # 而失败，故此处**不删除**：同名文件下次运行会原地覆盖（tmp_disasm/ 仅为项目内临时目录）。
 
 # ---------- 2. 数据 JSON 合法性 ----------
 for dp, _, fs in os.walk(RES):

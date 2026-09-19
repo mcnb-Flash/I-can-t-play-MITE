@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": ["minecraft:netherite_ingot"],
+  "result": {"id": "icpm:netherite_nugget", "count": 9}
+}

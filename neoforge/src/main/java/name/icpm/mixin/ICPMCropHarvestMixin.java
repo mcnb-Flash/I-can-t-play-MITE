@@ -35,11 +35,18 @@ public abstract class ICPMCropHarvestMixin {
             return;
         }
         int lvl = ICPMEnchantEffects.level(player.level(), player.getMainHandItem(), "harvesting");
+        // (a) R196 ItemHoe.java:108-114（ItemMattock / ItemScythe 同款）：收获成熟作物时，
+        //     以 getEnchantmentLevelFraction(fertility) = 等级/5 的概率把下方耕地重设为已施肥。
+        int fertLvl = ICPMEnchantEffects.level(level, player.getMainHandItem(), "fertility");
+        if (fertLvl > 0 && player.getRandom().nextFloat() < (float) fertLvl / 5.0f) {
+            ICPMFarmlandFertility.add(level.dimension(), blockPos.below(), 1);
+        }
+        // (b) 收获附魔额外掉落
         if (lvl <= 0) {
             return;
         }
-        // 收获成熟作物：作物吸收地力，下方耕地肥力 -1（MITE 施肥-种植-收获循环）
-        ICPMFarmlandFertility.consume(level.dimension(), blockPos.below());
+        // 注：R196 收获**不消耗**耕地肥力 —— 唯一的消耗点是 BlockCrops.java:124-125
+        //（作物生长成功时 1/256 概率取消施肥），故此处不再扣肥力。
         int extra = 1 + player.getRandom().nextInt(lvl + 1);
         ItemStack drop = new ItemStack(((CropBlockAccessor) crop).icpm$getBaseSeedId(), extra);
         double x = blockPos.getX() + 0.5;

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "X",
+    "#",
+    "Y"
+  ],
+  "key": {
+    "#": "minecraft:stick",
+    "X": "icpm:netherite_nugget",
+    "Y": "minecraft:feather"
+  },
+  "result": {
+    "id": "icpm:netherite_arrow",
+    "count": 4
+  }
+}

@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "2.4.10"
 }
 
-version = "1.1.2"
+version = "1.1.4"
 group = "name.icpm"
 
 neoForge {
@@ -39,11 +39,15 @@ repositories {
 }
 
 dependencies {
-    // NeoForge 端无 malilib；JEI/malilib Fabric 专属库不引用。
+    // NeoForge 端无原版 malilib，配置 GUI 改用其非官方移植 MaFgLib（见下方 compileOnly）。
     // Kotlin 运行时：NeoForge 不自带 kotlin-stdlib（缺失会 NoClassDefFoundError: kotlin/enums/EnumEntriesKt）
     // → 以 Kotlin for Forge 作前置库（用户 mods 目录需安装），此处引入使其进入 dev 运行期类路径，
     //   并在 META-INF/neoforge.mods.toml 声明 required 依赖（缺前置时给出明确报错而非崩溃）。
     implementation("thedarkcolour:kotlinforforge-neoforge:6.3.0")
+    // MaFgLib（malilib 的 (Neo)Forge 移植，包名同为 fi.dy.masa.malilib）：仅编译期依赖。
+    // 运行时若玩家装了 MaFgLib，ICPM 才注册图形配置 GUI（经反射安全层 ICPMConfigAccess 调用），
+    // 未装则静默降级为 /icpmconfig 命令；不会把 MaFgLib 打进本 mod jar。
+    compileOnly(files("libs/mafglib-neoforge-1.21.11-0.4.6.jar"))
 }
 
 // Mixin：NeoForge 1.21 通过 jar 根 *.mixins.json 自动发现（FML MixinService）。

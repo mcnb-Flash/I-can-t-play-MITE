@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " ? ",
+    "? ?",
+    " ? "
+  ],
+  "key": {
+    "?": "icpm:netherite_nugget"
+  },
+  "result": {
+    "id": "icpm:netherite_chain",
+    "count": 1
+  }
+}

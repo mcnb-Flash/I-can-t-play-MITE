@@ -84,3 +84,6 @@ tmp_*.py
 # build logs
 g*.log
 gb*.log
+
+# === devtools: 本地开发/调试脚本与整理归档（只在本机用，不随源码推送） ===
+devtools/

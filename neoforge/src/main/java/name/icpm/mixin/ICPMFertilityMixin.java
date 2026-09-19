@@ -14,7 +14,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * ICPM 肥沃附魔（R196 EnchantmentFertility 移植）：锄/战锄/镰刀锄地成功后给耕地增加肥力。
+ * ICPM 肥沃附魔（R196 `EnchantmentFertility` 移植）。
+ *
+ * <p>R196 判决源 `ItemHoe.java:88-91`（{@code ItemMattock} / {@code ItemScythe} 同款）：
+ * <pre>
+ * world.setBlock(x, y, z, Block.tilledField.blockID);          // 锄地成耕
+ * if (Math.random() &lt; EnchantmentHelper.getEnchantmentLevelFraction(Enchantment.fertility, item_stack)) {
+ *     BlockFarmland.setFertilized(world, x, y, z, true);        // 概率直接施好肥
+ * }
+ * </pre>
+ * 其中 {@code getEnchantmentLevelFraction = level / getNumLevels()}
+ * （`EnchantmentHelper.java:51-56`），fertility 的 {@code numLevels = 5}
+ * （`Enchantment.java:107-109` 默认值，`EnchantmentFertility` 未覆写）⇒ **概率 = 附魔等级 / 5**。
  */
 @Mixin(HoeItem.class)
 public abstract class ICPMFertilityMixin {
@@ -24,14 +35,15 @@ public abstract class ICPMFertilityMixin {
         if (!cir.getReturnValue().consumesAction() || context.getLevel().isClientSide()) {
             return;
         }
+        Level level = context.getLevel();
         ItemStack hoe = context.getItemInHand();
-        int lvl = ICPMEnchantEffects.level(context.getLevel(), hoe, "fertility");
+        int lvl = ICPMEnchantEffects.level(level, hoe, "fertility");
         if (lvl <= 0) {
             return;
         }
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        // 锄地成功后点击位置变成耕地，肥力 +附魔等级（上限 3）
-        ICPMFarmlandFertility.add(level.dimension(), pos, lvl);
+        // R196：概率 = 附魔等级 / 5，命中则把刚翻好的耕地直接设为已施肥
+        if (level.random.nextFloat() < (float) lvl / 5.0f) {
+            ICPMFarmlandFertility.add(level.dimension(), context.getClickedPos(), 1);
+        }
     }
 }

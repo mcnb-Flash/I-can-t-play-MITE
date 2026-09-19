@@ -43,10 +43,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code is} 比对，Redirect 处理器必须只对 {@code Items.SHEARS} 目标放宽、其余走原逻辑。
  */
 /*
- * ⚠️ NeoForge 1.21.11 已禁用（从 icpm.mixins.json 摘除）：
- * 1.21.11 剪毛走 ShearsItem.interactLivingEntity（NeoForge IShearable/vanilla Shearable 管道），
- * Sheep/MushroomCow.mobInteract 仅剩喂食；本 mixin 的 mobInteract/ItemStack.is 注入点已不存在。
- * 后续如需恢复 R196 耐久(50)/去抖，应改为对 ShearsItem.interactLivingEntity 注入。
+ * ⚠️ NeoForge 1.21.11 保持禁用（不注册进 icpm.mixins.json）——这不是遗漏，是 **loader 差异**：
+ * NeoForge 对 `Sheep`/`MushroomCow` 打了 patch，剪毛走 `IShearable`/`ShearsItem.interactLivingEntity`
+ * 管道，`Sheep.mobInteract` 内**没有** `ItemStack.is(Item)` 调用 → 本 mixin 的 @Redirect 扫描到
+ * 0 个目标，运行时抛 `InjectionError (0/1) succeeded` 直接崩启动（冒烟实测 2026-09-16）。
+ * Fabric 端 vanilla `Sheep.mobInteract` 是唯一入口，同版 mixin 工作正常 ⇒ **仅 Fabric 注册**。
  */
 
 @Mixin({Sheep.class, MushroomCow.class})

@@ -23,7 +23,8 @@ import java.util.Map;
  * - F 第 2 个及之后词条 50% 概率重置等级（除非无可选）
  *
  * <p>词条生成（EnchantmentHelper.buildEnchantmentList R196 算法）：
- * 预算难度 ×(0.75~1.25) 浮动 → 循环取最高可达等级词条（冲突排除）→ 扣难度与 +5 → 至多 3 词条。
+ * 预算难度 ×(0.75~1.25) 浮动 → 循环按 **weight 加权**抽取最高可达等级词条（冲突排除）
+ * → 扣难度与 +5 → 至多 3 词条。
  */
 public final class ICPMEnchantDifficulty {
 
@@ -69,6 +70,72 @@ public final class ICPMEnchantDifficulty {
 
     public static int difficulty(Identifier enchant) {
         return DIFFICULTY.getOrDefault(enchant.getPath(), 10);
+    }
+
+    /**
+     * 附魔权重表（w）。R196 判决源：`EnumRarity.java:7-10`
+     * （common=100 / uncommon=25 / rare=5 / epic=1）+ `Enchantment.java:194-231`
+     * （每个附魔的 rarity）+ `Enchantment.java:95`（`weight = rarity.standard_weight`）。
+     *
+     * <p>消费者：{@link #buildList} 的加权抽取（R196 `EnchantmentHelper.java:265`
+     * `WeightedRandom.getRandomItem(random, all_possible_enchantments.values())`，
+     * 其中 `EnchantmentData.getWeight()` = `enchantment.getWeight()`）。
+     */
+    private static final Map<String, Integer> WEIGHT = new LinkedHashMap<>();
+
+    private static void regW(String id, int w) {
+        WEIGHT.put(id, w);
+    }
+
+    static {
+        // common = 100（Enchantment.java:194,202,208,212,217,225）
+        regW("protection", 100);
+        regW("sharpness", 100);
+        regW("efficiency", 100);
+        regW("power", 100);
+        regW("fishing_fortune", 100);
+        regW("true_flight", 100);
+        // uncommon = 25（Enchantment.java:195-198,203-204,205,207,210,213,215-216,218-219,223-224,229-231）
+        regW("fire_protection", 25);
+        regW("feather_falling", 25);
+        regW("blast_protection", 25);
+        regW("projectile_protection", 25);
+        regW("smite", 25);
+        regW("bane_of_arthropods", 25);
+        regW("knockback", 25);
+        regW("looting", 25);
+        regW("unbreaking", 25);
+        regW("punch", 25);
+        regW("arrow_recovery", 25);
+        regW("stun", 25);
+        regW("fertility", 25);
+        regW("tree_felling", 25);
+        regW("free_action", 25);
+        regW("quickness", 25);
+        regW("harvesting", 25);
+        regW("butchering", 25);
+        regW("endurance", 25);
+        // rare = 5（Enchantment.java:199-201,206,209,211,214,220,222,226-228）
+        regW("respiration", 5);
+        regW("aqua_affinity", 5);
+        regW("thorns", 5);
+        regW("fire_aspect", 5);
+        regW("silk_touch", 5);
+        regW("fortune", 5);
+        regW("flame", 5);
+        regW("speed", 5);
+        regW("regeneration", 5);
+        regW("poison", 5);
+        regW("disarming", 5);
+        regW("piercing", 5);
+        // epic = 1（Enchantment.java:221）
+        regW("vampiric", 1);
+    }
+
+    /** 附魔权重。R196 未收录（1.21 独有：mending / infinity / sweeping_edge / 1.21 新增等）→ 25（uncommon 中性档）。 */
+    public static int weightOf(Identifier enchant) {
+        Integer w = WEIGHT.get(enchant.getPath());
+        return w == null ? 25 : w;
     }
 
     /** 是否分级（无等级词条：精准采集/aqua_affinity/mending 等视为 3 级） */
@@ -186,7 +253,28 @@ public final class ICPMEnchantDifficulty {
             if (affordable.isEmpty()) {
                 break;
             }
-            int idx = random.nextInt(affordable.size());
+            // R196 EnchantmentHelper.java:265 —— WeightedRandom.getRandomItem(random, values)：
+            // 候选按 weight 加权抽取（EnchantmentData.getWeight() = enchantment.getWeight()
+            // = rarity.standard_weight）。此前是均匀 random.nextInt(size)，属真实偏差。
+            int totalWeight = 0;
+            for (Identifier id : affordable) {
+                totalWeight += Math.max(0, weightOf(id));
+            }
+            int idx;
+            if (totalWeight <= 0) {
+                idx = random.nextInt(affordable.size());
+            } else {
+                int pick = random.nextInt(totalWeight);
+                idx = affordable.size() - 1;
+                int acc = 0;
+                for (int i = 0; i < affordable.size(); i++) {
+                    acc += Math.max(0, weightOf(affordable.get(i)));
+                    if (pick < acc) {
+                        idx = i;
+                        break;
+                    }
+                }
+            }
             Identifier enchant = affordable.get(idx);
             int level = bestLevels.get(idx);
             // F：第 2 个及以后词条 50% 重置等级

@@ -15,6 +15,14 @@ import struct
 import sys
 import zipfile
 
+# 控制台编码兜底：Windows GBK 控制台下打印 "✓" 会抛 UnicodeEncodeError，
+# 使审计在最后一步异常退出（明明已通过却退码 1），此处统一转 UTF-8。
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 NEOFORGE = os.path.dirname(HERE)
 CLIENT_JAR = r"E:\.minecraft\libraries\net\neoforged\minecraft-client-patched\21.11.45\minecraft-client-patched-21.11.45.jar"

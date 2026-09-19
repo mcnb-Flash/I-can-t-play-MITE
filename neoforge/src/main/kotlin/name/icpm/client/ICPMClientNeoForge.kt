@@ -30,6 +30,8 @@ class ICPMClientNeoForge(modBus: IEventBus) {
 
     init {
         ICPM.LOGGER.info("ICPM NeoForge client constructing")
+        // 配置界面接入（经反射安全层；未装 MaFgLib 时静默跳过，用 /icpmconfig 命令）
+        name.icpm.client.config.ICPMConfigAccess.init()
         // 按键注册（mod bus）
         modBus.addListener(RegisterKeyMappingsEvent::class.java) { evt ->
             ICPMKeyBindings.registerAll(evt)

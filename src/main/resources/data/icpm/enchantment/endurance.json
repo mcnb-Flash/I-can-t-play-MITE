@@ -16,5 +16,5 @@
     "chest"
   ],
   "supported_items": "#icpm:enchantable/chest_armor",
-  "weight": 8
+  "weight": 25
 }

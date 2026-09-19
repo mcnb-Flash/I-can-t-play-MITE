@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "???",
+    "? ?",
+    "???"
+  ],
+  "key": {
+    "?": "minecraft:netherite_ingot"
+  },
+  "result": {
+    "id": "icpm:netherite_strongbox",
+    "count": 1
+  }
+}

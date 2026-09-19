@@ -128,6 +128,19 @@ val NETHERITE_TIER: ToolMaterial = ToolMaterial(
     net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath("minecraft", "netherite_tool_materials"))
 )
 
+// ========== 锈铁材质 ==========
+// R196 EnumEquipmentMaterial.rusted_iron: durability=4.0, enchantability=0, quality=poor
+// R196 Material.rusted_iron: getDamageVsEntity()=2.0f, setMetal(true), setMinHarvestLevel(2)
+// R196 ToolMaterialHarvestEfficiency.rusted_iron = 1.25f → 4.0f × 1.25f = 5.0f
+val RUSTED_IRON_TIER: ToolMaterial = ToolMaterial(
+    BlockTags.INCORRECT_FOR_IRON_TOOL,   // MinHarvestLevel 2（同铜/银/金）
+    800,    // 默认耐久（实际由 .durability() 覆盖：4 × 部件数 × 4.0 × 100）
+    5.0f,   // R196: 4.0f * getMaterialHarvestEfficiency(1.25f) = 5.0f
+    2.0f,   // R196 rusted_iron: getDamageVsEntity() = 2.0f
+    1,      // R196 rusted_iron: enchantability = 0；1.21.11 Enchantable 要求 >0，取 1（等价「几乎不可附魔」）
+    net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath("minecraft", "iron_tool_materials"))
+)
+
 // ========== 特殊工具材质 (无材质伤害加成) ==========
 // 用于 Cudgel/Scythe 等 R196 源文件中不应用材质伤害的工具
 // R196 xj.getMaterialDamageVsEntity() 对部分工具不会被使用

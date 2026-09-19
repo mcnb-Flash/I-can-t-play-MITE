@@ -152,7 +152,7 @@ class LongdeadGuardianEntity(type: EntityType<out LongdeadGuardianEntity>, level
 
 /**
  * 骨领主（R196 `EntityBoneLord.java:37-44` —— HP 20 / 攻击 5 / 移速 0.26 / followRange 40；
- * 召唤随从链见 tick）。R196 武器/护甲为【锈铁】系（ICPM 未注册锈铁物品，暂用远古金属替代，另记缺口）。
+ * 召唤随从链见 tick）。武器/护甲 = R196 锈铁系（`addRandomWeapon`:47-58 / `addRandomEquipment`:63-66）。
  */
 class BoneLordEntity(type: EntityType<out BoneLordEntity>, level: Level) : ICPMSkeletonVariant(type, level) {
     override val healthValue: Double = 20.0
@@ -161,9 +161,24 @@ class BoneLordEntity(type: EntityType<out BoneLordEntity>, level: Level) : ICPMS
     override val isRanged: Boolean = false
     override val armorValue: Double = 6.0
 
-    override fun meleeWeapon(): ItemStack =
-        if (random.nextBoolean()) ItemStack(ICPMItems.ANCIENT_METAL_WAR_HAMMER)
-        else ItemStack(ICPMItems.ANCIENT_METAL_SWORD)
+    // R196 addRandomWeapon：swordRustedIron 权重 2；日≥10 加 battleAxeRustedIron 权重 1；日≥20 加 warHammerRustedIron 权重 1
+    override fun meleeWeapon(): ItemStack {
+        val day = ((level().gameTime + 6000L) / 24000L).toInt() + 1   // R196 getDayOfWorld
+        val total = if (day >= 20) 4 else if (day >= 10) 3 else 2
+        return when (random.nextInt(total)) {
+            0, 1 -> ItemStack(ICPMItems.RUSTED_IRON_SWORD)
+            2 -> ItemStack(ICPMItems.RUSTED_IRON_BATTLE_AXE)
+            else -> ItemStack(ICPMItems.RUSTED_IRON_WAR_HAMMER)
+        }
+    }
+
+    // R196 addRandomEquipment：板甲全套（靴/腿/胸/头）
+    override fun equipArmor() {
+        this.setItemSlot(EquipmentSlot.HEAD, ItemStack(ICPMItems.RUSTED_IRON_HELMET))
+        this.setItemSlot(EquipmentSlot.CHEST, ItemStack(ICPMItems.RUSTED_IRON_CHESTPLATE))
+        this.setItemSlot(EquipmentSlot.LEGS, ItemStack(ICPMItems.RUSTED_IRON_LEGGINGS))
+        this.setItemSlot(EquipmentSlot.FEET, ItemStack(ICPMItems.RUSTED_IRON_BOOTS))
+    }
 
     // R196 EntityBoneLord.num_troops_summoned（召唤普通骷髅随从，≤6）
     private var numTroopsSummoned = 0

@@ -91,12 +91,16 @@ object ICPMClient {
         val client = Minecraft.getInstance()
         client.player?.let { SprintLockManager.tick(it) }
         while (ICPMKeyBindings.CONFIG.consumeClick()) {
-            // NeoForge 无 malilib 配置 GUI：提示使用 /icpmconfig 命令
-            val pl = client.player
-            if (pl != null) {
-                pl.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("§e请在游戏内使用 /icpmconfig 命令修改 ICPM 配置"), false
-                )
+            // 装了 MaFgLib（malilib 的 NeoForge 移植）时打开图形配置界面；否则提示用 /icpmconfig 命令
+            if (name.icpm.client.config.ICPMConfigAccess.mafglibLoaded()) {
+                name.icpm.client.config.ICPMConfigAccess.openConfig()
+            } else {
+                val pl = client.player
+                if (pl != null) {
+                    pl.displayClientMessage(
+                        net.minecraft.network.chat.Component.literal("§e请在游戏内使用 /icpmconfig 命令修改 ICPM 配置（或安装 MaFgLib 以获得图形配置界面）"), false
+                    )
+                }
             }
         }
     }

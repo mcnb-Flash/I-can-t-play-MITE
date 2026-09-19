@@ -134,7 +134,12 @@
         "ICPMR196TargetingMixin",
         "ICPMVillagerReputationMixin",
         "ICPMVillagerTradeMixin",
-        "ICPMIronGolemReputationMixin"
+        "ICPMIronGolemReputationMixin",
+        "ICPMNoAttackCooldownMixin",
+        "ICPMSpawnDistanceMixin",
+        "ICPMSwellGoalMixin",
+        "ICPMInfernalCreeperSpawnMixin",
+        "ICPMSpawnDepthGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1
