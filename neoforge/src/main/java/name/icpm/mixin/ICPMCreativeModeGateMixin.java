@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * {@link ICPMGameModeNormalizeMixin} 在收敛点（{@code ServerPlayerGameMode.setGameModeForPlayer}）
  * 完成，因此存档恢复、其它 mod 等旁路同样被覆盖。
  *
- * <p>开关：{@code config/icpm.json} 的 {@code enableCreativeMode}，或 JVM 参数
- * {@code -Dicpm.devMode=true}（见 {@link ICPMDevMode}）。
+ * <p>开关：**只有** JVM 参数 {@code -Dicpm.devMode=true}（见 {@link ICPMDevMode}）；
+ * 配置文件与游戏内命令都没有该开关。
  *
  * <p>dev 模式开启时：不拦截、不提示、**不修改玩家模式**。
  */

@@ -10,15 +10,17 @@
 
 > 与根目录 `ICPM更新日志.md` 的 1.1.5 栏目内容一致（双树同源），此处只列 NeoForge 端需注意的点：
 
-- **禁用非生存双树同步**：新增 `ICPMDevMode` + `ICPMGameModeNormalizeMixin` + `ICPMPlayerJoinGateMixin`，改写 `ICPMCreativeModeGateMixin`；客户端新增 `ICPMWorldCreationGateMixin` + `ICPMLanCheatGateMixin`（mixin 注册各 +2）。两树拦截的均为原版类（`ServerPlayerGameMode` / `PlayerList` / `WorldCreationUiState` / `IntegratedServer`），行为一致。
+- **禁用非生存双树同步**：新增 `ICPMDevMode` + `ICPMGameModeNormalizeMixin` + `ICPMPlayerJoinGateMixin`，改写 `ICPMCreativeModeGateMixin`；客户端新增 `ICPMWorldCreationGateMixin` + `ICPMLanCheatGateMixin` + `ICPMLanScreenGateMixin`（client mixin 注册 +3、common +2）。两树拦截的均为原版类（`ServerPlayerGameMode` / `PlayerList` / `WorldCreationUiState` / `ShareToLanScreen` / `IntegratedServer`），行为一致。
+- **dev 模式后门只剩 JVM 参数**：`-Dicpm.devMode=true`。`config/icpm.json` 的 `enableCreativeMode` 已彻底移除（含 malilib 界面选项与译名键），旧配置里的遗留键读到即清除 —— 否则玩家改一下配置文件就能开创造，去作弊形同虚设。
 - **`/icpmconfig creative on|off` 删除**，改为只读 `/icpmconfig devmode status`（两树同）。
-- **下界合金 IMD 补完**：`assets/icpm/items/` 各 +23 个 IMD、多状态模型各 +4 个（弓 `_pulling_0/1/2`、钓鱼竿 `_cast`）；**创造栏补登**（`ICPMItemGroup` 各 +49 行）；**lang 各 +6 键**（铜 / 金 匕首·短斧·镰刀 + 蓝莓丛）。
+- **下界合金 IMD 补完**：`assets/icpm/items/` 各 +23 个 IMD、多状态模型各 +4 个（弓 `_pulling_0/1/2`、钓鱼竿 `_cast`）；**创造栏补登**（`ICPMItemGroup`）；**lang 各 +6 键**（铜 / 金 匕首·短斧·镰刀 + 蓝莓丛）。
+- **创造栏「金属砧」只列完好阶段**：裂痕 / 损坏砧没有对应物品（`ICPM.java` 注册方块时跳过 BlockItem），其 `asItem()` 返回 `Items.AIR`，而 1.21.11 的 `ItemStack.getCount()` 对 AIR 栈返回 0 ⇒ `CreativeModeTab` 会抛 `Stack size must be exactly 1`，使整个「ICPM 物品」栏构建失败（创造栏与 JEI 全空）。已在循环里过滤 `Items.AIR`。
 - **跨树 API 坑**：创造栏补录金属砧时不得用 `BuiltInRegistries.ITEM.get(id)`（NeoForge 返回 `Optional<Reference<Item>>`，编译期直接报类型不兼容），统一走既有 loader 无关工具 `ICPMBlocks.getAnvilVariant(metalType, stage)`。
 - **IMD 是 1.21.4+ 的通用改动**（非 Fabric 特例）：NeoForge 端漏 IMD 同样表现为物品栏无物品状贴图，必须双树同步。
 
 ### 验证（NeoForge 侧）
 
-`clean build` BUILD SUCCESSFUL；`neoforge/scripts/audit_mixins.py` 全绿（155 mixin / 245 注入点）；发版预检 0 问题；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 模型 / 贴图全部命中）；**服务端冒烟** `Done (0.574s)!`。
+`build` BUILD SUCCESSFUL（26s，增量）；`neoforge/scripts/audit_mixins.py` 全绿（156 mixin / 246 注入点）；发版预检 0 问题；双树自检 FAILS = 0；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 模型 / 贴图全部命中）；**服务端冒烟** `Done (0.473s)!`。
 
 版本号提升至 `1.1.5`（产物名 `ICPM-1.1.5-NeoForge.jar`）。
 

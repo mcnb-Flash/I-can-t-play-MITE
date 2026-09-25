@@ -3,11 +3,9 @@ package name.icpm.common;
 /**
  * ICPM 开发模式（dev mode）—— 唯一的“作弊后门”，**默认关闭**。
  *
- * <p>开启途径（二选一，JVM 参数优先）：
- * <ol>
- *   <li>JVM 启动参数：{@code -Dicpm.devMode=true}</li>
- *   <li>配置文件 {@code config/icpm.json} 的 {@code enableCreativeMode: true}</li>
- * </ol>
+ * <p><b>开启方式只有一种：JVM 启动参数 {@code -Dicpm.devMode=true}。</b>
+ * 配置文件与游戏内命令**都无法开启**（曾经把 {@code config/icpm.json} 的
+ * {@code enableCreativeMode} 也当作开关，等于把后门摆在玩家随手可改的地方——已移除）。
  *
  * <p>关闭（默认）时，ICPM 按 R196 语义禁用一切非生存玩法：
  * <ul>
@@ -31,16 +29,12 @@ public final class ICPMDevMode {
     private ICPMDevMode() {
     }
 
-    /** dev 模式是否开启（JVM 参数优先于配置文件）。 */
+    /** dev 模式是否开启（**只看 JVM 参数**；配置文件不再参与判定）。 */
     public static boolean isEnabled() {
         if (forced != null) {
             return forced;
         }
-        String prop = System.getProperty(PROPERTY);
-        if (prop != null && !prop.trim().isEmpty()) {
-            return Boolean.parseBoolean(prop.trim());
-        }
-        return ICPMConfig.isCreativeEnabled();
+        return Boolean.parseBoolean(System.getProperty(PROPERTY, "false").trim());
     }
 
     /** 仅供测试使用：强制 dev 模式取值（传 null 取消强制）。 */

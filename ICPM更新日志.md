@@ -4,20 +4,25 @@
 
 ## 1.1.5（2026-09-25）· 禁用非生存（去作弊）+ 1.1.4 收口补完
 
-> 本版两件事：① **移除「作弊」概念** —— 正常模式下无法创建作弊世界、无法开创造，也无法靠改存档绕过（新增统一 `devMode` 后门，仅供开发调试）；② 1.1.4 之后的收口补完（下界合金物品模型定义 / 创造栏 / 贴图 / 译名）。
+> 本版两件事：① **移除「作弊」概念** —— 正常模式下无法创建作弊世界、无法开创造，也无法靠改存档绕过（后门只剩 JVM 参数 `-Dicpm.devMode=true`，仅供开发调试）；② 1.1.4 之后的收口补完（下界合金物品模型定义 / 创造栏 / 贴图 / 译名）。
 
 ### 一、禁用非生存（对齐 R196：MITE 没有创造模式）
 
-判决源：R196 `CommandGameMode.java:40`（只允许切到生存）、`CommandServerPublishLocal.java:30`（`shareToLAN(SURVIVAL, false)`）；MITE 原版在创建世界界面同样**无法**选择「允许作弊」与创造模式。本版把这四层逐一掐断：
+判决源：R196 `CommandGameMode.java:40`（只允许切到生存）、`CommandServerPublishLocal.java:30`（`shareToLAN(SURVIVAL, false)`）；MITE 原版在创建世界界面同样**无法**选择「允许作弊」与创造模式。本版逐层掐断：
 
 | 层 | 落点 | 行为 |
 |---|---|---|
-| 入口 | `WorldCreationUiState.setAllowCommands` / `setGameMode` | 创建世界界面的「允许作弊」开关与创造 / 旁观模式选择一律撤销 |
-| 入口 | `IntegratedServer.publishServer` | LAN 开放时游戏模式强制生存、允许作弊强制 `false` |
+| 入口 | `CreateWorldScreen$GameTab` → `WorldCreationUiState.setGameMode` / `setAllowCommands` | 创建世界界面的「允许作弊」与创造 / 调试模式选择一律**归一为合法值**（关闭 / 生存） |
+| 入口 | `ShareToLanScreen.init` | LAN 界面的「游戏模式」「允许作弊」两个选择器直接锁死（灰掉不可点） |
+| 入口 | `IntegratedServer.publishServer` | LAN 发布时游戏模式强制生存、允许作弊强制 `false` |
 | **收敛点** | `ServerPlayerGameMode.setGameModeForPlayer` | 目标模式归算为生存 |
 | 归算 | `PlayerList.placeNewPlayer` | 登录后核对并归算回生存，归一值随存档写回 |
-| 后门 | `ICPMDevMode` | `-Dicpm.devMode=true`（JVM 参数，优先）或 `config/icpm.json` 的 `enableCreativeMode`；**开启后上述四处全部放行，不修改玩家模式** |
+| 后门 | `ICPMDevMode` | **只有** JVM 参数 `-Dicpm.devMode=true`；**开启后上述各处全部放行，不修改玩家模式** |
 
+> **后门只剩 JVM 参数**：曾经把 `config/icpm.json` 的 `enableCreativeMode` 也当作开关，等于把后门摆在玩家随手可改的地方 —— 本版已彻底移除该配置项（连 malilib 界面里的开关与译名键一并删掉；旧配置文件里的遗留键读到即清除）。
+>
+> **界面为什么用「归一参数」而不是「取消调用」**：`setGameMode` / `setAllowCommands` 内部都会执行 `onChanged()` 通知监听器，而 `CreateWorldScreen$GameTab` 注册了同步监听（把按钮的值重新拉回 uiState）。归一参数 ⇒ 状态被写回合法值 ⇒ 界面按钮 / 开关自己弹回「生存 / 关」，行为与显示一致；若用取消，uiState 不变但按钮已显示成「创造」，反而误导。
+>
 > **为什么改收敛点**：此前拦的是 `ServerPlayer.setGameMode`，而**存档恢复与第三方启动器改档走的是 `ServerPlayerGameMode.setGameModeForPlayer`**，根本不过那条路 —— 表现为「改存档能绕过」。现堵在真收敛点上，改档进游戏立刻被打回生存。
 
 游戏内的 `/icpmconfig creative on|off` **已删除**（不再能在游戏里开作弊），改为只读的 `/icpmconfig devmode status`。
@@ -25,13 +30,14 @@
 ### 二、1.1.4 收口补完
 
 1. **下界合金物品「物品栏无贴图」修复**：MC 1.21.4+ 起物品模型定义（IMD）在 `assets/icpm/items/<id>.json`（**不再是** `models/item/`）。上版只写了模型本体、漏了 IMD ⇒ 模型与贴图都在但没绑定，物品栏空白。已补齐 **23 个 IMD**（16 物品 + 7 方块）与 **4 个多状态模型本体**（弓 `_pulling_0/1/2`、钓鱼竿 `_cast`），并**顺带补上此前同样缺失的艾德曼裂痕 / 损坏砧** IMD。
-2. **下界合金未出现在创造栏 / JEI**：创造栏条目是硬编码清单（不遍历注册表），上版新增的下界合金从未登记 ⇒ 补登 **22 件物品**（粒 / 币 / 链条 / 箭 / 短斧 / 匕首 / 战锤 / 战斧 / 镰刀 / 鸭嘴锄 / 剪刀 / 钓竿 / 弓 / 桶 ×5 / 锁链甲 ×4）与**工作台 / 箱 / 门 / 符文石（16 变体）**；并**顺带补齐全部金属砧 8 材质 × 完好 / 裂痕 / 损坏 = 24 项**（此前创造栏里一个砧都没有）。
+2. **创造栏补登**：创造栏条目是硬编码清单（不遍历注册表），上版新增的下界合金从未登记 ⇒ 补登 **22 件物品**（粒 / 币 / 链条 / 箭 / 短斧 / 匕首 / 战锤 / 战斧 / 镰刀 / 鸭嘴锄 / 剪刀 / 钓竿 / 弓 / 桶 ×5 / 锁链甲 ×4）、**工作台 / 箱 / 门 / 符文石（16 变体）**，以及**全部金属砧的「完好」阶段**（铜 / 银 / 金 / 远古金属 / 秘银 / 艾德曼 / 下界合金；铁用原版 `minecraft:anvil`）。
+   - 裂痕 / 损坏砧（`chipped_*` / `damaged_*`）**不进创造栏**：它们只是旧存档兼容用的方块、没有对应物品（`ICPM.java` 注册方块时跳过其 BlockItem），而 1.21.11 的 `ItemStack.getCount()` 对 `Items.AIR` 栈返回 **0** —— 直接塞进创造栏会抛 `IllegalArgumentException: Stack size must be exactly 1`，**导致整个「ICPM 物品」栏构建失败（创造栏与 JEI 全空）**。本版已改为只取「完好」阶段并过滤 `Items.AIR`。
 3. **补齐 7 个无贴图物品**：5 个凝胶球（贴图原本就在 `textures/item/gelatinous_sphere/` 子目录，先前只扫了一层目录所以误判「无贴图」）、皮革线、去咒药水；后两件的物品模型 `layer0` 由原版占位（`minecraft:item/string` / `minecraft:item/glass_bottle`）改为专属贴图 `icpm:item/<id>`。
 4. **译名补全**：`copper_dagger` / `copper_hatchet` / `copper_scythe` / `gold_dagger` / `gold_hatchet` / `blueberry_bush` 此前**从未有过 lang 键**（游戏内直接显示原始键名），已补中英译名。
 
 ### 验证
 
-双端 `clean build` **BUILD SUCCESSFUL**（Fabric 7m58s / NeoForge 8m19s）；mixin 注入点审计 **155 mixin / 245 注入点**全绿；发版预检 **0 问题**；jar 全 entry 校验通过（`ICPMDevMode` 等 6 个新类与新增 IMD / 多状态模型 / 贴图全部命中，`BAD = 0`）；**服务端冒烟** NeoForge `Done (0.574s)!`、Fabric + Carpet 复现环境 `Done (2.006s)!` 且 `conflict-lines = 0`（新增 4 个 mixin 无注入冲突）。
+双端 `build` **BUILD SUCCESSFUL**（Fabric 51s / NeoForge 26s，增量）；mixin 注入点审计 **156 mixin / 246 注入点**全绿；发版预检 **0 问题**；双树自检脚本 **FAILS = 0**；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 多状态模型 / 贴图全部命中，`BAD = 0`）；**服务端冒烟** NeoForge `Done (0.473s)`、Fabric + Carpet 复现环境 `Done (0.501s)` 且 `conflict-lines = 0`。
 
 版本号提升至 `1.1.5`（Fabric 产物名 `ICPM-1.1.5-fabric.jar`；NeoForge 产物名 `ICPM-1.1.5-NeoForge.jar`）。
 

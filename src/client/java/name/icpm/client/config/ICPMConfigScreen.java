@@ -14,7 +14,7 @@ import java.util.List;
  * ICPM 配置界面（malilib GuiConfigsBase 子类，标签页 UI）。
  *
  * 顶部一排标签按钮（世界恶意 / 上天眷顾）+ 右侧重置/默认顺序按钮 + 下方配置列表。
- * "上天眷顾" 标签页：enableCreativeMode（创造模式）、noAttackCooldown（1.6.4 无攻击速度）。
+ * "上天眷顾" 标签页：noAttackCooldown（1.6.4 无攻击速度）。
  * "世界恶意" 标签页：witchWhisper（女巫低吟）、nightmareEra（噩梦时代）、
  * poorTechnique（技术不佳 0~4 档）、weakStrike（弱击）。
  *
@@ -42,7 +42,7 @@ public class ICPMConfigScreen extends GuiConfigsBase {
         }
     }
 
-    /** 默认标签 = "上天眷顾"（放 enableCreativeMode 开关）。 */
+    /** 默认标签 = "上天眷顾"。 */
     private int currentTab = ConfigTab.HEAVEN_FAVOR.ordinal();
 
     public ICPMConfigScreen() {
@@ -69,7 +69,6 @@ public class ICPMConfigScreen extends GuiConfigsBase {
                     ICPMMaLiLibConfig.POOR_TECHNIQUE,
                     ICPMMaLiLibConfig.WEAK_STRIKE));
             case HEAVEN_FAVOR -> ConfigOptionWrapper.createFor(List.of(
-                    ICPMMaLiLibConfig.ENABLE_CREATIVE,
                     ICPMMaLiLibConfig.NO_ATTACK_COOLDOWN));
         };
     }

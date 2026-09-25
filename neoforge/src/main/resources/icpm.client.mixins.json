@@ -21,7 +21,8 @@
         "EnchantmentMenuClientMixin",
         "ICPMUnderworldFogMixin",
         "ICPMWorldCreationGateMixin",
-        "ICPMLanCheatGateMixin"
+        "ICPMLanCheatGateMixin",
+        "ICPMLanScreenGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1

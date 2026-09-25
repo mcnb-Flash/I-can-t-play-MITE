@@ -9,18 +9,16 @@ import name.icpm.common.ICPMConfig;
  * ICPM malilib 配置句柄（client，仅当安装了 malilib 时由 ICPMClient 调用）。
  *
  * 提供 ICPM 全部可调项，值变更时经 ICPMConfig 写盘 config/icpm.json 立即生效：
- * - 上天眷顾（增益/便利）：enableCreativeMode、noAttackCooldown（1.6.4 无攻击速度）
+ * - 上天眷顾（增益/便利）：noAttackCooldown（1.6.4 无攻击速度）
  * - 世界恶意（世界威胁）：witchWhisper（女巫低吟）、nightmareEra（噩梦时代）、
  *   poorTechnique（技术不佳，0~4 档）、weakStrike（弱击开关）
+ *
+ * 注意：**没有创造/作弊开关**——它由 JVM 参数 {@code -Dicpm.devMode=true} 控制，
+ * 不提供任何游戏内或配置文件的开启途径，因此本类也不暴露该选项。
  */
 public class ICPMMaLiLibConfig implements IConfigHandler {
 
     public static final String MOD_ID = "icpm";
-
-    public static final ConfigBoolean ENABLE_CREATIVE = new ConfigBoolean(
-            "enableCreativeMode",
-            ICPMConfig.isCreativeEnabled(),
-            "true = 允许玩家变更为创造模式；false = 禁止（默认）");
 
     /** 1.6.4 无攻击速度（无攻击冷却）：近战不必等待武器充能，每次挥击都是满伤害。 */
     public static final ConfigBoolean NO_ATTACK_COOLDOWN = new ConfigBoolean(
@@ -67,7 +65,6 @@ public class ICPMMaLiLibConfig implements IConfigHandler {
     @Override
     public void load() {
         ICPMConfig.load();
-        ENABLE_CREATIVE.setBooleanValue(ICPMConfig.isCreativeEnabled());
         NO_ATTACK_COOLDOWN.setBooleanValue(ICPMConfig.isNoAttackCooldownEnabled());
         WITCH_WHISPER.setBooleanValue(ICPMConfig.isWitchWhisperEnabled());
         NIGHTMARE_ERA.setBooleanValue(ICPMConfig.isNightmareEnabled());
@@ -78,7 +75,6 @@ public class ICPMMaLiLibConfig implements IConfigHandler {
     @Override
     public void save() {
         // 值已通过 onConfigsChanged 写盘；此处兜底同步一次
-        ICPMConfig.setCreativeEnabled(ENABLE_CREATIVE.getBooleanValue());
         ICPMConfig.setNoAttackCooldown(NO_ATTACK_COOLDOWN.getBooleanValue());
         ICPMConfig.setWitchWhisper(WITCH_WHISPER.getBooleanValue());
         ICPMConfig.setNightmareEra(NIGHTMARE_ERA.getBooleanValue());
@@ -89,7 +85,6 @@ public class ICPMMaLiLibConfig implements IConfigHandler {
     @Override
     public void onConfigsChanged() {
         // malilib 界面里改动选项 → 立即写入 icpm.json 并热生效
-        ICPMConfig.setCreativeEnabled(ENABLE_CREATIVE.getBooleanValue());
         ICPMConfig.setNoAttackCooldown(NO_ATTACK_COOLDOWN.getBooleanValue());
         ICPMConfig.setWitchWhisper(WITCH_WHISPER.getBooleanValue());
         ICPMConfig.setNightmareEra(NIGHTMARE_ERA.getBooleanValue());

@@ -11,7 +11,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 
@@ -435,13 +437,19 @@ public class ICPMItemGroup {
                 if (ICPMBlocks.NETHERITE_STRONGBOX != null)
                     output.accept(ICPMBlocks.NETHERITE_STRONGBOX.asItem().getDefaultInstance());
 
-                // ===== 金属砧（完好 / 裂痕 / 损坏；8 种材质 × 3 阶段）=====
+                // ===== 金属砧（只列「完好」阶段）=====
+                // 裂痕/损坏变体仅为旧存档兼容保留（ICPM 注册方块时不为其注册 BlockItem，见 ICPM.java），
+                // 其 asItem() 返回 Items.AIR；而 1.21.11 的 ItemStack.getCount() 对 AIR 栈返回 0，
+                // 直接塞进创造栏会抛 IllegalArgumentException: Stack size must be exactly 1
+                //（整个「ICPM 物品」栏构建失败 ⇒ 创造栏与 JEI 全空）。故此处必须过滤。
                 for (BlockMetalAnvil.MetalType anvilMetal : BlockMetalAnvil.MetalType.values()) {
-                    for (int stage = 0; stage < 3; stage++) {
-                        BlockMetalAnvil anvil = ICPMBlocks.getAnvilVariant(anvilMetal, stage);
-                        if (anvil != null)
-                            output.accept(anvil.asItem().getDefaultInstance());
-                    }
+                    BlockMetalAnvil anvil = ICPMBlocks.getAnvilVariant(anvilMetal, 0);
+                    if (anvil == null)
+                        continue;
+                    Item anvilItem = anvil.asItem();
+                    if (anvilItem == Items.AIR)
+                        continue;
+                    output.accept(anvilItem);
                 }
 
                 // ===== 符文石（16 变体，1.6.4 BlockRunestone 符文门框架 4 角）=====

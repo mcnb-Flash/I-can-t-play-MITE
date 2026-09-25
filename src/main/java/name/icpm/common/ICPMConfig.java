@@ -16,7 +16,6 @@ import java.nio.file.Path;
  * ICPM 全局配置（config/icpm.json）。
  *
  * 字段（默认文件自带中文注释，方便服主直接阅读/修改）：
- * - enableCreativeMode（默认 false）：为 true 时才允许玩家变更为创造模式（服务端 setGameMode 拦截）。
  * - witchWhisper（默认 false）：女巫低吟——玩家永久携带一枚随机女巫诅咒（不可被去咒药水解除/变更），
  *   且女巫仍可叠加普通诅咒。
  * - nightmareEra（默认 false）：噩梦时代——世界始终为夜晚，且每日 80% 为血月。
@@ -27,13 +26,16 @@ import java.nio.file.Path;
  * - noAttackCooldown（默认 true）：1.6.4 式无攻击速度（无攻击冷却）——近战无视武器攻击冷却，
  *   每次挥击都按满充能结算伤害（1.6.4/R196 手感）。false = 保留现代版攻击冷却（连点伤害衰减）。
  *
+ * 注意：**创造 / 作弊没有任何配置开关**。它由 JVM 启动参数 {@code -Dicpm.devMode=true} 控制
+ * （见 {@link ICPMDevMode}），默认关闭，且玩家无法通过改配置文件开启。
+ *
  * 文件格式：支持行注释与块注释——写入时生成带中文说明的文本，读取时自动剥离注释后再解析，
  * 因此服主可直接在 icpm.json 里阅读中文说明、按需改动数值。
  *
  * 修改途径：
  * 1. 直接编辑 config/icpm.json（重启生效，或经 malilib GUI 立即生效）
  * 2. malilib 配置 GUI（若安装，由 ICPMMaLiLibConfig 桥接，变更回调本类 setter 落盘）
- * 3. /icpmconfig 命令（creative / attackcooldown）
+ * 3. /icpmconfig 命令（attackcooldown）
  *
  * 线程：仅 Server/游戏主线程读写（单机安全）。
  */
@@ -42,7 +44,9 @@ public final class ICPMConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger("ICPM-Config");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static final String KEY_ENABLE_CREATIVE = "enableCreativeMode";
+    /** 旧版遗留键：仅用于「读到就顺手从文件里清掉」，不再有任何语义（原为作弊开关）。 */
+    private static final String LEGACY_KEY_ENABLE_CREATIVE = "enableCreativeMode";
+
     public static final String KEY_WITCH_WHISPER = "witchWhisper";
     public static final String KEY_NIGHTMARE = "nightmareEra";
     public static final String KEY_POOR_TECHNIQUE = "poorTechnique";
@@ -56,7 +60,6 @@ public final class ICPMConfig {
         return FabricLoader.getInstance().getConfigDir().resolve("icpm.json");
     }
 
-    private static boolean enableCreativeMode = false;
     private static boolean witchWhisper = false;
     private static boolean nightmareEra = false;
     private static int poorTechnique = 0;
@@ -74,7 +77,6 @@ public final class ICPMConfig {
     /** 从 config/icpm.json 读取（自动剥离注释）；文件缺失/损坏时回退默认值并重建默认文件。 */
     public static synchronized void load() {
         Path path = file();
-        boolean creative = false;
         boolean whisper = false;
         boolean nightmare = false;
         int technique = 0;
@@ -85,10 +87,10 @@ public final class ICPMConfig {
             try {
                 String raw = Files.readString(path, StandardCharsets.UTF_8);
                 // 旧版本写出的无注释文件：本次顺带升级为"带中文说明"的新格式（数值保留）
-                needsUpgrade = !raw.contains(COMMENT_MARK);
+                // 另：旧文件里遗留的 enableCreativeMode（曾经的作弊开关）读到即顺手清除
+                needsUpgrade = !raw.contains(COMMENT_MARK) || raw.contains(LEGACY_KEY_ENABLE_CREATIVE);
                 JsonObject obj = GSON.fromJson(stripComments(raw), JsonObject.class);
                 if (obj != null) {
-                    if (obj.has(KEY_ENABLE_CREATIVE)) creative = obj.get(KEY_ENABLE_CREATIVE).getAsBoolean();
                     if (obj.has(KEY_WITCH_WHISPER)) whisper = obj.get(KEY_WITCH_WHISPER).getAsBoolean();
                     if (obj.has(KEY_NIGHTMARE)) nightmare = obj.get(KEY_NIGHTMARE).getAsBoolean();
                     if (obj.has(KEY_POOR_TECHNIQUE)) technique = Math.max(0, Math.min(4, obj.get(KEY_POOR_TECHNIQUE).getAsInt()));
@@ -98,7 +100,6 @@ public final class ICPMConfig {
             } catch (Exception e) {
                 LOGGER.warn("[ICPM] 读取 {} 失败，使用默认值", path, e);
             }
-            enableCreativeMode = creative;
             witchWhisper = whisper;
             nightmareEra = nightmare;
             poorTechnique = technique;
@@ -109,7 +110,6 @@ public final class ICPMConfig {
                 save();
             }
         } else {
-            enableCreativeMode = false;
             witchWhisper = false;
             nightmareEra = false;
             poorTechnique = 0;
@@ -117,16 +117,16 @@ public final class ICPMConfig {
             noAttackCooldown = true;
             saveDefault(path);
         }
-        LOGGER.info("[ICPM] config {} creative={} whisper={} nightmare={} poorTechnique={} weakStrike={} noAttackCooldown={}",
-                path, enableCreativeMode, witchWhisper, nightmareEra, poorTechnique, weakStrike, noAttackCooldown);
+        LOGGER.info("[ICPM] config {} whisper={} nightmare={} poorTechnique={} weakStrike={} noAttackCooldown={} devMode={}",
+                path, witchWhisper, nightmareEra, poorTechnique, weakStrike, noAttackCooldown,
+                ICPMDevMode.isEnabled());
     }
 
     /** 现有文件是否已包含全部键（缺键则需重写以补全 + 补中文说明）。 */
     private static boolean rawTextHasAllKeys(Path path) {
         try {
             String raw = Files.readString(path, StandardCharsets.UTF_8);
-            return raw.contains(KEY_ENABLE_CREATIVE)
-                    && raw.contains(KEY_WITCH_WHISPER)
+            return raw.contains(KEY_WITCH_WHISPER)
                     && raw.contains(KEY_NIGHTMARE)
                     && raw.contains(KEY_POOR_TECHNIQUE)
                     && raw.contains(KEY_WEAK_STRIKE)
@@ -137,10 +137,6 @@ public final class ICPMConfig {
     }
 
     // ==================== getters（各拦截点查询用） ====================
-
-    public static boolean isCreativeEnabled() {
-        return enableCreativeMode;
-    }
 
     /** 女巫低吟：玩家永久携带随机女巫诅咒（服务器 tick 轮询此值）。 */
     public static boolean isWitchWhisperEnabled() {
@@ -168,11 +164,6 @@ public final class ICPMConfig {
     }
 
     // ==================== setters（命令 / malilib 回调调用，立即写盘） ====================
-
-    public static synchronized void setCreativeEnabled(boolean value) {
-        enableCreativeMode = value;
-        save();
-    }
 
     public static synchronized void setWitchWhisper(boolean value) {
         witchWhisper = value;
@@ -218,10 +209,8 @@ public final class ICPMConfig {
         sb.append("// ===== ICPM 配置文件（config/icpm.json）=====\n");
         sb.append("// 支持 // 行注释；修改后重启游戏/服务器生效（装 malilib 的客户端可在 GUI 里即时生效）。\n");
         sb.append("// 取值说明：true = 开启，false = 关闭。\n");
+        sb.append("// 注：创造 / 作弊没有配置开关（由 JVM 参数 -Dicpm.devMode=true 控制，默认关闭）。\n");
         sb.append("{\n");
-        sb.append("  //允许玩家切换为创造模式：false = 禁止（默认）；true = 允许。\n");
-        sb.append("  \"").append(KEY_ENABLE_CREATIVE).append("\": ").append(enableCreativeMode).append(",\n");
-        sb.append("\n");
         sb.append("  //女巫低吟：true = 玩家永久携带一枚随机女巫诅咒（去咒药水无法解除或变更），且女巫仍可叠加普通诅咒；false = 关闭（默认）。\n");
         sb.append("  \"").append(KEY_WITCH_WHISPER).append("\": ").append(witchWhisper).append(",\n");
         sb.append("\n");
