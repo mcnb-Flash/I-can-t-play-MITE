@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/string"
+    "layer0": "icpm:item/leather_cord"
   }
 }

@@ -19,7 +19,9 @@
         "BucketCtrlClientMixin",
         "BucketTooltipMixin",
         "EnchantmentMenuClientMixin",
-        "ICPMUnderworldFogMixin"
+        "ICPMUnderworldFogMixin",
+        "ICPMWorldCreationGateMixin",
+        "ICPMLanCheatGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1

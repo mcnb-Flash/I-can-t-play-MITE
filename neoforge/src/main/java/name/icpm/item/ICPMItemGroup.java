@@ -2,6 +2,7 @@ package name.icpm.item;
 
 import name.icpm.ICPM;
 import name.icpm.block.BlockICPMFlintWorkbench;
+import name.icpm.block.BlockMetalAnvil;
 import name.icpm.block.ICPMBlocks;
 import name.icpm.item.RunestoneItem;
 import net.minecraft.core.Registry;
@@ -193,6 +194,34 @@ public class ICPMItemGroup {
                 output.accept(ICPMItems.ADAMANTIUM_LEGGINGS);
                 output.accept(ICPMItems.ADAMANTIUM_BOOTS);
 
+                // ===== 下界合金系（ICPM 高版本衍生：R196 无下界合金，等级高于艾德曼）=====
+                // 材料
+                output.accept(ICPMItems.NETHERITE_NUGGET);
+                output.accept(ICPMItems.NETHERITE_COIN);
+                output.accept(ICPMItems.NETHERITE_CHAIN);
+                output.accept(ICPMItems.NETHERITE_ARROW);
+                // 工具与武器
+                output.accept(ICPMItems.NETHERITE_HATCHET);
+                output.accept(ICPMItems.NETHERITE_DAGGER);
+                output.accept(ICPMItems.NETHERITE_WAR_HAMMER);
+                output.accept(ICPMItems.NETHERITE_BATTLE_AXE);
+                output.accept(ICPMItems.NETHERITE_SCYTHE);
+                output.accept(ICPMItems.NETHERITE_MATTOCK);
+                output.accept(ICPMItems.NETHERITE_SHEARS);
+                output.accept(ICPMItems.NETHERITE_FISHING_ROD);
+                output.accept(ICPMItems.NETHERITE_BOW);
+                // 多级桶
+                output.accept(ICPMItems.NETHERITE_BUCKET);
+                output.accept(ICPMItems.NETHERITE_WATER_BUCKET);
+                output.accept(ICPMItems.NETHERITE_LAVA_BUCKET);
+                output.accept(ICPMItems.NETHERITE_MILK_BUCKET);
+                output.accept(ICPMItems.NETHERITE_STONE_BUCKET);
+                // 下界合金锁链甲
+                output.accept(ICPMItems.NETHERITE_CHAINMAIL_HELMET);
+                output.accept(ICPMItems.NETHERITE_CHAINMAIL_CHESTPLATE);
+                output.accept(ICPMItems.NETHERITE_CHAINMAIL_LEGGINGS);
+                output.accept(ICPMItems.NETHERITE_CHAINMAIL_BOOTS);
+
                 // 硬币 (ICPM 货币)
                 output.accept(ICPMItems.COPPER_COIN);
                 output.accept(ICPMItems.SILVER_COIN);
@@ -356,6 +385,8 @@ public class ICPMItemGroup {
                     output.accept(ICPMBlocks.MITHRIL_WORKBENCH.asItem().getDefaultInstance());
                 if (ICPMBlocks.ADAMANTIUM_WORKBENCH != null)
                     output.accept(ICPMBlocks.ADAMANTIUM_WORKBENCH.asItem().getDefaultInstance());
+                if (ICPMBlocks.NETHERITE_WORKBENCH != null)
+                    output.accept(ICPMBlocks.NETHERITE_WORKBENCH.asItem().getDefaultInstance());
 
                 // ===== ICPM 熔炉（粘土/硬化粘土/沙石/黑曜石/地狱岩；原石熔炉=原版熔炉）=====
                 if (ICPMBlocks.CLAY_FURNACE != null)
@@ -380,6 +411,8 @@ public class ICPMItemGroup {
                     output.accept(ICPMBlocks.MITHRIL_DOOR.asItem().getDefaultInstance());
                 if (ICPMBlocks.ADAMANTIUM_DOOR != null)
                     output.accept(ICPMBlocks.ADAMANTIUM_DOOR.asItem().getDefaultInstance());
+                if (ICPMBlocks.NETHERITE_DOOR != null)
+                    output.accept(ICPMBlocks.NETHERITE_DOOR.asItem().getDefaultInstance());
 
                 // ===== 绿宝石附魔台 =====
                 if (ICPMBlocks.EMERALD_ENCHANTING_TABLE != null)
@@ -398,6 +431,17 @@ public class ICPMItemGroup {
                     output.accept(ICPMBlocks.MITHRIL_STRONGBOX.asItem().getDefaultInstance());
                 if (ICPMBlocks.ADAMANTIUM_STRONGBOX != null)
                     output.accept(ICPMBlocks.ADAMANTIUM_STRONGBOX.asItem().getDefaultInstance());
+                if (ICPMBlocks.NETHERITE_STRONGBOX != null)
+                    output.accept(ICPMBlocks.NETHERITE_STRONGBOX.asItem().getDefaultInstance());
+
+                // ===== 金属砧（完好 / 裂痕 / 损坏；8 种材质 × 3 阶段）=====
+                for (BlockMetalAnvil.MetalType anvilMetal : BlockMetalAnvil.MetalType.values()) {
+                    for (int stage = 0; stage < 3; stage++) {
+                        BlockMetalAnvil anvil = ICPMBlocks.getAnvilVariant(anvilMetal, stage);
+                        if (anvil != null)
+                            output.accept(anvil.asItem().getDefaultInstance());
+                    }
+                }
 
                 // ===== 符文石（16 变体，1.6.4 BlockRunestone 符文门框架 4 角）=====
                 if (ICPMBlocks.MITHRIL_RUNESTONE != null) {
@@ -408,6 +452,11 @@ public class ICPMItemGroup {
                 if (ICPMBlocks.ADAMANTIUM_RUNESTONE != null) {
                     for (int i = 0; i < 16; i++) {
                         output.accept(RunestoneItem.createStack(ICPMBlocks.ADAMANTIUM_RUNESTONE, i));
+                    }
+                }
+                if (ICPMBlocks.NETHERITE_RUNESTONE != null) {
+                    for (int i = 0; i < 16; i++) {
+                        output.accept(RunestoneItem.createStack(ICPMBlocks.NETHERITE_RUNESTONE, i));
                     }
                 }
 

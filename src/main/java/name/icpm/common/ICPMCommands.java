@@ -69,25 +69,15 @@ public final class ICPMCommands {
                                         return 1;
                                     }))));
 
-        // ICPM 配置开关：/icpmconfig <creative|attackcooldown> on|off|status（写 config/icpm.json，即时生效）
+        // ICPM 配置开关：/icpmconfig <devmode|attackcooldown> status
+        // dev 模式（原本的“允许创造”）只能在配置文件 config/icpm.json 或 JVM 参数里改，游戏内不提供开关。
         dispatcher.register(Commands.literal("icpmconfig")
-                .then(Commands.literal("creative")
-                        .then(Commands.literal("on").executes(ctx -> {
-                            ICPMConfig.setCreativeEnabled(true);
-                            ctx.getSource().sendSuccess(() -> Component.literal(
-                                    "[ICPM] 已允许变更为创造模式（enableCreativeMode=true）"), false);
-                            return 1;
-                        }))
-                        .then(Commands.literal("off").executes(ctx -> {
-                            ICPMConfig.setCreativeEnabled(false);
-                            ctx.getSource().sendSuccess(() -> Component.literal(
-                                    "[ICPM] 已禁止变更为创造模式（enableCreativeMode=false）"), false);
-                            return 1;
-                        }))
+                .then(Commands.literal("devmode")
                         .then(Commands.literal("status").executes(ctx -> {
-                            boolean v = ICPMConfig.isCreativeEnabled();
+                            boolean v = ICPMDevMode.isEnabled();
                             ctx.getSource().sendSuccess(() -> Component.literal(
-                                    "[ICPM] enableCreativeMode=" + v), false);
+                                    "[ICPM] dev 模式 = " + v + "（开启方式：JVM 参数 -Dicpm.devMode=true，"
+                                            + "或 config/icpm.json 的 enableCreativeMode=true；游戏内不可切换）"), false);
                             return 1;
                         })))
                 .then(Commands.literal("attackcooldown")

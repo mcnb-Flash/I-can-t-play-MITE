@@ -139,7 +139,9 @@
         "ICPMSpawnDistanceMixin",
         "ICPMSwellGoalMixin",
         "ICPMInfernalCreeperSpawnMixin",
-        "ICPMSpawnDepthGateMixin"
+        "ICPMSpawnDepthGateMixin",
+        "ICPMGameModeNormalizeMixin",
+        "ICPMPlayerJoinGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1

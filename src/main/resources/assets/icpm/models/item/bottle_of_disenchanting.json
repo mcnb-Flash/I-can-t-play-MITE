@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/glass_bottle"
+    "layer0": "icpm:item/bottle_of_disenchanting"
   }
 }

@@ -18,7 +18,9 @@
         "IntegratedServerOwnerFixMixin",
         "BucketCtrlClientMixin",
         "BucketTooltipMixin",
-        "ICPMUnderworldFogMixin"
+        "ICPMUnderworldFogMixin",
+        "ICPMWorldCreationGateMixin",
+        "ICPMLanCheatGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1

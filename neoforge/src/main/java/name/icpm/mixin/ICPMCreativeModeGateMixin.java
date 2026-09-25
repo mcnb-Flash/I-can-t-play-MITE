@@ -1,40 +1,46 @@
 package name.icpm.mixin;
 
-import name.icpm.common.ICPMConfig;
+import name.icpm.common.ICPMDevMode;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * 创造模式限制（config/icpm.json → enableCreativeMode）。
+ * 非生存模式变更的拦截与提示（R196 {@code CommandGameMode} 的现代等价）。
  *
- * enableCreativeMode=false（默认）时拦截所有把玩家变更为创造模式的路径
- * （/gamemode creative、作弊切换、第三方 mod 调 setGameMode 等统一收敛点 = ServerPlayer.setGameMode）。
- * 已是创造模式的玩家不受影响；已开启的玩家可自由切换/退出。
+ * <p>R196 的 {@code /gamemode} 只允许切 {@code SURVIVAL}（{@code CommandGameMode.java:40}）。
+ * 本类对**变更为非生存**的请求给出明确反馈；真正的模式归一由
+ * {@link ICPMGameModeNormalizeMixin} 在收敛点（{@code ServerPlayerGameMode.setGameModeForPlayer}）
+ * 完成，因此存档恢复、其它 mod 等旁路同样被覆盖。
+ *
+ * <p>开关：{@code config/icpm.json} 的 {@code enableCreativeMode}，或 JVM 参数
+ * {@code -Dicpm.devMode=true}（见 {@link ICPMDevMode}）。
+ *
+ * <p>dev 模式开启时：不拦截、不提示、**不修改玩家模式**。
  */
 @Mixin(ServerPlayer.class)
 public abstract class ICPMCreativeModeGateMixin {
 
-    @Unique
-    private static final String CONFIG_HINT = "creative mode is disabled (config/icpm.json enableCreativeMode=false)";
-
     @Inject(method = "setGameMode", at = @At("HEAD"), cancellable = true)
-    private void icpm$blockCreativeSwitch(GameType gameType, CallbackInfoReturnable<Boolean> cir) {
-        if (gameType != GameType.CREATIVE) {
-            return; // 只限制「变更为创造」；生存/冒险/旁观不受影响
+    private void icpm$blockNonSurvival(GameType gameType, CallbackInfoReturnable<Boolean> cir) {
+        if (ICPMDevMode.isEnabled()) {
+            return; // dev 模式：放行，且不改动玩家模式
+        }
+        if (gameType == GameType.SURVIVAL) {
+            return;
         }
         ServerPlayer self = (ServerPlayer) (Object) this;
-        if (self.gameMode().equals(GameType.CREATIVE)) {
-            return; // 已是创造，重复设置放行
+        self.sendSystemMessage(Component.literal(
+                "§c[ICPM] 本模组禁用非生存模式（R196：/gamemode 仅允许 survival）。"
+                        + "开发者可用 -Dicpm.devMode=true 开启调试。"));
+        // 当前已是非生存（例如存档被外部工具改过）⇒ 立即归一回生存
+        if (self.gameMode() != GameType.SURVIVAL) {
+            self.setGameMode(GameType.SURVIVAL);
         }
-        if (!ICPMConfig.isCreativeEnabled()) {
-            self.sendSystemMessage(Component.literal("§c[ICPM] 无法切换到创造模式：" + CONFIG_HINT));
-            cir.setReturnValue(Boolean.FALSE);
-        }
+        cir.setReturnValue(Boolean.FALSE);
     }
 }

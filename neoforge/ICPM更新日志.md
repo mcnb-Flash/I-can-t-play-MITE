@@ -2,9 +2,25 @@
 
 > 关于美术资源：本项目贴图在 MITE 资源包风格基础上已做**调色板级再处理**（透明度与像素形状不变、色值全部偏离原作，不再存在与原作逐像素相同的文件）；如原作者或权利方仍有异议，请联系我，我会立即替换或移除。
 
-> 本文件为 **NeoForge 端**更新日志（对应产物 `ICPM-1.1.4-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
+> 本文件为 **NeoForge 端**更新日志（对应产物 `ICPM-1.1.5-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
 > 命名说明：NeoForge 产物自 1.1.3 起统一为 **`ICPM-<ver>-NeoForge.jar`**（此前一度带 `[内测]` 前缀，系早期内部测试遗留，已去除）。
 > 两端共享绝大部分源码（双树结构），本日志只记录 NeoForge 端的差异与落地情况。
+
+## 1.1.5（2026-09-25）· 与 Fabric 端同步：禁用非生存 + 1.1.4 收口补完
+
+> 与根目录 `ICPM更新日志.md` 的 1.1.5 栏目内容一致（双树同源），此处只列 NeoForge 端需注意的点：
+
+- **禁用非生存双树同步**：新增 `ICPMDevMode` + `ICPMGameModeNormalizeMixin` + `ICPMPlayerJoinGateMixin`，改写 `ICPMCreativeModeGateMixin`；客户端新增 `ICPMWorldCreationGateMixin` + `ICPMLanCheatGateMixin`（mixin 注册各 +2）。两树拦截的均为原版类（`ServerPlayerGameMode` / `PlayerList` / `WorldCreationUiState` / `IntegratedServer`），行为一致。
+- **`/icpmconfig creative on|off` 删除**，改为只读 `/icpmconfig devmode status`（两树同）。
+- **下界合金 IMD 补完**：`assets/icpm/items/` 各 +23 个 IMD、多状态模型各 +4 个（弓 `_pulling_0/1/2`、钓鱼竿 `_cast`）；**创造栏补登**（`ICPMItemGroup` 各 +49 行）；**lang 各 +6 键**（铜 / 金 匕首·短斧·镰刀 + 蓝莓丛）。
+- **跨树 API 坑**：创造栏补录金属砧时不得用 `BuiltInRegistries.ITEM.get(id)`（NeoForge 返回 `Optional<Reference<Item>>`，编译期直接报类型不兼容），统一走既有 loader 无关工具 `ICPMBlocks.getAnvilVariant(metalType, stage)`。
+- **IMD 是 1.21.4+ 的通用改动**（非 Fabric 特例）：NeoForge 端漏 IMD 同样表现为物品栏无物品状贴图，必须双树同步。
+
+### 验证（NeoForge 侧）
+
+`clean build` BUILD SUCCESSFUL；`neoforge/scripts/audit_mixins.py` 全绿（155 mixin / 245 注入点）；发版预检 0 问题；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 模型 / 贴图全部命中）；**服务端冒烟** `Done (0.574s)!`。
+
+版本号提升至 `1.1.5`（产物名 `ICPM-1.1.5-NeoForge.jar`）。
 
 ## 1.1.4（2026-09-19）· 与 Fabric 端同步：下界合金体系 + R196 移植收口 + 崩溃修复
 
