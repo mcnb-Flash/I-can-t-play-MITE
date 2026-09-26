@@ -223,6 +223,7 @@ object ICPMItems {
     @JvmField val OBSIDIAN_SHARD: Item = register("obsidian_shard", Item(makeProperties("obsidian_shard", 64)))
     @JvmField val EMERALD_SHARD: Item = register("emerald_shard", Item(makeProperties("emerald_shard", 64)))
     @JvmField val DIAMOND_SHARD: Item = register("diamond_shard", Item(makeProperties("diamond_shard", 64)))
+
     // 注意：燧石碎片在本 mod 中已实现为 FLINT_FRAGMENT，不再另加 flint_shard
     @JvmField val GLASS_SHARD: Item = register("glass_shard", Item(makeProperties("glass_shard", 64)))
     @JvmField val QUARTZ_SHARD: Item = register("quartz_shard", Item(makeProperties("quartz_shard", 64)))

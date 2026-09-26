@@ -7,6 +7,7 @@ import name.icpm.entity.ai.ICPMSeekOpenSpaceIfCrowded;
 import name.icpm.entity.ai.ICPMSeekShelterFromRain;
 import name.icpm.entity.ai.ICPMGetOutOfWater;
 import name.icpm.entity.ai.ICPMFleeWhenSpooked;
+import name.icpm.entity.ai.ICPMAvoidAttackerFrightGoal;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -49,9 +50,12 @@ public abstract class ICPMLivestockGoalsMixin {
         // 躲避捕食者（仅对怪物生效，与"受攻击"无关）：高优先级，遇怪即逃
         this.goalSelector.addGoal(1, new AvoidEntityGoal<>(
             mob, LivingEntity.class, 8.0F, 1.0, 1.2, entity -> entity instanceof Monster));
+        // R196 定向逃跑：重伤且攻击者临近时，沿"远离攻击者"方向持续逃窜（含加速）。
+        // 优先级 2——低于避怪(1)，高于随机惊慌(3)与生理需求目标(5-6)。
+        this.goalSelector.addGoal(2, new ICPMAvoidAttackerFrightGoal(mob, 1.7));
         // R196 受惊传染驱动：被同伴惊吓、或直接被攻击（spook 已标记）的动物，
-        // 在此目标下随机四散奔逃。优先级 2——低于避怪(1)，高于生理需求目标(5-6)。
-        this.goalSelector.addGoal(2, new ICPMFleeWhenSpooked(mob, 1.5));
+        // 在此目标下随机四散奔逃。优先级 3——低于定向逃跑(2)。
+        this.goalSelector.addGoal(3, new ICPMFleeWhenSpooked(mob, 1.5));
         // 生理需求目标放到低优先级，平时动物保持安静。
         this.goalSelector.addGoal(5, new ICPMSeekFoodIfHungry(mob, 1.0, true));
         this.goalSelector.addGoal(5, new ICPMSeekWaterIfThirsty(mob, 1.0, false));

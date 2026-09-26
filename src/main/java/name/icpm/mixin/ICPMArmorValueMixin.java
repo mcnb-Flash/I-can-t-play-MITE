@@ -6,6 +6,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -39,9 +42,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * </ul>
  *
  * <p>注入点 {@code LivingEntity.getDamageAfterArmorAbsorb(DamageSource, float)}（1.21.11 伤害链
- * 护甲减伤入口，refmap 实证 method_6132）。HEAD cancel 完全接管；药水减伤由原版
- * getDamageAfterMagicAbsorb 继续处理（不重复）。ICPMCombatEnchantMixin 的穿刺注入在
- * RETURN（其后执行），无冲突。
+ * 护甲减伤入口，refmap 实证 method_6132）。HEAD cancel 完全接管；R196 的药水保护
+ * （抗性提升→平板甲 +5×(amp+1)，火烧抗性→火伤平板甲）在此与护甲/附魔一并折算
+ * （忠实 R196 getTotalProtectionOfPotionEffects，2026-09-26 用户+Infx 双核实）。原版
+ * getDamageAfterMagicAbsorb 的百分比抗性经本类 icpm$undoVanillaResistance（RETURN 注入）中性化，
+ * 避免重复减免；ShieldBlockHurtMixin 在该方法 RETURN 的格挡减半不受影响（与还原除算可交换，顺序无关）。
+ * ICPMCombatEnchantMixin 的穿刺注入在 RETURN（其后执行），无冲突。
  */
 @Mixin(LivingEntity.class)
 public abstract class ICPMArmorValueMixin {
@@ -63,7 +69,9 @@ public abstract class ICPMArmorValueMixin {
         }
         float armorProt = icpm$armorProtection(self);
         // 穿刺附魔（R196，镐/战斧）：每级穿透 20% 的【护甲】减伤；附魔保护不被穿透。
-        float protection = armorProt * icpm$pierceFactor(source) + icpm$enchantProtection(self, source);
+        // 抗性提升（R196 忠实特性，2026-09-26 用户+Infx 双核实）：原版百分比改为平板甲 +5×(amp+1)，
+        // 在此与护甲/附魔一并折算；原版 getDamageAfterMagicAbsorb 的百分比抗性经 icpm$undoVanillaResistance 中性化，避免重复减免。
+        float protection = armorProt * icpm$pierceFactor(source) + icpm$enchantProtection(self, source) + icpm$potionProtection(self, source);
         float reduced = Math.max(amount - protection, 1.0f);
         cir.setReturnValue(reduced);
         cir.cancel();
@@ -100,6 +108,60 @@ public abstract class ICPMArmorValueMixin {
             return EnchantmentHelper.getDamageProtection(sl, self, source);
         }
         return 0.0f;
+    }
+
+    /**
+     * R196 getTotalProtectionOfPotionEffects：药水保护折算为平板甲。
+     *  - 抗性提升：+5×(amp+1)（R196 忠实特性，2026-09-26 用户+Infx 双核实；
+     *    原版是按百分比减免，R196 改为线性平板甲）。
+     *  - 火烧抗性 + 火属性伤害：+5×(amp+1)（原版火抗已使火伤免疫，此分支通常死代码，但忠实 R196）。
+     *  - isAbsolute()（虚空/创造，对应 BYPASSES_EFFECTS）的伤害无视药水保护，返回 0。
+     */
+    @Unique
+    private static float icpm$potionProtection(LivingEntity self, DamageSource source) {
+        if (source.is(DamageTypeTags.BYPASSES_EFFECTS)) {
+            return 0.0f;
+        }
+        float p = 0.0f;
+        MobEffectInstance res = self.getEffect(MobEffects.RESISTANCE);
+        if (res != null) {
+            p += (res.getAmplifier() + 1) * 5.0f;
+        }
+        MobEffectInstance fr = self.getEffect(MobEffects.FIRE_RESISTANCE);
+        if (fr != null && source.is(DamageTypeTags.IS_FIRE)) {
+            p += (fr.getAmplifier() + 1) * 5.0f;
+        }
+        return p;
+    }
+
+    /**
+     * 中性化原版 getDamageAfterMagicAbsorb 的抗性百分比减免。
+     * R196 的抗性已在 {@code icpm$miteArmorAbsorb} 折算为平板甲，原版此处若再按百分比减免会双重减免。
+     * 于 RETURN 处把原版的抗性乘算还原（÷ (25 − (amp+1)×5)/25），使返回值回到"护甲步骤已含平板甲"的量；
+     * 该还原与 ShieldBlockHurtMixin 的格挡减半（同为乘法）可交换，故回调顺序无关。
+     * 仅服务端执行，客户端原样返回。
+     */
+    @Inject(method = "getDamageAfterMagicAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F",
+            at = @At("RETURN"), cancellable = true)
+    private void icpm$undoVanillaResistance(DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self.level().isClientSide()) {
+            return;
+        }
+        // 原版 modifyAppliedDamage 仅对“既非 BYPASSES_EFFECTS、也非 BYPASSES_RESISTANCE”的伤害施加抗性百分比；
+        // 这两类伤害原版未减免，故此处无需（也不应）撤销，否则会错误放大减伤。
+        if (source.is(DamageTypeTags.BYPASSES_EFFECTS) || source.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
+            return;
+        }
+        MobEffectInstance res = self.getEffect(MobEffects.RESISTANCE);
+        if (res != null) {
+            int i = res.getAmplifier() + 1;
+            // 原版乘子 = (25 − (amp+1)×5)/25（0 级=0.8、1 级=0.6、2 级=0.4、3 级=0.2），与 1.21.11 modifyAppliedDamage 字节码一致
+            float mult = (25.0f - (float) i * 5.0f) / 25.0f;
+            if (mult > 0.0f && mult < 1.0f) {
+                cir.setReturnValue(cir.getReturnValue() / mult);
+            }
+        }
     }
 
     /**

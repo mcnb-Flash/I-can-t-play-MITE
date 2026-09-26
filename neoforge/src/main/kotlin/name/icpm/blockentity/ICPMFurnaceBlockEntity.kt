@@ -1,6 +1,7 @@
 package name.icpm.blockentity
 
 import name.icpm.block.ICPMFurnaceBlock
+import name.icpm.common.ICPMFuelValues
 import name.icpm.item.ICPMBucketItem
 import name.icpm.item.ICPMBuckets
 import name.icpm.item.ICPMItems
@@ -274,30 +275,21 @@ class ICPMFurnaceBlockEntity(
 
     // ==================== 热量与配方 ====================
 
-    /** 燃料热量等级（ICPM R196 Item.getHeatLevel） */
+    /** 燃料热量等级（R196 Item.getHeatLevel / ItemBlock.getHeatLevel / ItemCoal.getHeatLevel） */
     fun getHeatLevel(stack: ItemStack): Int {
         if (stack.isEmpty) return 0
-        val item = stack.item
-        return when {
-            item == Items.BLAZE_ROD -> 4
-            // 原版岩浆桶 + 全部 ICPM 金属岩浆桶：热量 3
-            item == Items.LAVA_BUCKET || (item is ICPMBucketItem && item.getContent() == Fluids.LAVA) -> 3
-            item == Items.COAL -> 2
-            // 木炭 / 粪便：热量 1
-            item == Items.CHARCOAL || item == ICPMItems.MANURE -> 1
-            else -> if (level != null && level!!.fuelValues().isFuel(stack)) 1 else 0
-        }
+        // R196 表：烈焰棒 4 / 岩浆容器 3 / 煤炭·煤炭块 2 / 木炭 1 / 其余能烧即 1
+        val mite = ICPMFuelValues.heatLevel(stack)
+        if (mite > 0) return mite
+        // R196 时代不存在的 1.21 新燃料（干海带块等）保留原版判定（有意偏离，见 ICPMFuelValues 类注释）
+        return if (level != null && level!!.fuelValues().isFuel(stack)) 1 else 0
     }
 
-    /** 燃料燃烧时长（原版 fuelValues；ICPM 桶/粪便补表） */
+    /** 燃料燃烧时长（R196 全表；R196 未定义的 1.21 新燃料回落原版 fuelValues） */
     private fun getBurnDuration(stack: ItemStack): Int {
         val level = level ?: return 0
-        val item = stack.item
-        if (item is ICPMBucketItem && item.getContent() == Fluids.LAVA) {
-            // 全部 ICPM 金属岩浆桶燃烧时长与原版岩浆桶一致（R196：与材质无关）
-            return level.fuelValues().burnDuration(ItemStack(Items.LAVA_BUCKET)).coerceAtLeast(20000)
-        }
-        if (item == ICPMItems.MANURE) return 100
+        val mite = ICPMFuelValues.burnTime(stack)
+        if (mite > 0) return mite
         return level.fuelValues().burnDuration(stack)
     }
 

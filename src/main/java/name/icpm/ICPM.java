@@ -643,6 +643,7 @@ public class ICPM implements ModInitializer {
             }
             Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(MOD_ID, name), blockItem);
         }
+
     }
 
     public static Identifier id(String path) {

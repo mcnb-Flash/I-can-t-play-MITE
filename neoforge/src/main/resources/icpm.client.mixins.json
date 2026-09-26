@@ -22,7 +22,8 @@
         "ICPMUnderworldFogMixin",
         "ICPMWorldCreationGateMixin",
         "ICPMLanCheatGateMixin",
-        "ICPMLanScreenGateMixin"
+        "ICPMLanScreenGateMixin",
+        "ICPMWorldDifficultyGateMixin"
     ],
     "injectors": {
         "defaultRequire": 1

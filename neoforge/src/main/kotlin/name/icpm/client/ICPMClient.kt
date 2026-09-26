@@ -60,6 +60,11 @@ object ICPMClient {
             ThrownItemRenderer(context, 0.8f, false)
         }
 
+        // 注册砖抛射物渲染器（R196 EntityBrick）
+        evt.registerEntityRenderer(ICPMEntities.BRICK) { context ->
+            ThrownItemRenderer(context, 0.8f, false)
+        }
+
         // 注册 ICPM 箭矢渲染器
         evt.registerEntityRenderer(ICPMEntities.ICPM_ARROW) { context ->
             ICPMArrowRenderer(context)

@@ -2,9 +2,12 @@ package name.icpm.client.mixin;
 
 import name.icpm.common.ICPMDevMode;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.world.Difficulty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * 创建世界界面：禁用「允许作弊」与「创造 / 调试」游戏模式。
@@ -53,5 +56,28 @@ public class ICPMWorldCreationGateMixin {
             return WorldCreationUiState.SelectedGameMode.SURVIVAL;
         }
         return mode;
+    }
+
+    /**
+     * 难度：只能困难（MITE R196 锁死困难）。任何经 setter 写入的难度都被归一为 {@link Difficulty#HARD}。
+     */
+    @ModifyVariable(method = "setDifficulty", at = @At("HEAD"), argsOnly = true)
+    private Difficulty icpm$forceHardDifficulty(Difficulty difficulty) {
+        if (ICPMDevMode.isEnabled()) {
+            return difficulty;
+        }
+        return Difficulty.HARD;
+    }
+
+    /**
+     * 构造结束时把初始难度强制为困难：vanilla 默认可能是普通，直接字段赋值不调用 setter，
+     * 因此这里显式经 setter 写入一次（会被上面的 {@code setDifficulty} 归一兜底）。
+     */
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void icpm$initHardDifficulty(CallbackInfo ci) {
+        if (ICPMDevMode.isEnabled()) {
+            return;
+        }
+        ((WorldCreationUiState) (Object) this).setDifficulty(Difficulty.HARD);
     }
 }

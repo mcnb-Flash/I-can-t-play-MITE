@@ -141,7 +141,15 @@
         "ICPMInfernalCreeperSpawnMixin",
         "ICPMSpawnDepthGateMixin",
         "ICPMGameModeNormalizeMixin",
-        "ICPMPlayerJoinGateMixin"
+        "ICPMPlayerJoinGateMixin",
+        "ICPMDataSealMixin",
+        "ICPMLevelSaveGateMixin",
+        "ICPMHardDifficultyMixin",
+        "ICPMFlintDurabilityMixin",
+        "ICPMFlintIgniteMixin",
+        "ICPMGlassShardMixin",
+        "ICPMPoisonIntervalMixin",
+        "BrickThrowMixin"
     ],
     "injectors": {
         "defaultRequire": 1

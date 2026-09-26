@@ -143,10 +143,22 @@ public final class ICPMFoodProperties {
             Map.entry("sugar", food(1, 0.0f))
     );
 
-    /** 原版食物需要 ICPM 进食效果（中毒等）：同时替换 FOOD 与 CONSUMABLE */
+    /**
+     * 原版食物需要 ICPM 进食效果（中毒等）：同时替换 FOOD 与 CONSUMABLE。
+     *
+     * <p>中毒时长按 R196 {@code ItemFood.onEaten}（ItemFood.java:60-63）计算 ——
+     * 那里是 {@code new PotionEffect(id, duration * 20, amplifier)}，即注册时的 duration 要 ×20 tick：
+     * <ul>
+     *   <li>生鸡肉 Item.java:228 {@code setPotionEffect(poison, 20, 0, 0.3f)} ⇒ 400 tick @30%</li>
+     *   <li>腐肉 Item.java:230 {@code setPotionEffect(poison, 20, 0, 0.8f)} ⇒ 400 tick @80%
+     *       （R196 用 setPotionEffect 覆盖了原版腐肉的「饥饿」效果，所以只有中毒、没有饥饿）</li>
+     *   <li>蜘蛛眼 Item.java:238 {@code setPotionEffect(poison, 5, 0, 1.0f)} ⇒ 100 tick @100%</li>
+     *   <li>毒马铃薯 Item.java:257 {@code setPotionEffect(poison, 5, 0, 0.6f)} ⇒ 100 tick @60%</li>
+     * </ul>
+     */
     public static final Map<String, Consumable> VANILLA_CONSUMABLES = Map.ofEntries(
             Map.entry("chicken", consumableWithEffects(
-                    List.of(new MobEffectInstance(MobEffects.POISON, 150, 0)), 0.3f)),
+                    List.of(new MobEffectInstance(MobEffects.POISON, 400, 0)), 0.3f)),
             Map.entry("poisonous_potato", consumableWithEffects(
                     List.of(new MobEffectInstance(MobEffects.POISON, 100, 0)), 0.6f)),
             Map.entry("pufferfish", consumableWithEffects(
@@ -154,10 +166,9 @@ public final class ICPMFoodProperties {
                             new MobEffectInstance(MobEffects.HUNGER, 300, 2),
                             new MobEffectInstance(MobEffects.NAUSEA, 1200, 0)), 1.0f)),
             Map.entry("rotten_flesh", consumableWithEffects(
-                    List.of(new MobEffectInstance(MobEffects.HUNGER, 600, 0),
-                            new MobEffectInstance(MobEffects.POISON, 300, 0)), 0.8f)),
+                    List.of(new MobEffectInstance(MobEffects.POISON, 400, 0)), 0.8f)),
             Map.entry("spider_eye", consumableWithEffects(
-                    List.of(new MobEffectInstance(MobEffects.POISON, 300, 0)), 1.0f))
+                    List.of(new MobEffectInstance(MobEffects.POISON, 100, 0)), 1.0f))
     );
 
     // ==================== ICPM 新增食物数值（注册新物品用） ====================

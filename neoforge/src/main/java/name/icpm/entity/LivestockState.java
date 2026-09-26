@@ -24,6 +24,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 /**
@@ -66,6 +67,11 @@ public final class LivestockState {
     public long spookedUntil = 0L;
     public boolean hasBeenSpookedByOtherAnimal = false;
     public int lastHurtTime = 0;
+    // ===================== R196 受惊逃跑状态（EntityAnimal.attackEntityFrom / EntityCreature 状态机） =====================
+    /** 吓到本动物的攻击者 UUID（R196 的 last_harming_entity）。null 表示当前没有追逃目标。 */
+    public UUID fleeAttackerUUID = null;
+    /** 是否已决定逃跑（R196 的 has_decided_to_flee）：由 considerFleeing 在重伤+临近攻击者时 50% 决定。 */
+    public boolean hasDecidedToFlee = false;
 
     // ===================== 健康 / 判定 =====================
 
@@ -122,6 +128,84 @@ public final class LivestockState {
             spookedUntil = until;
         }
         hasBeenSpookedByOtherAnimal = true;
+    }
+
+    public void setFleeAttacker(UUID uuid) {
+        this.fleeAttackerUUID = uuid;
+    }
+
+    // ===================== R196 受惊状态机（与 EntityCreature / EntityLivingBase 一一对应） =====================
+
+    /** 重伤判定：血量不足上限 20%（R196 EntityLivingBase.isBadlyWounded）。 */
+    public static boolean isBadlyWounded(LivingEntity e) {
+        return e.getHealth() / e.getMaxHealth() < 0.2f;
+    }
+
+    /**
+     * 解析 fleeAttackerUUID 为存活的攻击者实体（R196 getLastHarmingEntity）。
+     * 攻击者已消失/死亡则返回 null。
+     */
+    public LivingEntity getFleeAttacker(Animal self) {
+        if (fleeAttackerUUID == null) {
+            return null;
+        }
+        Entity e = self.level().getEntity(fleeAttackerUUID);
+        if (e instanceof LivingEntity le && le.isAlive()) {
+            return le;
+        }
+        return null;
+    }
+
+    /**
+     * 是否决定逃跑（R196 EntityLivingBase.considerFleeing）：
+     * 有攻击者、非亡灵、当前重伤、且攻击者距离 ≤32 时，50% 概率决定逃。
+     * 否则清零 hasDecidedToFlee。
+     */
+    public void considerFleeing(Animal self, LivingEntity attacker) {
+        if (attacker == null
+                || !isBadlyWounded(self) || self.distanceTo(attacker) > 32.0) {
+            hasDecidedToFlee = false;
+            return;
+        }
+        hasDecidedToFlee = self.getRandom().nextInt(2) == 0;
+    }
+
+    /**
+     * 是否应停止逃跑（R196 EntityLivingBase.considerStopFleeing）：
+     * 攻击者消失、或不再重伤、或距离 >40 → 停止并清零 hasDecidedToFlee。
+     */
+    public boolean considerStopFleeing(Animal self, LivingEntity attacker) {
+        if (attacker == null || !isBadlyWounded(self)) {
+            hasDecidedToFlee = false;
+            return true;
+        }
+        if (self.distanceTo(attacker) > 40.0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * R196 EntityLiving.warnPeersOfAttacker：被攻击时立即通知 8×4×8 内的同类，
+     * 把攻击者告诉它们并让它们各自 considerFleeing（重伤+临近者会决定逃跑）。
+     * 已驯服（如马）或已获知攻击者的同类不再重复通知。
+     */
+    public static void warnPeersOfAttacker(Animal self, LivingEntity attacker) {
+        if (attacker == null) {
+            return;
+        }
+        AABB box = self.getBoundingBox().inflate(8.0, 4.0, 8.0);
+        for (Entity e : self.level().getEntities(self, box, LivestockState::isLivestock)) {
+            if (e == self || e.isRemoved()) {
+                continue;
+            }
+            LivestockState ps = get(e);
+            if (ps.fleeAttackerUUID != null) {
+                continue;
+            }
+            ps.setFleeAttacker(attacker.getUUID());
+            ps.considerFleeing((Animal) e, attacker);
+        }
     }
 
     // ===================== 共享静态辅助（供接口实现与 tick 逻辑复用） =====================
@@ -202,11 +286,18 @@ public final class LivestockState {
             }
         }
 
-        // ===== 受伤即惊吓（spook 火种）=====
-        // 读 LivingEntity.hurtTime（受伤当帧被置正、逐 tick 递减），检测其上升沿即判定"刚受伤" → spook。
+        // ===== 受伤即惊吓（R196 受惊：记录攻击者 + 决定逃跑 + 通知同类）=====
+        // 读 LivingEntity.hurtTime（受伤当帧被置正、逐 tick 递减），检测其上升沿即判定"刚受伤"。
         int curHurt = a.hurtTime;
         if (curHurt > s.lastHurtTime) {
             s.spook(a.level().getGameTime() + 400L + (long) a.getRandom().nextInt(400));
+            // R196 EntityAnimal.attackEntityFrom：被攻击 → 记下攻击者、决定是否逃、并警告同类。
+            LivingEntity attacker = a.getLastHurtByMob();
+            if (attacker != null) {
+                s.setFleeAttacker(attacker.getUUID());
+                s.considerFleeing(a, attacker);
+                LivestockState.warnPeersOfAttacker(a, attacker);
+            }
         }
         s.lastHurtTime = curHurt;
 

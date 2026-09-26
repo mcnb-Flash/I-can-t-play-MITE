@@ -35,5 +35,7 @@ public class ICPMPlayerJoinGateMixin {
             player.sendSystemMessage(Component.literal(
                     "§c[ICPM] 检测到非生存模式，已按 R196 规则重置为生存。"));
         }
+        // 防改物：进入存档前比对 level.dat（篡改则破坏存档核心并弹窗）
+        name.icpm.common.DataSeal.verifyAndHandle(player);
     }
 }

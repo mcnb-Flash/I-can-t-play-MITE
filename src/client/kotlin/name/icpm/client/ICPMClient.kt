@@ -83,6 +83,11 @@ object ICPMClient : ClientModInitializer {
             ThrownItemRenderer(context, 0.8f, false)
         }
 
+        // 注册砖抛射物渲染器（R196 EntityBrick）
+        EntityRendererRegistry.register(ICPMEntities.BRICK) { context ->
+            ThrownItemRenderer(context, 0.8f, false)
+        }
+
         // 注册 ICPM 箭矢渲染器
         EntityRendererRegistry.register(ICPMEntities.ICPM_ARROW) { context ->
             ICPMArrowRenderer(context)

@@ -2,9 +2,24 @@
 
 > 关于美术资源：本项目贴图在 MITE 资源包风格基础上已做**调色板级再处理**（透明度与像素形状不变、色值全部偏离原作，不再存在与原作逐像素相同的文件）；如原作者或权利方仍有异议，请联系我，我会立即替换或移除。
 
-> 本文件为 **NeoForge 端**更新日志（对应产物 `ICPM-1.1.5-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
+> 本文件为 **NeoForge 端**更新日志（对应产物 `ICPM-1.1.6-NeoForge.jar`）。Fabric 端日志见项目根目录 `ICPM更新日志.md`。
 > 命名说明：NeoForge 产物自 1.1.3 起统一为 **`ICPM-<ver>-NeoForge.jar`**（此前一度带 `[内测]` 前缀，系早期内部测试遗留，已去除）。
 > 两端共享绝大部分源码（双树结构），本日志只记录 NeoForge 端的差异与落地情况。
+
+## 1.1.6（2026-09-26）· 与 Fabric 端同步：砖投掷（新抛射物）+ R196 移植收口 + Infx 讹传归档
+
+> 与根目录 `ICPM更新日志.md` 的 1.1.6 栏目内容一致（双树同源），此处只列 NeoForge 端需注意的点：
+
+- **砖投掷双树同步**：新增 `BrickEntity`（继承 `ThrowableItemProjectile`）+ `BRICK` 实体注册 + `ThrownItemRenderer` 渲染接线 + `BrickThrowMixin`（`@Mixin(Item)` `use` 注入），与 Fabric 端同源码镜像。
+- **NeoForge 渲染注册**走 `evt.registerEntityRenderer(...)`（区别于 Fabric 的 `EntityRendererRegistry.register`），其余逻辑一致。
+- 燃料表、食物中毒纠偏、打火石耐久16/点燃、中毒间隔、玻璃碎片、动物掉落：双树同源，NeoForge 端同样落地。
+- **横扫归档**：R196 无此机制，双树均不实现。
+
+### 验证（NeoForge 侧）
+
+`clean build` BUILD SUCCESSFUL；`neoforge/scripts/audit_mixins.py` 全绿；jar 全 entry 校验 + MD5 通过；三处部署 `ALL_OK=True`。
+
+版本号提升至 `1.1.6`（产物名 `ICPM-1.1.6-NeoForge.jar`）。
 
 ## 1.1.5（2026-09-25）· 与 Fabric 端同步：禁用非生存 + 1.1.4 收口补完
 
@@ -18,9 +33,13 @@
 - **跨树 API 坑**：创造栏补录金属砧时不得用 `BuiltInRegistries.ITEM.get(id)`（NeoForge 返回 `Optional<Reference<Item>>`，编译期直接报类型不兼容），统一走既有 loader 无关工具 `ICPMBlocks.getAnvilVariant(metalType, stage)`。
 - **IMD 是 1.21.4+ 的通用改动**（非 Fabric 特例）：NeoForge 端漏 IMD 同样表现为物品栏无物品状贴图，必须双树同步。
 
+- **R196 燃料表**（同日补充）：新增 `ICPMFuelValues`（逐条标注 R196 文件:行），接入 `FurnaceFuelMixin`（原版/高炉/烟熏炉 `getBurnDuration`）与 `ICPMFurnaceBlockEntity.getBurnDuration / getHeatLevel`。显眼三处：原木 300→**1600**、岩浆桶 20000→**3200**、火把在 1.21 不能当燃料→R196 **800**。两树同源。
+- **三处食物中毒数值纠偏**（同日补充，`ICPMFoodProperties.VANILLA_CONSUMABLES`）：判决源 R196 `ItemFood.onEaten`（`duration * 20`）—— 生鸡肉 150→**400**、腐肉「饥饿600+中毒300」→**仅中毒 400**、蜘蛛眼 300→**100**；毒马铃薯本就正确。两树同源。
+- **1.21 陷阱记录**：挂墙火把（`WALL_TORCH` / `REDSTONE_WALL_TORCH` / `SOUL_WALL_TORCH`）**只有方块、没有 `Items` 常量**（与普通火把共用一个物品），物品级判定只能写 `Items.TORCH / REDSTONE_TORCH / SOUL_TORCH`。
+
 ### 验证（NeoForge 侧）
 
-`build` BUILD SUCCESSFUL（26s，增量）；`neoforge/scripts/audit_mixins.py` 全绿（156 mixin / 246 注入点）；发版预检 0 问题；双树自检 FAILS = 0；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 模型 / 贴图全部命中）；**服务端冒烟** `Done (0.473s)!`。
+`build` BUILD SUCCESSFUL（41s，增量）；`neoforge/scripts/audit_mixins.py` 全绿（156 mixin / 246 注入点）；发版预检 0 问题；双树自检 FAILS = 0；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 模型 / 贴图全部命中）；**服务端冒烟** `Done (0.478s)!`。
 
 版本号提升至 `1.1.5`（产物名 `ICPM-1.1.5-NeoForge.jar`）。
 

@@ -9,6 +9,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Donkey;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.Mule;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *   Sheep：羊毛：未剪且未燃时 50% 掉 1（本羊毛色，R196 织布）
  *         肉：仅 isWell 时 = rand(2)+rand(1+屠宰级)，&lt;1 强制 1；燃烧→熟羊肉
  *         皮革：50% 掉 1
+ *   Horse/Donkey/Mule：皮革 1..3 恒掉（R196 getDropItemId type<=2 → leather）；牛肉 = 1+rand(1+屠宰级)，普通马额外 +rand(2)；燃烧→熟牛肉
+ *                      （R196 EntityHorse.dropFewItems:530；僵尸马/骷髅马 type>2 不在此列，保持原版）
  * </pre>
  * 取代 vanilla 常掉 1..3 肉（R196：**不健康动物不掉肉**，这才是"全量"缺口）。
  * 1.21 MushroomCow 继承 Cow，天然覆盖。牛/猪/羊已从屠宰附魔 mixin 剔除避免叠加。
@@ -95,6 +101,28 @@ public abstract class LivestockMeatR196Mixin {
             // 皮革：50%（R196 rand(2)==0 → 掉 1）
             if (level.random.nextInt(2) == 0) {
                 sheep.spawnAtLocation(level, new ItemStack(Items.LEATHER, 1));
+            }
+            ci.cancel();
+        }
+        if (self instanceof Horse || self instanceof Donkey || self instanceof Mule) {
+            AbstractHorse horse = (AbstractHorse) self;
+            if (horse.isBaby()) {
+                ci.cancel(); // 幼崽不掉落（R196 同 vanilla）
+                return;
+            }
+            // R196 EntityHorse.dropFewItems:530 —— 1..3 皮革（getDropItemId 对 type<=2 恒为 leather）
+            int leather = level.random.nextInt(3) + 1;
+            for (int i = 0; i < leather; i++) {
+                horse.spawnAtLocation(level, new ItemStack(Items.LEATHER, 1));
+            }
+            // 牛肉：1 + rand(1+屠宰级)；普通马(type 0) 额外 +rand(2)；燃烧→熟牛肉
+            int numDrops = 1 + level.random.nextInt(1 + butcheringLevel(level, damageSource));
+            if (horse instanceof Horse) {
+                numDrops += level.random.nextInt(2);
+            }
+            Item beef = horse.isOnFire() ? Items.COOKED_BEEF : Items.BEEF;
+            for (int i = 0; i < numDrops; i++) {
+                horse.spawnAtLocation(level, new ItemStack(beef, 1));
             }
             ci.cancel();
         }

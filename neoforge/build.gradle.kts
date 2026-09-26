@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "2.4.10"
 }
 
-version = "1.1.5"
+version = "1.1.6"
 group = "name.icpm"
 
 neoForge {

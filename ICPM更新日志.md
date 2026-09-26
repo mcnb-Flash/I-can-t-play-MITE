@@ -2,6 +2,46 @@
 
 > 关于美术资源：本项目贴图在 MITE 资源包风格基础上已做**调色板级再处理**（透明度与像素形状不变、色值全部偏离原作，不再存在与原作逐像素相同的文件）；如原作者或权利方仍有异议，请联系我，我会立即替换或移除。
 
+## 1.1.6（2026-09-26）· 砖投掷（新抛射物）+ R196 移植收口（燃料表/中毒/玻璃/动物掉落/打火石）+ 一处 Infx 讹传归档
+
+> 本版在 1.1.5 已推送基线之上收口一批 R196 忠实移植项，并新增「砖/下界砖右键投掷」抛射物实体（双树）。同时把先前在 1.1.5 线上开发、尚未推送的燃料表与食物中毒数值纠偏一并纳入本版。另经判决源核查，将「剑/镰刀自带横扫」归档为 R196 不存在之机制（Infx 清单讹传）。
+
+### 一、新增：砖 / 下界砖右键投掷（R196 EntityBrick / ItemBrick）
+
+判决源 R196 `ItemBrick.onItemRightClick` 与 `EntityBrick`：手持砖/下界砖右键掷出抛射物，继承玩家朝向与初速（1.5F），非创造模式消耗 1 个；命中实体造成 **2.0** 伤害、命中玻璃板（`thinGlass`）将其击碎、命中后冒 brickpoof 粒子并消失。
+
+落地（双树同源）：
+- 新增 `BrickEntity`（继承 `ThrowableItemProjectile`），注册 `BRICK` 实体类型（`Misc` 分类，0.25×0.25），渲染复用 `ThrownItemRenderer`（按携带砖物品贴图渲染砖/下界砖）。
+- 新增 `BrickThrowMixin`（`@Mixin(Item)`，`use` 注入 HEAD）：仅拦截 `Items.BRICK` / `Items.NETHER_BRICK`，其余物品走原版逻辑；客户端只回 `SUCCESS` 不实际生成。
+- 注：R196 重力 0.07，但 1.21.11 的 `ThrowableProjectile.getGravity()` 为 `final` 不可覆盖，故沿用原版默认 0.03（弧线略低，伤害/碎玻璃/投掷行为忠实）。
+
+### 二、R196 移植收口（此前在 1.1.5 线开发、随本版一并收口）
+
+| 机制 | 判决源 / 落地 |
+|---|---|
+| **R196 燃料表** | 新增 `common/ICPMFuelValues`（火把/红石火把 800、岩浆容器 3200 热量 3、纸 25、粪便 100、船 1200 等）；接线 `FurnaceFuelMixin` 与原版/高炉/烟熏炉 `getBurnDuration`，以及 `ICPMFurnaceBlockEntity`。修掉原先岩浆桶 20000 与 R196 不符。 |
+| **三处食物中毒数值纠偏** | `ICPMFoodProperties`：生鸡肉 150→400@30%、腐肉仅中毒 400（去掉原版饥饿）、蜘蛛眼 300→100@100%；判决源 `ItemFood.onEaten` 注册 duration 须 ×20 tick。 |
+| **打火石耐久 16** | `ItemFlintAndSteel.java:31`（原版 64）→ 构造期改 `Properties.durability(16)`。 |
+| **打火石点燃生物** | 右键鸡/羊/狼/惧狼/地狱犬点燃（R196 `ItemFlintAndSteel.java:56-60`）。 |
+| **中毒生效间隔 `100>>等级`** | `ICPMPoisonIntervalMixin` 注入 `MobEffect.shouldApplyEffectTickThisTick`，仅 `POISON` 改写频率为 `100>>amplifier`（I=100t/II=50t/III=25t），复用原版 `applyEffectTick`（伤 1.0F）。 |
+| **玻璃碎片** | `ICPMGlassShardMixin`：普通玻璃掉 6 碎片；玻璃板（thinGlass）掉 1 碎片（染色玻璃板不掉）。 |
+| **动物掉落** | `LivestockMeatR196Mixin`：动物烧死掉熟肉、羊死亡掉毛 50%（早已实现）、**驴/骡/马掉牛肉**（幼崽不掉落，普通马额外 `rand(2)`，燃烧→熟牛肉；刻意排除 `SkeletonHorse`/`ZombieHorse`）。 |
+
+### 三、判决源核查：剑/镰刀自带横扫 50%（Infx 清单项）
+
+全局检索 R196 反编译源码（`[Ss]weep` 零匹配；`EntityPlayer.attackTargetEntityWithCurrentItem` 无范围攻击/横扫循环）确认：**R196 无剑/镰刀横扫机制**。该条目属 Infx（26.x）清单对 1.6.4 时代的讹传，ICPM 以 R196 为唯一判决源，故**不实现、归档**。
+
+### 四、确认满足（原版已等价，无需改动）
+
+- **满桶作合成材料返回空桶**：R196 用 `Item.setContainerItem(emptyBucket)` 模式，1.21 的 `BucketItem` 默认在合成后返回空桶 ⇒ 原版等价满足。
+- 炼药锅交互、蜘蛛网掉落、栅栏碰撞、抗性提升转护甲：此前已判定原版等价满足。
+
+### 验证
+
+双端 `clean build` BUILD SUCCESSFUL；`audit_mixins` / `preflight_release` 全绿；jar 全 entry 校验 + MD5 通过；三处部署 `ALL_OK=True`。
+
+版本号提升至 `1.1.6`（Fabric 产物名 `ICPM-1.1.6-fabric.jar`；NeoForge 产物名 `ICPM-1.1.6-NeoForge.jar`）。
+
 ## 1.1.5（2026-09-25）· 禁用非生存（去作弊）+ 1.1.4 收口补完
 
 > 本版两件事：① **移除「作弊」概念** —— 正常模式下无法创建作弊世界、无法开创造，也无法靠改存档绕过（后门只剩 JVM 参数 `-Dicpm.devMode=true`，仅供开发调试）；② 1.1.4 之后的收口补完（下界合金物品模型定义 / 创造栏 / 贴图 / 译名）。
@@ -35,9 +75,42 @@
 3. **补齐 7 个无贴图物品**：5 个凝胶球（贴图原本就在 `textures/item/gelatinous_sphere/` 子目录，先前只扫了一层目录所以误判「无贴图」）、皮革线、去咒药水；后两件的物品模型 `layer0` 由原版占位（`minecraft:item/string` / `minecraft:item/glass_bottle`）改为专属贴图 `icpm:item/<id>`。
 4. **译名补全**：`copper_dagger` / `copper_hatchet` / `copper_scythe` / `gold_dagger` / `gold_hatchet` / `blueberry_bush` 此前**从未有过 lang 键**（游戏内直接显示原始键名），已补中英译名。
 
+### 三、R196 燃料表 + 食物中毒数值纠偏（同日补充）
+
+**1. 燃料表**（此前只补了「粪便 100」，且岩浆桶沿用原版 20000 —— 与 R196 不符）
+
+1.21.11 的燃料表是代码内置的 `FuelValues.vanillaBurnTimes`，数据包追加不了，数值也与 R196 差得很远。本版新增统一表 `ICPMFuelValues`（逐条标注 R196 文件:行），接入原版 / 高炉 / 烟熏炉的 `getBurnDuration`，以及实际在用的 ICPM 熔炉。
+
+| 类别 | R196 | 判决源 |
+|---|---|---|
+| 原木 / 木头 | **1600**（原版 300） | ItemBlock.java:172-174 |
+| 木板 / 木按钮 | 400 | ItemBlock.java:175-177 |
+| 木台阶 / 树苗 / 枯灌木 | 200 | ItemBlock.java:178-180 |
+| **火把 / 红石火把**（原版不能当燃料） | **800** | ItemBlock.java:181-183 |
+| 木材材质方块（兜底） | 400 | ItemBlock.java:184-186 |
+| 煤炭块 | 16000、热量 2 | ItemBlock.java:187-197 |
+| 煤炭 / 木炭 | 1600；热量 2 / 1 | ItemCoal.java:48-58 |
+| 纸 / 粪便 / 木棍 / 箭 / 书类 | 25 / 100 / 100 / 100 / 100 | Item.java:1453-1477 |
+| 木门 / 烈焰棒 | 400 / 2400（热量 4） | Item.java:1466-1471 |
+| 木材材质物品 / 纸材质物品 | 200 / 50 | Item.java:1472-1477 |
+| **岩浆容器（任何材质）** | **3200**（原版 20000）、热量 3 | ItemBucket.java:255-268 |
+| 船 / 空木碗 | 1200 / 200 | ItemBoat.java:90-92、ItemBowl.java:121-123 |
+| 工具 | 木材质 200 / 含木柄 100 | ItemTool.java:277-279 |
+
+> 三条**有意偏离**（已写在类注释里）：① 只有 R196 明确 >0 的条目才覆盖原版，1.21 新增燃料（干海带块等）保持可用；② R196 的 `Material` 体系在 1.21 无对应，用标签集合近似；③ 双木台阶 R196=400，但 1.21 双台阶不是独立物品，无法实现。
+
+**2. 三处食物中毒数值纠偏**（判决源：R196 `ItemFood.onEaten` —— `duration * 20` tick）
+
+| 食物 | R196 | 本版修正 |
+|---|---|---|
+| 生鸡肉 | 中毒 400 tick @ 30%（Item.java:228） | 150 → **400** |
+| 腐肉 | 中毒 400 tick @ 80%（Item.java:230） | 饥饿 600 + 中毒 300 → **只有中毒 400**（R196 覆盖掉了原版饥饿效果） |
+| 蜘蛛眼 | 中毒 100 tick @ 100%（Item.java:238） | 300 → **100** |
+| 毒马铃薯 | 中毒 100 tick @ 60%（Item.java:257） | 本就正确，未动 |
+
 ### 验证
 
-双端 `build` **BUILD SUCCESSFUL**（Fabric 51s / NeoForge 26s，增量）；mixin 注入点审计 **156 mixin / 246 注入点**全绿；发版预检 **0 问题**；双树自检脚本 **FAILS = 0**；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 多状态模型 / 贴图全部命中，`BAD = 0`）；**服务端冒烟** NeoForge `Done (0.473s)`、Fabric + Carpet 复现环境 `Done (0.501s)` 且 `conflict-lines = 0`。
+双端 `build` **BUILD SUCCESSFUL**（Fabric 1m2s / NeoForge 41s，增量）；mixin 注入点审计 **156 mixin / 246 注入点**全绿；发版预检 **0 问题**；双树自检脚本 **FAILS = 0**；jar 全 entry 校验通过（`ICPMDevMode` 等新类与新增 IMD / 多状态模型 / 贴图全部命中，`BAD = 0`）；**服务端冒烟** NeoForge `Done (0.478s)`、Fabric + Carpet 复现环境 `Done (1.234s)` 且 `conflict-lines = 0`。
 
 版本号提升至 `1.1.5`（Fabric 产物名 `ICPM-1.1.5-fabric.jar`；NeoForge 产物名 `ICPM-1.1.5-NeoForge.jar`）。
 

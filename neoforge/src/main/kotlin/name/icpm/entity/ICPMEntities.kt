@@ -52,6 +52,7 @@ import name.icpm.entity.monster.ShadowEntity
 import name.icpm.entity.monster.VampireBatEntity
 import name.icpm.entity.monster.WightEntity
 import name.icpm.entity.monster.WoodSpiderEntity
+import name.icpm.entity.projectile.BrickEntity
 import name.icpm.entity.projectile.GelatinousSphereEntity
 import name.icpm.entity.projectile.ICPMArrowEntity
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
@@ -104,6 +105,16 @@ object ICPMEntities {
         "gelatinous_sphere",
         EntityType.Builder.of(
             { type, level -> GelatinousSphereEntity(type, level) },
+            MobCategory.MISC
+        ).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10)
+    )
+
+    // ==================== 砖抛射物 ====================
+
+    val BRICK: EntityType<BrickEntity> = register(
+        "brick",
+        EntityType.Builder.of(
+            { type, level -> BrickEntity(type, level) },
             MobCategory.MISC
         ).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10)
     )
