@@ -3,11 +3,12 @@ ICPM MITE 1.6.4 材质包构建报告
 来源: E:/MITE Resource Pack 1.6.4/assets/minecraft/textures
 输出: C:\Users\Administrator\Desktop\I can't play MITE\ICPM-MITE1.6.4-RP
 模组贴图总数(icpm): 617
-命中并复制: 417
+命中并复制: 404
   其中 direct: 146
   其中 rule(结构性重命名): 97
-  其中 cat-basename: 174
-未命中(MITE 1.6.4 无对应, 留 mod 默认): 200
+  其中 cat-basename: 161
+未命中(MITE 1.6.4 无对应, 留 mod 默认): 184
+刻意排除(1.21 equipment 新布局, MITE 1.6.4 无对应物, 留 mod 默认): 29
 同名歧义(多层候选且无法精确判定, 已排除): 8
 
 --- 命中示例(前 20) ---
@@ -31,6 +32,37 @@ ICPM MITE 1.6.4 材质包构建报告
   [direct] block/anvil/gold/top_damaged_1.png  <=  blocks\anvil\gold\top_damaged_1.png
   [direct] block/anvil/gold/top_damaged_2.png  <=  blocks\anvil\gold\top_damaged_2.png
   [direct] block/anvil/iron/base.png  <=  blocks\anvil\iron\base.png
+
+--- 刻意排除清单(全部, 留 mod 默认) ---
+  entity/equipment/horse_body/adamantium.png
+  entity/equipment/horse_body/ancient_metal.png
+  entity/equipment/horse_body/copper.png
+  entity/equipment/horse_body/mithril.png
+  entity/equipment/horse_body/silver.png
+  entity/equipment/humanoid/adamantium.png
+  entity/equipment/humanoid/adamantium_chainmail.png
+  entity/equipment/humanoid/ancient_metal.png
+  entity/equipment/humanoid/ancient_metal_chainmail.png
+  entity/equipment/humanoid/copper_chainmail.png
+  entity/equipment/humanoid/gold_chainmail.png
+  entity/equipment/humanoid/iron_chainmail.png
+  entity/equipment/humanoid/mithril.png
+  entity/equipment/humanoid/mithril_chainmail.png
+  entity/equipment/humanoid/netherite_chainmail.png
+  entity/equipment/humanoid/silver.png
+  entity/equipment/humanoid/silver_chainmail.png
+  entity/equipment/humanoid_leggings/adamantium.png
+  entity/equipment/humanoid_leggings/adamantium_chainmail.png
+  entity/equipment/humanoid_leggings/ancient_metal.png
+  entity/equipment/humanoid_leggings/ancient_metal_chainmail.png
+  entity/equipment/humanoid_leggings/copper_chainmail.png
+  entity/equipment/humanoid_leggings/gold_chainmail.png
+  entity/equipment/humanoid_leggings/iron_chainmail.png
+  entity/equipment/humanoid_leggings/mithril.png
+  entity/equipment/humanoid_leggings/mithril_chainmail.png
+  entity/equipment/humanoid_leggings/netherite_chainmail.png
+  entity/equipment/humanoid_leggings/silver.png
+  entity/equipment/humanoid_leggings/silver_chainmail.png
 
 --- 未命中清单(全部) ---
   block/adamantium_door_bottom.png
@@ -103,22 +135,6 @@ ICPM MITE 1.6.4 材质包构建报告
   entity/dire_wolf/wolf_collar.png
   entity/dire_wolf/wolf_tame.png
   entity/earth_elemental/plank/earth_elemental_plank.png
-  entity/equipment/humanoid/adamantium_chainmail.png
-  entity/equipment/humanoid/ancient_metal_chainmail.png
-  entity/equipment/humanoid/copper_chainmail.png
-  entity/equipment/humanoid/gold_chainmail.png
-  entity/equipment/humanoid/iron_chainmail.png
-  entity/equipment/humanoid/mithril_chainmail.png
-  entity/equipment/humanoid/netherite_chainmail.png
-  entity/equipment/humanoid/silver_chainmail.png
-  entity/equipment/humanoid_leggings/adamantium_chainmail.png
-  entity/equipment/humanoid_leggings/ancient_metal_chainmail.png
-  entity/equipment/humanoid_leggings/copper_chainmail.png
-  entity/equipment/humanoid_leggings/gold_chainmail.png
-  entity/equipment/humanoid_leggings/iron_chainmail.png
-  entity/equipment/humanoid_leggings/mithril_chainmail.png
-  entity/equipment/humanoid_leggings/netherite_chainmail.png
-  entity/equipment/humanoid_leggings/silver_chainmail.png
   entity/invisible_stalker.png
   entity/skeleton/annihilation_skeleton.png
   entity/skeleton/annihilation_skeleton_glow.png
