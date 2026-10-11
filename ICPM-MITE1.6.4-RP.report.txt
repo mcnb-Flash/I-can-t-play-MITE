@@ -1,0 +1,235 @@
+ICPM MITE 1.6.4 材质包构建报告
+==================================================
+来源: E:/MITE Resource Pack 1.6.4/assets/minecraft/textures
+输出: C:\Users\Administrator\Desktop\I can't play MITE\ICPM-MITE1.6.4-RP
+模组贴图总数(icpm): 617
+命中并复制: 417
+  其中 direct: 146
+  其中 rule(结构性重命名): 97
+  其中 cat-basename: 174
+未命中(MITE 1.6.4 无对应, 留 mod 默认): 200
+同名歧义(多层候选且无法精确判定, 已排除): 8
+
+--- 命中示例(前 20) ---
+  [direct] block/adamantium_block.png  <=  blocks\adamantium_block.png
+  [direct] block/adamantium_ore.png  <=  blocks\adamantium_ore.png
+  [direct] block/ancient_metal_block.png  <=  blocks\ancient_metal_block.png
+  [direct] block/anvil/adamantium/base.png  <=  blocks\anvil\adamantium\base.png
+  [direct] block/anvil/adamantium/top_damaged_0.png  <=  blocks\anvil\adamantium\top_damaged_0.png
+  [direct] block/anvil/adamantium/top_damaged_1.png  <=  blocks\anvil\adamantium\top_damaged_1.png
+  [direct] block/anvil/adamantium/top_damaged_2.png  <=  blocks\anvil\adamantium\top_damaged_2.png
+  [direct] block/anvil/ancient_metal/base.png  <=  blocks\anvil\ancient_metal\base.png
+  [direct] block/anvil/ancient_metal/top_damaged_0.png  <=  blocks\anvil\ancient_metal\top_damaged_0.png
+  [direct] block/anvil/ancient_metal/top_damaged_1.png  <=  blocks\anvil\ancient_metal\top_damaged_1.png
+  [direct] block/anvil/ancient_metal/top_damaged_2.png  <=  blocks\anvil\ancient_metal\top_damaged_2.png
+  [direct] block/anvil/copper/base.png  <=  blocks\anvil\copper\base.png
+  [direct] block/anvil/copper/top_damaged_0.png  <=  blocks\anvil\copper\top_damaged_0.png
+  [direct] block/anvil/copper/top_damaged_1.png  <=  blocks\anvil\copper\top_damaged_1.png
+  [direct] block/anvil/copper/top_damaged_2.png  <=  blocks\anvil\copper\top_damaged_2.png
+  [direct] block/anvil/gold/base.png  <=  blocks\anvil\gold\base.png
+  [direct] block/anvil/gold/top_damaged_0.png  <=  blocks\anvil\gold\top_damaged_0.png
+  [direct] block/anvil/gold/top_damaged_1.png  <=  blocks\anvil\gold\top_damaged_1.png
+  [direct] block/anvil/gold/top_damaged_2.png  <=  blocks\anvil\gold\top_damaged_2.png
+  [direct] block/anvil/iron/base.png  <=  blocks\anvil\iron\base.png
+
+--- 未命中清单(全部) ---
+  block/adamantium_door_bottom.png
+  block/adamantium_door_top.png
+  block/adamantium_runestone.png
+  block/ancient_metal_door_bottom.png
+  block/ancient_metal_door_top.png
+  block/anvil/netherite/base.png
+  block/anvil/netherite/top_damaged_0.png
+  block/anvil/netherite/top_damaged_1.png
+  block/anvil/netherite/top_damaged_2.png
+  block/blueberry_bush.png
+  block/blueberry_bush_picked.png
+  block/clay_furnace_front_off.png
+  block/clay_furnace_front_on.png
+  block/clay_furnace_side.png
+  block/clay_furnace_top.png
+  block/crafting_table/netherite/front.png
+  block/crafting_table/netherite/side.png
+  block/crafting_table/soul/front.png
+  block/crafting_table/soul/side.png
+  block/dead_crop_0.png
+  block/dead_crop_1.png
+  block/dead_crop_2.png
+  block/dead_crop_3.png
+  block/dead_crop_4.png
+  block/dead_crop_5.png
+  block/dead_crop_6.png
+  block/deepslate_adamantium_ore.png
+  block/deepslate_mithril_ore.png
+  block/deepslate_silver_ore.png
+  block/emerald_enchanting_table_bottom.png
+  block/gold_door_bottom.png
+  block/gold_door_top.png
+  block/gold_ore.png
+  block/hardened_clay_furnace_front_off.png
+  block/hardened_clay_furnace_front_on.png
+  block/hardened_clay_furnace_side.png
+  block/hardened_clay_furnace_top.png
+  block/hell_portal.png
+  block/iron_ore.png
+  block/mithril_door_bottom.png
+  block/mithril_door_top.png
+  block/mithril_runestone.png
+  block/netherite_block.png
+  block/netherite_door_bottom.png
+  block/netherite_door_top.png
+  block/netherite_runestone.png
+  block/netherrack_furnace_front_off.png
+  block/netherrack_furnace_front_on.png
+  block/netherrack_furnace_side.png
+  block/netherrack_furnace_top.png
+  block/obsidian_furnace_front_off.png
+  block/obsidian_furnace_front_on.png
+  block/obsidian_furnace_side.png
+  block/obsidian_furnace_top.png
+  block/return_portal.png
+  block/sandstone_furnace_front_off.png
+  block/sandstone_furnace_front_on.png
+  block/sandstone_furnace_side.png
+  block/sandstone_furnace_top.png
+  block/silver_door_bottom.png
+  block/silver_door_top.png
+  block/underworld_portal.png
+  block/workbench/mangrove_log.png
+  entity/creeper/creeper.png
+  entity/creeper/creeper_armor.png
+  entity/dire_wolf/wolf.png
+  entity/dire_wolf/wolf_angry.png
+  entity/dire_wolf/wolf_collar.png
+  entity/dire_wolf/wolf_tame.png
+  entity/earth_elemental/plank/earth_elemental_plank.png
+  entity/equipment/humanoid/adamantium_chainmail.png
+  entity/equipment/humanoid/ancient_metal_chainmail.png
+  entity/equipment/humanoid/copper_chainmail.png
+  entity/equipment/humanoid/gold_chainmail.png
+  entity/equipment/humanoid/iron_chainmail.png
+  entity/equipment/humanoid/mithril_chainmail.png
+  entity/equipment/humanoid/netherite_chainmail.png
+  entity/equipment/humanoid/silver_chainmail.png
+  entity/equipment/humanoid_leggings/adamantium_chainmail.png
+  entity/equipment/humanoid_leggings/ancient_metal_chainmail.png
+  entity/equipment/humanoid_leggings/copper_chainmail.png
+  entity/equipment/humanoid_leggings/gold_chainmail.png
+  entity/equipment/humanoid_leggings/iron_chainmail.png
+  entity/equipment/humanoid_leggings/mithril_chainmail.png
+  entity/equipment/humanoid_leggings/netherite_chainmail.png
+  entity/equipment/humanoid_leggings/silver_chainmail.png
+  entity/invisible_stalker.png
+  entity/skeleton/annihilation_skeleton.png
+  entity/skeleton/annihilation_skeleton_glow.png
+  entity/skeleton/skeleton.png
+  entity/skeleton/wither_skeleton.png
+  entity/slime/magmacube.png
+  entity/slime/slime.png
+  entity/zombie/zombie.png
+  entity/zombie/zombie_villager.png
+  item/adamantium_ore_chunk.png
+  item/adamantium_spear.png
+  item/adamantium_spear_in_hand.png
+  item/alloy_axe.png
+  item/alloy_boots.png
+  item/alloy_chestplate.png
+  item/alloy_helmet.png
+  item/alloy_hoe.png
+  item/alloy_leggings.png
+  item/alloy_pickaxe.png
+  item/alloy_shovel.png
+  item/alloy_sword.png
+  item/alloy_upgrade_template.png
+  item/amethyst.png
+  item/ancient_metal_spear.png
+  item/ancient_metal_spear_in_hand.png
+  item/annihilation_skeleton_spawn_egg.png
+  item/black_widow_spawn_egg.png
+  item/blob_spawn_egg.png
+  item/bone_lord_spawn_egg.png
+  item/bow_pulling_0.png
+  item/bow_pulling_1.png
+  item/bow_pulling_2.png
+  item/bronze_ingot.png
+  item/cave_spider_variant_spawn_egg.png
+  item/copper_ore_chunk.png
+  item/demon_spider_spawn_egg.png
+  item/dire_wolf_spawn_egg.png
+  item/earth_elemental_spawn_egg.png
+  item/fire_elemental_spawn_egg.png
+  item/gold_ore_chunk.png
+  item/hellhound_spawn_egg.png
+  item/hoary_silverfish_spawn_egg.png
+  item/infernal_creeper_frag.png
+  item/infernal_creeper_spawn_egg.png
+  item/iron_chainmail_boots.png
+  item/iron_chainmail_chestplate.png
+  item/iron_chainmail_helmet.png
+  item/iron_chainmail_leggings.png
+  item/iron_ore_chunk.png
+  item/jelly_spawn_egg.png
+  item/lead_ingot.png
+  item/lead_ore_chunk.png
+  item/leather_cord.png
+  item/longdead_guardian_spawn_egg.png
+  item/longdead_spawn_egg.png
+  item/mantle.png
+  item/mithril_ore_chunk.png
+  item/mithril_spear.png
+  item/mithril_spear_in_hand.png
+  item/netherite_arrow.png
+  item/netherite_battle_axe.png
+  item/netherite_bow_pulling_0.png
+  item/netherite_bow_pulling_1.png
+  item/netherite_bow_pulling_2.png
+  item/netherite_bow_standby.png
+  item/netherite_bucket.png
+  item/netherite_chain.png
+  item/netherite_chainmail_boots.png
+  item/netherite_chainmail_chestplate.png
+  item/netherite_chainmail_helmet.png
+  item/netherite_chainmail_leggings.png
+  item/netherite_coin.png
+  item/netherite_dagger.png
+  item/netherite_door.png
+  item/netherite_fishing_rod.png
+  item/netherite_hatchet.png
+  item/netherite_lava_bucket.png
+  item/netherite_mattock.png
+  item/netherite_milk_bucket.png
+  item/netherite_nugget.png
+  item/netherite_scythe.png
+  item/netherite_shears.png
+  item/netherite_stone_bucket.png
+  item/netherite_war_hammer.png
+  item/netherite_water_bucket.png
+  item/ooze_spawn_egg.png
+  item/opal.png
+  item/peridot.png
+  item/phase_spider_spawn_egg.png
+  item/pudding_spawn_egg.png
+  item/ruby.png
+  item/sapphire.png
+  item/silver_ore_chunk.png
+  item/silver_spear.png
+  item/silver_spear_in_hand.png
+  item/steel_ingot.png
+  item/tin_ingot.png
+  item/tin_ore_chunk.png
+  item/topaz.png
+  item/wood_spider_spawn_egg.png
+  item/worm.png
+  mob_effect/malnutrition.png
+  models/armor/chainmail_layer_1.png
+  models/armor/chainmail_layer_2.png
+  models/armor/iron_chainmail_layer_1.png
+  models/armor/iron_chainmail_layer_2.png
+  models/armor/iron_layer_1.png
+  models/armor/iron_layer_2.png
+  models/armor/leather_layer_1.png
+  models/armor/leather_layer_1_overlay.png
+  models/armor/leather_layer_2.png
+  models/armor/leather_layer_2_overlay.png
+  models/armor/netherite_chainmail_layer_1.png
+  models/armor/netherite_chainmail_layer_2.png
